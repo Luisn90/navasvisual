@@ -162,7 +162,7 @@ img { display: block; max-width: 100%; }
 }
 
 /* === MAIN === */
-main { padding-top: 100px; }
+main { padding-top: 0; }
 
 .nv-section { padding: clamp(60px, 8vw, 120px) var(--pad); position: relative; }
 .nv-section--soft { background: var(--bg-soft); }
@@ -939,20 +939,22 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
 }
 
 /* === SCROLL SNAP === */
-html {
+html, body {
+  height: 100%;
+  overflow: hidden; /* let the snap container handle scrolling */
+}
+
+.nv-snap-container {
+  height: 100vh;
+  overflow-y: scroll;
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
-  overflow-y: scroll;
-  height: 100%;
+  /* push content below fixed navbar */
+  padding-top: 0;
 }
 
-body {
-  height: auto;
-  overflow-y: unset;
-}
-
-/* Each snap section takes at least full viewport */
-.nv-snap {
+/* Sections that snap to exactly one viewport */
+.nv-snap-section {
   scroll-snap-align: start;
   scroll-snap-stop: always;
   min-height: 100vh;
@@ -961,21 +963,28 @@ body {
   justify-content: center;
 }
 
-/* Footer snap — doesn't need 100vh */
-.nv-snap--footer {
+/* Sections taller than viewport — snap to top but allow internal scroll */
+.nv-snap-section--auto {
+  min-height: auto;
+  height: auto;
   scroll-snap-align: start;
   scroll-snap-stop: always;
-  min-height: auto;
 }
 
-/* Marquee is short, attach to services snap */
-.nv-marquee {
-  scroll-snap-align: none;
+/* Adjust hero — already has its own min-height logic */
+.nv-hero.nv-snap-section {
+  padding-top: 100px; /* account for fixed nav */
+  min-height: 100vh;
+  justify-content: flex-end;
 }
 
+/* Mobile: proximity snap so content is still reachable */
 @media (max-width: 720px) {
-  html {
+  .nv-snap-container {
     scroll-snap-type: y proximity;
+  }
+  html, body {
+    overflow: hidden;
   }
 }
 
