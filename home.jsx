@@ -9,15 +9,29 @@ function useGyroParallax() {
   const base   = useRefHome(null);
 
   useEffectHome(() => {
+    let hasOrientation = false;
+
+    // Primary: deviceorientation (gamma/beta)
     const onOrientation = (e) => {
-      const g = e.gamma ?? 0; // left/right: -90 to 90
-      const b = e.beta  ?? 0; // front/back: -180 to 180
-
+      if (e.gamma === null && e.beta === null) return;
+      hasOrientation = true;
+      const g = e.gamma ?? 0;
+      const b = e.beta  ?? 0;
       if (base.current === null) base.current = { x: g, y: b };
-
       target.current = {
         x: Math.max(-1, Math.min(1, (g - base.current.x) / 20)),
         y: Math.max(-1, Math.min(1, (b - base.current.y) / 20)),
+      };
+    };
+
+    // Fallback: devicemotion (acceleration)
+    const onMotion = (e) => {
+      if (hasOrientation) return;
+      const acc = e.accelerationIncludingGravity;
+      if (!acc) return;
+      target.current = {
+        x: Math.max(-1, Math.min(1, -(acc.x ?? 0) / 9)),
+        y: Math.max(-1, Math.min(1,  (acc.y ?? 0) / 9)),
       };
     };
 
@@ -29,10 +43,12 @@ function useGyroParallax() {
     };
 
     window.addEventListener('deviceorientation', onOrientation, true);
+    window.addEventListener('devicemotion',      onMotion,      true);
     raf.current = requestAnimationFrame(tick);
 
     return () => {
       window.removeEventListener('deviceorientation', onOrientation, true);
+      window.removeEventListener('devicemotion',      onMotion,      true);
       cancelAnimationFrame(raf.current);
     };
   }, []);
@@ -45,21 +61,27 @@ function HomeApp() {
   const [loading, setLoading] = useStateHome(true);
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
-  const [debug, setDebug] = useStateHome({ gamma: 'esperando...', beta: 'esperando...', x: 0, y: 0 });
-  const gyro = useGyroParallax();
+  const [debug, setDebug] = useStateHome({ gamma: 'esperando...', beta: 'esperando...', motion: 'esperando...' });
 
-  // Debug: escuchar raw también
   useEffectHome(() => {
     const onOri = (e) => {
-      setDebug({
-        gamma: (e.gamma ?? 0).toFixed(2),
-        beta:  (e.beta  ?? 0).toFixed(2),
-        x: gyro.x.toFixed(3),
-        y: gyro.y.toFixed(3),
-      });
+      setDebug(d => ({ ...d,
+        gamma: (e.gamma ?? 'null').toString().slice(0,6),
+        beta:  (e.beta  ?? 'null').toString().slice(0,6),
+      }));
+    };
+    const onMot = (e) => {
+      const a = e.accelerationIncludingGravity;
+      setDebug(d => ({ ...d,
+        motion: a ? `x:${(a.x??0).toFixed(1)} y:${(a.y??0).toFixed(1)}` : 'null'
+      }));
     };
     window.addEventListener('deviceorientation', onOri, true);
-    return () => window.removeEventListener('deviceorientation', onOri, true);
+    window.addEventListener('devicemotion', onMot, true);
+    return () => {
+      window.removeEventListener('deviceorientation', onOri, true);
+      window.removeEventListener('devicemotion', onMot, true);
+    };
   }, []);
 
   const layer = (strength) => ({
@@ -231,10 +253,10 @@ function HomeApp() {
         pointerEvents: 'none',
       }}>
         <div>📱 Gyro debug</div>
-        <div>gamma (izq/der): <b>{debug.gamma}°</b></div>
-        <div>beta  (frente): <b>{debug.beta}°</b></div>
-        <div>offset x: <b>{debug.x}</b></div>
-        <div>offset y: <b>{debug.y}</b></div>
+        <div>orientation gamma: <b>{debug.gamma}</b></div>
+        <div>orientation beta:  <b>{debug.beta}</b></div>
+        <div>motion accel: <b>{debug.motion}</b></div>
+        <div>offset: <b>{gyro.x.toFixed(3)} / {gyro.y.toFixed(3)}</b></div>
       </div>
     </React.Fragment>
   );
