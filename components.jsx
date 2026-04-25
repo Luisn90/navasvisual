@@ -290,40 +290,19 @@ function SectionHead({ eyebrow, title, lede, right, layout = 'split' }) {
 // === VARIABLE FONT TITLE ===
 function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
   const ref = React.useRef(null);
-  const [weights, setWeights] = React.useState([]);
+  const [weight, setWeight] = React.useState(500);
   const isMobile = window.matchMedia('(hover: none)').matches;
-
-  // Split text content into letters
-  const letters = React.useMemo(() => {
-    const text = typeof children === 'string' ? children : '';
-    return text.split('');
-  }, [children]);
-
-  React.useEffect(() => {
-    setWeights(new Array(letters.length).fill(500));
-  }, [letters.length]);
 
   React.useEffect(() => {
     if (isMobile || !ref.current) return;
-
     const el = ref.current;
 
     const onMove = (e) => {
-      const spans = el.querySelectorAll('.nv-var-letter');
-      const newWeights = Array.from(spans).map((span) => {
-        const rect = span.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top  + rect.height / 2;
-        const dist = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
-        // Close = thin (100), far = bold (800), max radius 300px
-        const maxDist = 300;
-        const t = Math.min(1, dist / maxDist);
-        return Math.round(100 + t * 500); // max 600 instead of 800
-      });
-      setWeights(newWeights);
+      const rect = el.getBoundingClientRect();
+      const relX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      setWeight(Math.round(100 + relX * 500));
     };
-
-    const onLeave = () => setWeights(new Array(letters.length).fill(500));
+    const onLeave = () => setWeight(500);
 
     el.addEventListener('mousemove', onMove);
     el.addEventListener('mouseleave', onLeave);
@@ -331,75 +310,28 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
       el.removeEventListener('mousemove', onMove);
       el.removeEventListener('mouseleave', onLeave);
     };
-  }, [letters.length, isMobile]);
+  }, [isMobile]);
 
-  // Mobile: gyroX (-1 to 1) → weight 100-900 for all letters
+  // Mobile: gyroX (-1 to 1) → weight 100-600
   React.useEffect(() => {
     if (!isMobile) return;
-    const w = Math.round(100 + ((gyroX + 1) / 2) * 800);
-    setWeights(new Array(letters.length).fill(w));
-  }, [gyroX, isMobile, letters.length]);
-
-  if (isMobile) {
-    // On mobile just render as-is with gyro weight
-    const w = Math.round(100 + ((gyroX + 1) / 2) * 800);
-    return (
-      <span
-        className={`nv-var-title ${className}`}
-        style={{ fontWeight: w, fontVariationSettings: `'wght' ${w}`, display: 'block', ...style }}
-      >
-        {children}
-      </span>
-    );
-  }
-
-  // Desktop: render letter by letter
-  if (typeof children !== 'string') {
-    // Non-string children (JSX) — apply weight to whole block via mouse proximity
-    return (
-      <span
-        ref={ref}
-        className={`nv-var-title ${className}`}
-        style={{ display: 'block', cursor: 'crosshair', ...style }}
-      >
-        {React.Children.map(children, (child) =>
-          typeof child === 'string'
-            ? child.split('').map((ch, i) => (
-                <span key={i} className="nv-var-letter" style={{
-                  fontWeight: weights[i] || 500,
-                  fontVariationSettings: `'wght' ${weights[i] || 500}`,
-                  display: 'inline-block',
-                  whiteSpace: ch === ' ' ? 'pre' : 'normal',
-                  transition: 'font-weight 0.1s ease, font-variation-settings 0.1s ease',
-                }}>{ch}</span>
-              ))
-            : child
-        )}
-      </span>
-    );
-  }
+    setWeight(Math.round(100 + ((gyroX + 1) / 2) * 500));
+  }, [gyroX, isMobile]);
 
   return (
     <span
       ref={ref}
       className={`nv-var-title ${className}`}
-      style={{ display: 'block', cursor: 'crosshair', ...style }}
+      style={{
+        fontWeight: weight,
+        fontVariationSettings: `'wght' ${weight}`,
+        display: 'block',
+        cursor: 'crosshair',
+        transition: 'font-weight 0.1s ease, font-variation-settings 0.1s ease',
+        ...style,
+      }}
     >
-      {letters.map((ch, i) => (
-        <span
-          key={i}
-          className="nv-var-letter"
-          style={{
-            fontWeight: weights[i] || 500,
-            fontVariationSettings: `'wght' ${weights[i] || 500}`,
-            display: 'inline-block',
-            whiteSpace: ch === ' ' ? 'pre' : 'normal',
-            transition: 'font-weight 0.1s ease, font-variation-settings 0.1s ease',
-          }}
-        >
-          {ch}
-        </span>
-      ))}
+      {children}
     </span>
   );
 }
