@@ -61,29 +61,7 @@ function HomeApp() {
   const [loading, setLoading] = useStateHome(true);
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
-  const [debug, setDebug] = useStateHome({ gamma: 'esperando...', beta: 'esperando...', motion: 'esperando...' });
   const gyro = useGyroParallax();
-
-  useEffectHome(() => {
-    const onOri = (e) => {
-      setDebug(d => ({ ...d,
-        gamma: (e.gamma ?? 'null').toString().slice(0,6),
-        beta:  (e.beta  ?? 'null').toString().slice(0,6),
-      }));
-    };
-    const onMot = (e) => {
-      const a = e.accelerationIncludingGravity;
-      setDebug(d => ({ ...d,
-        motion: a ? `x:${(a.x??0).toFixed(1)} y:${(a.y??0).toFixed(1)}` : 'null'
-      }));
-    };
-    window.addEventListener('deviceorientation', onOri, true);
-    window.addEventListener('devicemotion', onMot, true);
-    return () => {
-      window.removeEventListener('deviceorientation', onOri, true);
-      window.removeEventListener('devicemotion', onMot, true);
-    };
-  }, []);
 
   const layer = (strength) => ({
     transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
@@ -244,21 +222,6 @@ function HomeApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
-
-      {/* DEBUG GYRO — borrar después */}
-      <div style={{
-        position: 'fixed', bottom: 16, left: 16, right: 16,
-        background: 'rgba(0,0,0,0.85)', color: '#0f0',
-        fontFamily: 'monospace', fontSize: 13, padding: 12,
-        borderRadius: 10, zIndex: 99999, lineHeight: 1.8,
-        pointerEvents: 'none',
-      }}>
-        <div>📱 Gyro debug</div>
-        <div>orientation gamma: <b>{debug.gamma}</b></div>
-        <div>orientation beta:  <b>{debug.beta}</b></div>
-        <div>motion accel: <b>{debug.motion}</b></div>
-        <div>offset: <b>{gyro.x.toFixed(3)} / {gyro.y.toFixed(3)}</b></div>
-      </div>
     </React.Fragment>
   );
 }
