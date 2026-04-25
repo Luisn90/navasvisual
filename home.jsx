@@ -100,7 +100,7 @@ function HomeApp() {
               <div style={layer(10)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
               </div>
-              <div className="nv-hero__title" style={layer(50)}>
+              <div className="nv-hero__title">
                 <h1 className="nv-h1">
                   <span><em style={titleStyle}>{t.hero.title_1}</em></span>
                   <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
