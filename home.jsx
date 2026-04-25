@@ -1,64 +1,30 @@
 // Página Home - Navas Visual
 const { useState: useStateHome, useEffect: useEffectHome, useRef: useRefHome } = React;
 
-function GyroPermissionBtn({ onGranted }) {
-  const [asked, setAsked] = useStateHome(false);
-
-  const request = async () => {
-    setAsked(true);
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-      try {
-        const res = await DeviceOrientationEvent.requestPermission();
-        if (res === 'granted') onGranted();
-      } catch(e) {}
-    } else {
-      // Android / no permission needed
-      onGranted();
-    }
-  };
-
-  if (asked) return null;
-  return (
-    <button className="nv-gyro-btn" onClick={request}>
-      <span className="nv-gyro-btn__icon">⟳</span>
-      <span>Activar efecto 3D</span>
-    </button>
-  );
-}
-
-function useGyroParallax(active) {
+function useGyroParallax() {
   const [offset, setOffset] = useStateHome({ x: 0, y: 0 });
   const smooth = useRefHome({ x: 0, y: 0 });
   const target = useRefHome({ x: 0, y: 0 });
   const raf    = useRefHome(null);
-  const base   = useRefHome(null); // calibration baseline
+  const base   = useRefHome(null);
 
   useEffectHome(() => {
-    if (!active) return;
-
     const onOrientation = (e) => {
-      const g = e.gamma ?? 0;
-      const b = e.beta  ?? 0;
+      const g = e.gamma ?? 0; // left/right: -90 to 90
+      const b = e.beta  ?? 0; // front/back: -180 to 180
 
-      // Calibrate on first reading
-      if (base.current === null) {
-        base.current = { x: g, y: b };
-      }
-
-      const dx = g - base.current.x;
-      const dy = b - base.current.y;
+      if (base.current === null) base.current = { x: g, y: b };
 
       target.current = {
-        x: Math.max(-1, Math.min(1, dx / 25)),
-        y: Math.max(-1, Math.min(1, dy / 25)),
+        x: Math.max(-1, Math.min(1, (g - base.current.x) / 20)),
+        y: Math.max(-1, Math.min(1, (b - base.current.y) / 20)),
       };
     };
 
     const tick = () => {
-      smooth.current.x += (target.current.x - smooth.current.x) * 0.1;
-      smooth.current.y += (target.current.y - smooth.current.y) * 0.1;
-      setOffset({ x: smooth.current.x, y: smooth.current.y });
+      smooth.current.x += (target.current.x - smooth.current.x) * 0.12;
+      smooth.current.y += (target.current.y - smooth.current.y) * 0.12;
+      setOffset({ x: +smooth.current.x.toFixed(4), y: +smooth.current.y.toFixed(4) });
       raf.current = requestAnimationFrame(tick);
     };
 
@@ -69,7 +35,7 @@ function useGyroParallax(active) {
       window.removeEventListener('deviceorientation', onOrientation, true);
       cancelAnimationFrame(raf.current);
     };
-  }, [active]);
+  }, []);
 
   return offset;
 }
@@ -79,13 +45,10 @@ function HomeApp() {
   const [loading, setLoading] = useStateHome(true);
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
-  const [gyroActive, setGyroActive] = useStateHome(false);
-  const gyro = useGyroParallax(gyroActive);
+  const gyro = useGyroParallax();
 
-  // Parallax layers with strong movement
   const layer = (strength) => ({
     transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
-    transition: 'transform 0.05s linear',
     willChange: 'transform',
   });
 
@@ -162,7 +125,6 @@ function HomeApp() {
             <span>{lang === 'es' ? 'Caracas, VEN' : 'Caracas, VEN'}</span>
             <span>↓</span>
           </div>
-          {!gyroActive && <GyroPermissionBtn onGranted={() => setGyroActive(true)} />}
         </section>
 
         {/* MARQUEE */}
