@@ -1076,6 +1076,46 @@ html { scroll-behavior: smooth; }
 .nv-hero {
   overflow: hidden;
 }
+
+/* Gyro permission button */
+.nv-gyro-btn {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .nv-gyro-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    background: var(--fg);
+    color: var(--bg);
+    border: none;
+    border-radius: 100px;
+    padding: 10px 18px;
+    font-size: 12px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    z-index: 10;
+    animation: gyro-pulse 2s ease-in-out infinite;
+  }
+}
+.nv-gyro-btn__icon {
+  font-size: 16px;
+  display: inline-block;
+  animation: gyro-spin 3s linear infinite;
+}
+@keyframes gyro-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes gyro-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+}
 @media (max-width: 480px) {
   .nv-section { padding: clamp(40px, 8vw, 80px) var(--pad); }
   .nv-footer {

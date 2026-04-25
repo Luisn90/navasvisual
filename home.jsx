@@ -1,53 +1,75 @@
 // Página Home - Navas Visual
 const { useState: useStateHome, useEffect: useEffectHome, useRef: useRefHome } = React;
 
-function useGyroParallax() {
+function GyroPermissionBtn({ onGranted }) {
+  const [asked, setAsked] = useStateHome(false);
+
+  const request = async () => {
+    setAsked(true);
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const res = await DeviceOrientationEvent.requestPermission();
+        if (res === 'granted') onGranted();
+      } catch(e) {}
+    } else {
+      // Android / no permission needed
+      onGranted();
+    }
+  };
+
+  if (asked) return null;
+  return (
+    <button className="nv-gyro-btn" onClick={request}>
+      <span className="nv-gyro-btn__icon">⟳</span>
+      <span>Activar efecto 3D</span>
+    </button>
+  );
+}
+
+function useGyroParallax(active) {
   const [offset, setOffset] = useStateHome({ x: 0, y: 0 });
-  const smoothRef = useRefHome({ x: 0, y: 0 });
-  const rafRef = useRefHome(null);
-  const targetRef = useRefHome({ x: 0, y: 0 });
+  const smooth = useRefHome({ x: 0, y: 0 });
+  const target = useRefHome({ x: 0, y: 0 });
+  const raf    = useRefHome(null);
+  const base   = useRefHome(null); // calibration baseline
 
   useEffectHome(() => {
-    // Only on mobile with gyroscope
-    if (!window.DeviceOrientationEvent) return;
+    if (!active) return;
 
-    // iOS 13+ requires permission
-    const requestPermission = async () => {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-          const perm = await DeviceOrientationEvent.requestPermission();
-          if (perm !== 'granted') return;
-        } catch(e) { return; }
+    const onOrientation = (e) => {
+      const g = e.gamma ?? 0;
+      const b = e.beta  ?? 0;
+
+      // Calibrate on first reading
+      if (base.current === null) {
+        base.current = { x: g, y: b };
       }
-      window.addEventListener('deviceorientation', handleOrientation, true);
-    };
 
-    const handleOrientation = (e) => {
-      // gamma = left/right tilt (-90 to 90), beta = front/back tilt (-180 to 180)
-      const gamma = Math.max(-30, Math.min(30, e.gamma || 0)); // clamp
-      const beta  = Math.max(-20, Math.min(20, (e.beta || 0) - 45)); // offset neutral
-      targetRef.current = {
-        x: (gamma / 30),  // -1 to 1
-        y: (beta  / 20),  // -1 to 1
+      const dx = g - base.current.x;
+      const dy = b - base.current.y;
+
+      target.current = {
+        x: Math.max(-1, Math.min(1, dx / 25)),
+        y: Math.max(-1, Math.min(1, dy / 25)),
       };
     };
 
     const tick = () => {
-      // Lerp for smoothness
-      smoothRef.current.x += (targetRef.current.x - smoothRef.current.x) * 0.08;
-      smoothRef.current.y += (targetRef.current.y - smoothRef.current.y) * 0.08;
-      setOffset({ x: smoothRef.current.x, y: smoothRef.current.y });
-      rafRef.current = requestAnimationFrame(tick);
+      smooth.current.x += (target.current.x - smooth.current.x) * 0.1;
+      smooth.current.y += (target.current.y - smooth.current.y) * 0.1;
+      setOffset({ x: smooth.current.x, y: smooth.current.y });
+      raf.current = requestAnimationFrame(tick);
     };
 
-    requestPermission();
-    rafRef.current = requestAnimationFrame(tick);
+    window.addEventListener('deviceorientation', onOrientation, true);
+    raf.current = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener('deviceorientation', handleOrientation, true);
-      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('deviceorientation', onOrientation, true);
+      cancelAnimationFrame(raf.current);
     };
-  }, []);
+  }, [active]);
 
   return offset;
 }
@@ -57,12 +79,13 @@ function HomeApp() {
   const [loading, setLoading] = useStateHome(true);
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
-  const gyro = useGyroParallax();
+  const [gyroActive, setGyroActive] = useStateHome(false);
+  const gyro = useGyroParallax(gyroActive);
 
-  // Parallax layers — each element moves at different speed
+  // Parallax layers with strong movement
   const layer = (strength) => ({
     transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
-    transition: 'transform 0.1s linear',
+    transition: 'transform 0.05s linear',
     willChange: 'transform',
   });
 
@@ -139,6 +162,7 @@ function HomeApp() {
             <span>{lang === 'es' ? 'Caracas, VEN' : 'Caracas, VEN'}</span>
             <span>↓</span>
           </div>
+          {!gyroActive && <GyroPermissionBtn onGranted={() => setGyroActive(true)} />}
         </section>
 
         {/* MARQUEE */}
