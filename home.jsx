@@ -69,12 +69,7 @@ function HomeApp() {
   });
 
   // Gyro X (-1 a 1) → font-weight 100 a 900
-  const gyroWeight = Math.round(100 + ((gyro.x + 1) / 2) * 800);
-  const titleStyle = {
-    fontWeight: gyroWeight,
-    fontVariationSettings: `'wght' ${gyroWeight}`,
-    transition: 'font-weight 0.05s linear, font-variation-settings 0.05s linear',
-  };
+  const gyroX = gyro.x;
 
   useEffectHome(() => {
     if (!loading) setTimeout(() => setReady(true), 100);
@@ -102,9 +97,9 @@ function HomeApp() {
               </div>
               <div className="nv-hero__title">
                 <h1 className="nv-h1">
-                  <span><em style={titleStyle}>{t.hero.title_1}</em></span>
+                  <VarTitle gyroX={gyroX}>{t.hero.title_1}</VarTitle>
                   <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
-                  <span><em style={titleStyle}>{t.hero.title_3}</em></span>
+                  <VarTitle gyroX={gyroX}>{t.hero.title_3}</VarTitle>
                 </h1>
               </div>
               <div className="nv-hero__bottom" style={layer(20)}>

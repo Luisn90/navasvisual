@@ -30,8 +30,7 @@ function WorkApp() {
             <div className="reveal">
               <Eyebrow>{t.work.eyebrow}</Eyebrow>
               <h1 className="nv-h1" style={{ marginTop: 24, fontSize: 'clamp(56px, 11vw, 192px)' }}>
-                <span className="nv-serif">{lang === 'es' ? 'Selección' : 'Selected'}</span> <br />
-                {lang === 'es' ? 'de proyectos' : 'projects'}
+                <VarTitle><span className="nv-serif">{lang === 'es' ? 'Selección' : 'Selected'}</span> <br />{lang === 'es' ? 'de proyectos' : 'projects'}</VarTitle>
               </h1>
               <p className="nv-work__lede" style={{ marginTop: 32, maxWidth: 540 }}>{t.work.lede}</p>
             </div>

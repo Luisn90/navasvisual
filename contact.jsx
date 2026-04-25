@@ -38,8 +38,7 @@ function ContactApp() {
             <div className="reveal">
               <Eyebrow>{t.contact.eyebrow}</Eyebrow>
               <h1 className="nv-h1" style={{ marginTop: 24, fontSize: 'clamp(48px, 9vw, 156px)' }}>
-                {t.contact.title} <br />
-                <span className="nv-serif">{t.contact.title_2}</span>
+                <VarTitle>{t.contact.title} <br /><span className="nv-serif">{t.contact.title_2}</span></VarTitle>
               </h1>
               <p className="nv-work__lede" style={{ marginTop: 32, maxWidth: 540 }}>{t.contact.lede}</p>
             </div>

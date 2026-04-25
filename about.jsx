@@ -30,7 +30,7 @@ function AboutApp() {
               </div>
               <div className="nv-about-text reveal">
                 <Eyebrow>{t.about.role}</Eyebrow>
-                <h1 className="nv-h2">{t.about.title}</h1>
+                <h1 className="nv-h2"><VarTitle>{t.about.title}</VarTitle></h1>
                 <div className="nv-about-text__bio">
                   <p>{t.about.bio_1}</p>
                   <p>{t.about.bio_2}</p>

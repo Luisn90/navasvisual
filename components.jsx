@@ -287,11 +287,62 @@ function SectionHead({ eyebrow, title, lede, right, layout = 'split' }) {
   );
 }
 
+// === VARIABLE FONT TITLE ===
+function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
+  const ref = React.useRef(null);
+  const [weight, setWeight] = React.useState(500);
+  const isMobile = window.matchMedia('(hover: none)').matches;
+
+  React.useEffect(() => {
+    if (isMobile) return; // mobile uses gyro passed via prop
+
+    const el = ref.current;
+    if (!el) return;
+
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      // x position relative to element: 0 (left) → 1 (right)
+      const relX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      setWeight(Math.round(100 + relX * 800));
+    };
+    const onLeave = () => setWeight(500);
+
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+    };
+  }, []);
+
+  // Mobile: gyroX (-1 to 1) → weight 100-900
+  React.useEffect(() => {
+    if (!isMobile) return;
+    setWeight(Math.round(100 + ((gyroX + 1) / 2) * 800));
+  }, [gyroX]);
+
+  return (
+    <span
+      ref={ref}
+      className={`nv-var-title ${className}`}
+      style={{
+        fontWeight: weight,
+        fontVariationSettings: `'wght' ${weight}`,
+        display: 'block',
+        cursor: 'crosshair',
+        ...style,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
 // === REVEAL HOOK COMPONENT ===
 function RevealMount() { useReveal(); return null; }
 
 // Export to window
 Object.assign(window, {
   useI18n, useReveal,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle
 });
