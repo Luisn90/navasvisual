@@ -1081,3 +1081,11 @@ html { scroll-behavior: smooth; }
     margin-top: 40px;
   }
 }
+
+@media (max-width: 600px) {
+  main { padding-top: 72px; }
+  .nv-hero { min-height: calc(100vh - 72px); }
+  .nv-hero__main { min-height: unset; padding: 20px 20px 24px; }
+  .nv-hero__title { margin-top: 20px; }
+  .nv-hero__bottom { margin-top: 24px; }
+}
