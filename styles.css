@@ -782,3 +782,142 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
 .nv-divider {
   height: 1px; background: var(--bg-line); margin: 80px 0;
 }
+
+/* === RESPONSIVE FIXES === */
+
+/* Navbar mobile */
+@media (max-width: 720px) {
+  .nv-nav__inner {
+    padding: 6px 6px 6px 14px;
+    gap: 10px;
+    width: calc(100% - 32px);
+  }
+  .nv-nav__links {
+    display: none;
+  }
+  .nv-nav__right {
+    margin-left: 0;
+    gap: 4px;
+  }
+  .nv-lang button {
+    padding: 4px 7px;
+  }
+  .nv-nav__cta {
+    padding: 8px 12px;
+    font-size: 12px;
+    gap: 6px;
+  }
+}
+
+/* Hamburger menu for mobile nav links */
+@media (max-width: 720px) {
+  .nv-nav__logo { font-size: 13px; }
+}
+
+/* Hero bottom: stack on mobile */
+@media (max-width: 600px) {
+  .nv-hero__bottom {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .nv-hero__ctas {
+    flex-direction: column;
+    width: 100%;
+  }
+  .nv-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+/* Hero sidebar: show below main on mobile */
+@media (max-width: 959px) {
+  .nv-hero__sidebar {
+    grid-template-rows: none;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .nv-hero__sidebar {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Hero meta strip: wrap on mobile */
+@media (max-width: 600px) {
+  .nv-hero__meta-strip {
+    flex-wrap: wrap;
+    gap: 10px;
+    row-gap: 10px;
+  }
+  .nv-hero__meta-strip span:last-child {
+    display: none;
+  }
+}
+
+/* Hero main: reduce min-height on mobile */
+@media (max-width: 600px) {
+  .nv-hero__main {
+    min-height: 420px;
+    padding: 28px 24px;
+  }
+}
+
+/* Work card tablet fix */
+@media (min-width: 721px) and (max-width: 879px) {
+  .nv-work-card--lg { grid-column: span 12; }
+  .nv-work-card--md { grid-column: span 6; }
+  .nv-work-card--sm { grid-column: span 6; }
+}
+
+/* Work head: stack on small screens */
+@media (max-width: 600px) {
+  .nv-work__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Footer CTA: reduce gap on mobile */
+@media (max-width: 600px) {
+  .nv-footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .nv-footer__cols {
+    margin-top: 48px;
+    gap: 24px;
+  }
+}
+
+/* Process steps: 2 col on tablet */
+@media (min-width: 540px) and (max-width: 879px) {
+  .nv-process__steps { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* About portrait: reduce aspect on mobile */
+@media (max-width: 600px) {
+  .nv-about-portrait { aspect-ratio: 3/4; }
+}
+
+/* Stats: always 2 cols on very small screens */
+@media (max-width: 400px) {
+  .nv-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Contact field-row: already handled, but reinforce */
+@media (max-width: 500px) {
+  .nv-field-row { grid-template-columns: 1fr; }
+}
+
+/* General section padding reduction on mobile */
+@media (max-width: 480px) {
+  .nv-section { padding: clamp(40px, 8vw, 80px) var(--pad); }
+  .nv-footer {
+    border-radius: 20px 20px 0 0;
+    margin-top: 40px;
+  }
+}
