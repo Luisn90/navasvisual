@@ -45,7 +45,22 @@ function HomeApp() {
   const [loading, setLoading] = useStateHome(true);
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
+  const [debug, setDebug] = useStateHome({ gamma: 'esperando...', beta: 'esperando...', x: 0, y: 0 });
   const gyro = useGyroParallax();
+
+  // Debug: escuchar raw también
+  useEffectHome(() => {
+    const onOri = (e) => {
+      setDebug({
+        gamma: (e.gamma ?? 0).toFixed(2),
+        beta:  (e.beta  ?? 0).toFixed(2),
+        x: gyro.x.toFixed(3),
+        y: gyro.y.toFixed(3),
+      });
+    };
+    window.addEventListener('deviceorientation', onOri, true);
+    return () => window.removeEventListener('deviceorientation', onOri, true);
+  }, []);
 
   const layer = (strength) => ({
     transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
@@ -206,6 +221,21 @@ function HomeApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
+
+      {/* DEBUG GYRO — borrar después */}
+      <div style={{
+        position: 'fixed', bottom: 16, left: 16, right: 16,
+        background: 'rgba(0,0,0,0.85)', color: '#0f0',
+        fontFamily: 'monospace', fontSize: 13, padding: 12,
+        borderRadius: 10, zIndex: 99999, lineHeight: 1.8,
+        pointerEvents: 'none',
+      }}>
+        <div>📱 Gyro debug</div>
+        <div>gamma (izq/der): <b>{debug.gamma}°</b></div>
+        <div>beta  (frente): <b>{debug.beta}°</b></div>
+        <div>offset x: <b>{debug.x}</b></div>
+        <div>offset y: <b>{debug.y}</b></div>
+      </div>
     </React.Fragment>
   );
 }
