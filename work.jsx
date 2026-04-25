@@ -12,7 +12,7 @@ function WorkApp() {
 
   const navigate = (href) => {
     setTransPhase('out');
-    setTimeout(() => { window.location.href = href; }, 700);
+    setTimeout(() => { window.location.href = href; }, 600);
   };
 
   const allTags = ['all', ...new Set(t.work.items.map(i => i.tag))];

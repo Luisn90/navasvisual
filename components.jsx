@@ -64,39 +64,98 @@ function Loader({ onDone }) {
 
 // === NAV ===
 function Nav({ active, lang, setLang, t, ready, onNavigate }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const links = [
+    { k: 'home', href: 'index.html' },
+    { k: 'work', href: 'work.html' },
+    { k: 'about', href: 'about.html' },
+    { k: 'contact', href: 'contact.html' },
+  ];
+
+  const handleNav = (href) => {
+    setMenuOpen(false);
+    setTimeout(() => onNavigate(href), 80);
+  };
+
+  // Lock body scroll when menu open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
   return (
-    <nav className={`nv-nav ${ready ? 'ready' : ''}`}>
-      <div className="nv-nav__inner">
-        <a href="index.html" onClick={(e) => { e.preventDefault(); onNavigate('index.html'); }} className="nv-nav__logo">
-          <span className="nv-nav__logo-mark">N</span>
-          <span>Navas Visual</span>
-        </a>
-        <div className="nv-nav__links">
-          {[
-            { k: 'work', href: 'work.html' },
-            { k: 'about', href: 'about.html' },
-            { k: 'contact', href: 'contact.html' },
-          ].map(l => (
-            <a key={l.k}
-               href={l.href}
-               onClick={(e) => { e.preventDefault(); onNavigate(l.href); }}
-               className={`nv-nav__link ${active === l.k ? 'active' : ''}`}>
-              {t.nav[l.k]}
-            </a>
-          ))}
-        </div>
-        <div className="nv-nav__right">
-          <div className="nv-lang">
-            <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
-            <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
-          </div>
-          <a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }} className="nv-nav__cta">
-            <span className="nv-nav__cta-dot" />
-            {lang === 'es' ? 'Disponible' : 'Available'}
+    <>
+      <nav className={`nv-nav ${ready ? 'ready' : ''}`}>
+        <div className="nv-nav__inner">
+          <a href="index.html" onClick={(e) => { e.preventDefault(); handleNav('index.html'); }} className="nv-nav__logo">
+            <span className="nv-nav__logo-mark">N</span>
+            <span>Navas Visual</span>
           </a>
+          <div className="nv-nav__links">
+            {links.slice(1).map(l => (
+              <a key={l.k}
+                 href={l.href}
+                 onClick={(e) => { e.preventDefault(); handleNav(l.href); }}
+                 className={`nv-nav__link ${active === l.k ? 'active' : ''}`}>
+                {t.nav[l.k]}
+              </a>
+            ))}
+          </div>
+          <div className="nv-nav__right">
+            <div className="nv-lang">
+              <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
+              <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
+            </div>
+            <a href="contact.html" onClick={(e) => { e.preventDefault(); handleNav('contact.html'); }} className="nv-nav__cta nv-nav__cta--desktop">
+              <span className="nv-nav__cta-dot" />
+              {lang === 'es' ? 'Disponible' : 'Available'}
+            </a>
+            {/* Hamburger button — only mobile */}
+            <button
+              className={`nv-hamburger ${menuOpen ? 'open' : ''}`}
+              onClick={() => setMenuOpen(o => !o)}
+              aria-label="Menú"
+            >
+              <span /><span /><span />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile drawer */}
+      <div className={`nv-drawer ${menuOpen ? 'open' : ''}`}>
+        <div className="nv-drawer__inner">
+          <nav className="nv-drawer__links">
+            {links.map((l, i) => (
+              <a
+                key={l.k}
+                href={l.href}
+                className={`nv-drawer__link ${active === l.k ? 'active' : ''}`}
+                style={{ transitionDelay: menuOpen ? `${i * 0.07}s` : '0s' }}
+                onClick={(e) => { e.preventDefault(); handleNav(l.href); }}
+              >
+                <span className="nv-drawer__link-num">0{i + 1}</span>
+                <span className="nv-drawer__link-text">{t.nav[l.k] || 'Home'}</span>
+                <span className="nv-drawer__link-arrow">↗</span>
+              </a>
+            ))}
+          </nav>
+          <div className="nv-drawer__footer">
+            <div className="nv-lang">
+              <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
+              <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
+            </div>
+            <a href="contact.html" onClick={(e) => { e.preventDefault(); handleNav('contact.html'); }} className="nv-nav__cta">
+              <span className="nv-nav__cta-dot" />
+              {lang === 'es' ? 'Disponible' : 'Available'}
+            </a>
+          </div>
         </div>
       </div>
-    </nav>
+      {/* Backdrop */}
+      {menuOpen && <div className="nv-drawer__backdrop" onClick={() => setMenuOpen(false)} />}
+    </>
   );
 }
 
@@ -157,9 +216,13 @@ function Footer({ t, lang, onNavigate }) {
   );
 }
 
-// === PAGE TRANSITION ===
+// === PAGE TRANSITION (snap-style) ===
 function PageTransition({ phase }) {
-  return <div className={`nv-page-trans ${phase || ''}`} />;
+  return (
+    <div className={`nv-page-trans ${phase || ''}`}>
+      <span className="nv-page-trans__mark">N</span>
+    </div>
+  );
 }
 
 // === CUSTOM CURSOR ===

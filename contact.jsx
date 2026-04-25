@@ -14,7 +14,7 @@ function ContactApp() {
 
   const navigate = (href) => {
     setTransPhase('out');
-    setTimeout(() => { window.location.href = href; }, 700);
+    setTimeout(() => { window.location.href = href; }, 600);
   };
 
   const submit = (e) => {
