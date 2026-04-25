@@ -1072,7 +1072,10 @@ html { scroll-behavior: smooth; }
   .nv-field-row { grid-template-columns: 1fr; }
 }
 
-/* General section padding reduction on mobile */
+/* Gyro parallax containment */
+.nv-hero {
+  overflow: hidden;
+}
 @media (max-width: 480px) {
   .nv-section { padding: clamp(40px, 8vw, 80px) var(--pad); }
   .nv-footer {

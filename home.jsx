@@ -1,11 +1,70 @@
 // Página Home - Navas Visual
-const { useState: useStateHome, useEffect: useEffectHome } = React;
+const { useState: useStateHome, useEffect: useEffectHome, useRef: useRefHome } = React;
+
+function useGyroParallax() {
+  const [offset, setOffset] = useStateHome({ x: 0, y: 0 });
+  const smoothRef = useRefHome({ x: 0, y: 0 });
+  const rafRef = useRefHome(null);
+  const targetRef = useRefHome({ x: 0, y: 0 });
+
+  useEffectHome(() => {
+    // Only on mobile with gyroscope
+    if (!window.DeviceOrientationEvent) return;
+
+    // iOS 13+ requires permission
+    const requestPermission = async () => {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const perm = await DeviceOrientationEvent.requestPermission();
+          if (perm !== 'granted') return;
+        } catch(e) { return; }
+      }
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    };
+
+    const handleOrientation = (e) => {
+      // gamma = left/right tilt (-90 to 90), beta = front/back tilt (-180 to 180)
+      const gamma = Math.max(-30, Math.min(30, e.gamma || 0)); // clamp
+      const beta  = Math.max(-20, Math.min(20, (e.beta || 0) - 45)); // offset neutral
+      targetRef.current = {
+        x: (gamma / 30),  // -1 to 1
+        y: (beta  / 20),  // -1 to 1
+      };
+    };
+
+    const tick = () => {
+      // Lerp for smoothness
+      smoothRef.current.x += (targetRef.current.x - smoothRef.current.x) * 0.08;
+      smoothRef.current.y += (targetRef.current.y - smoothRef.current.y) * 0.08;
+      setOffset({ x: smoothRef.current.x, y: smoothRef.current.y });
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    requestPermission();
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation, true);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  return offset;
+}
 
 function HomeApp() {
   const { lang, setLang, t } = useI18n();
   const [loading, setLoading] = useStateHome(true);
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
+  const gyro = useGyroParallax();
+
+  // Parallax layers — each element moves at different speed
+  const layer = (strength) => ({
+    transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
+    transition: 'transform 0.1s linear',
+    willChange: 'transform',
+  });
 
   useEffectHome(() => {
     if (!loading) setTimeout(() => setReady(true), 100);
@@ -28,17 +87,17 @@ function HomeApp() {
         <section className="nv-hero">
           <div className="nv-hero__grid">
             <div className="nv-hero__main">
-              <div>
+              <div style={layer(6)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
               </div>
-              <div className="nv-hero__title">
+              <div className="nv-hero__title" style={layer(14)}>
                 <h1 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
                   <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
                   <span><em>{t.hero.title_3}</em></span>
                 </h1>
               </div>
-              <div className="nv-hero__bottom">
+              <div className="nv-hero__bottom" style={layer(8)}>
                 <p className="nv-hero__lede">{t.hero.lede}</p>
                 <div className="nv-hero__ctas">
                   <a href="work.html" onClick={(e) => { e.preventDefault(); navigate('work.html'); }} className="nv-btn nv-btn--primary">
@@ -52,7 +111,7 @@ function HomeApp() {
               </div>
             </div>
 
-            <div className="nv-hero__sidebar">
+            <div className="nv-hero__sidebar" style={layer(10)}>
               <div className="nv-card">
                 <div className="nv-meta">
                   <span className="nv-meta__label">{lang === 'es' ? 'Disciplina' : 'Discipline'}</span>
@@ -74,7 +133,7 @@ function HomeApp() {
             </div>
           </div>
 
-          <div className="nv-hero__meta-strip">
+          <div className="nv-hero__meta-strip" style={layer(4)}>
             <span>{lang === 'es' ? 'Disponible para nuevos proyectos' : 'Available for new projects'}</span>
             <span>{lang === 'es' ? 'Q2 — 2026' : 'Q2 — 2026'}</span>
             <span>{lang === 'es' ? 'Caracas, VEN' : 'Caracas, VEN'}</span>
