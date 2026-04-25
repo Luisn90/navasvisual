@@ -23,11 +23,10 @@ function HomeApp() {
       <PageTransition phase={transPhase} />
       <Nav active="home" lang={lang} setLang={setLang} t={t} ready={ready} onNavigate={navigate} />
 
-      <div className="nv-snap-container">
+      <main>
         {/* HERO */}
-        <section className="nv-hero nv-snap-section">
+        <section className="nv-hero">
           <div className="nv-hero__grid">
-            {/* Main */}
             <div className="nv-hero__main">
               <div>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
@@ -53,7 +52,6 @@ function HomeApp() {
               </div>
             </div>
 
-            {/* Sidebar */}
             <div className="nv-hero__sidebar">
               <div className="nv-card">
                 <div className="nv-meta">
@@ -84,28 +82,28 @@ function HomeApp() {
           </div>
         </section>
 
-        {/* MARQUEE + SERVICES — same snap section */}
-        <section className="nv-snap-section nv-snap-section--auto">
-          <Marquee items={t.marquee} />
-          <div className="nv-section nv-services">
-            <div className="nv-container">
-              <SectionHead eyebrow={t.services.eyebrow} title={t.services.title} lede={t.services.lede} />
-              <div className="nv-svc-list reveal-stagger">
-                {t.services.list.map((svc) => (
-                  <div className="nv-svc-row" key={svc.n}>
-                    <span className="nv-svc-num">{svc.n}</span>
-                    <span className="nv-svc-title">{svc.t}</span>
-                    <span className="nv-svc-desc">{svc.d}</span>
-                    <span className="nv-svc-arrow">↗</span>
-                  </div>
-                ))}
-              </div>
+        {/* MARQUEE */}
+        <Marquee items={t.marquee} />
+
+        {/* SERVICES */}
+        <section className="nv-section nv-services">
+          <div className="nv-container">
+            <SectionHead eyebrow={t.services.eyebrow} title={t.services.title} lede={t.services.lede} />
+            <div className="nv-svc-list reveal-stagger">
+              {t.services.list.map((svc) => (
+                <div className="nv-svc-row" key={svc.n}>
+                  <span className="nv-svc-num">{svc.n}</span>
+                  <span className="nv-svc-title">{svc.t}</span>
+                  <span className="nv-svc-desc">{svc.d}</span>
+                  <span className="nv-svc-arrow">↗</span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* WORK PREVIEW */}
-        <section className="nv-section nv-section--soft nv-work nv-snap-section nv-snap-section--auto">
+        <section className="nv-section nv-section--soft nv-work">
           <div className="nv-container">
             <div className="nv-work__head reveal">
               <div className="nv-work__head-l">
@@ -143,7 +141,7 @@ function HomeApp() {
         </section>
 
         {/* PROCESS */}
-        <section className="nv-section nv-snap-section nv-snap-section--auto">
+        <section className="nv-section">
           <div className="nv-container">
             <SectionHead eyebrow={t.process.eyebrow} title={t.process.title} lede={t.process.lede} />
             <div className="nv-process__steps reveal-stagger">
@@ -159,13 +157,9 @@ function HomeApp() {
             </div>
           </div>
         </section>
+      </main>
 
-        {/* FOOTER */}
-        <div className="nv-snap-section nv-snap-section--auto">
-          <Footer t={t} lang={lang} onNavigate={navigate} />
-        </div>
-      </div>
-
+      <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
     </React.Fragment>
   );

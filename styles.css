@@ -30,6 +30,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 body {
@@ -162,7 +163,7 @@ img { display: block; max-width: 100%; }
 }
 
 /* === MAIN === */
-main { padding-top: 0; }
+main { padding-top: 100px; }
 
 .nv-section { padding: clamp(60px, 8vw, 120px) var(--pad); position: relative; }
 .nv-section--soft { background: var(--bg-soft); }
@@ -938,55 +939,8 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   .nv-drawer { display: none; }
 }
 
-/* === SCROLL SNAP === */
-html, body {
-  height: 100%;
-  overflow: hidden; /* let the snap container handle scrolling */
-}
-
-.nv-snap-container {
-  height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-  /* push content below fixed navbar */
-  padding-top: 0;
-}
-
-/* Sections that snap to exactly one viewport */
-.nv-snap-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* Sections taller than viewport — snap to top but allow internal scroll */
-.nv-snap-section--auto {
-  min-height: auto;
-  height: auto;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
-/* Adjust hero — already has its own min-height logic */
-.nv-hero.nv-snap-section {
-  padding-top: 100px; /* account for fixed nav */
-  min-height: 100vh;
-  justify-content: flex-end;
-}
-
-/* Mobile: proximity snap so content is still reachable */
-@media (max-width: 720px) {
-  .nv-snap-container {
-    scroll-snap-type: y proximity;
-  }
-  html, body {
-    overflow: hidden;
-  }
-}
+/* === SCROLL SUAVE === */
+html { scroll-behavior: smooth; }
 
 /* === RESPONSIVE FIXES === */
 
