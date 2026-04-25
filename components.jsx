@@ -289,26 +289,34 @@ function SectionHead({ eyebrow, title, lede, right, layout = 'split' }) {
 
 // === VARIABLE FONT TITLE ===
 function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
-  const ref = React.useRef(null);
   const [weight, setWeight] = React.useState(500);
   const isMobile = window.matchMedia('(hover: none)').matches;
+  const currentWeight = React.useRef(500);
+  const targetWeight  = React.useRef(500);
+  const raf = React.useRef(null);
 
   React.useEffect(() => {
-    if (isMobile || !ref.current) return;
-    const el = ref.current;
+    if (isMobile) return;
 
     const onMove = (e) => {
-      const rect = el.getBoundingClientRect();
-      const relX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      setWeight(Math.round(100 + relX * 500));
+      const relX = e.clientX / window.innerWidth; // 0 (left) → 1 (right)
+      targetWeight.current = Math.round(100 + relX * 500);
     };
-    const onLeave = () => setWeight(500);
 
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
+    const tick = () => {
+      // Smooth lerp — 0.12 = fast but fluid
+      currentWeight.current += (targetWeight.current - currentWeight.current) * 0.12;
+      const w = Math.round(currentWeight.current);
+      setWeight(w);
+      raf.current = requestAnimationFrame(tick);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    raf.current = requestAnimationFrame(tick);
+
     return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(raf.current);
     };
   }, [isMobile]);
 
@@ -320,14 +328,11 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
 
   return (
     <span
-      ref={ref}
       className={`nv-var-title ${className}`}
       style={{
         fontWeight: weight,
         fontVariationSettings: `'wght' ${weight}`,
         display: 'block',
-        cursor: 'crosshair',
-        transition: 'font-weight 0.1s ease, font-variation-settings 0.1s ease',
         ...style,
       }}
     >
