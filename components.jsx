@@ -175,7 +175,7 @@ function Footer({ t, lang, onNavigate }) {
   }, []);
 
   return (
-    <footer className="nv-footer">
+    <footer className="nv-footer nv-snap--footer">
       <div className="nv-container">
         <div className="nv-footer__cta">
           <a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>

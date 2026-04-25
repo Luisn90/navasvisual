@@ -25,7 +25,7 @@ function HomeApp() {
 
       <main>
         {/* HERO */}
-        <section className="nv-hero">
+        <section className="nv-hero nv-snap">
           <div className="nv-hero__grid">
             {/* Main */}
             <div className="nv-hero__main">
@@ -88,7 +88,7 @@ function HomeApp() {
         <Marquee items={t.marquee} />
 
         {/* SERVICES */}
-        <section className="nv-section nv-services">
+        <section className="nv-section nv-services nv-snap">
           <div className="nv-container">
             <SectionHead eyebrow={t.services.eyebrow} title={t.services.title} lede={t.services.lede} />
             <div className="nv-svc-list reveal-stagger">
@@ -105,7 +105,7 @@ function HomeApp() {
         </section>
 
         {/* WORK PREVIEW */}
-        <section className="nv-section nv-section--soft nv-work">
+        <section className="nv-section nv-section--soft nv-work nv-snap">
           <div className="nv-container">
             <div className="nv-work__head reveal">
               <div className="nv-work__head-l">
@@ -143,7 +143,7 @@ function HomeApp() {
         </section>
 
         {/* PROCESS */}
-        <section className="nv-section">
+        <section className="nv-section nv-snap">
           <div className="nv-container">
             <SectionHead eyebrow={t.process.eyebrow} title={t.process.title} lede={t.process.lede} />
             <div className="nv-process__steps reveal-stagger">
