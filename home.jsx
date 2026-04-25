@@ -19,8 +19,8 @@ function useGyroParallax() {
       const b = e.beta  ?? 0;
       if (base.current === null) base.current = { x: g, y: b };
       target.current = {
-        x: Math.max(-1, Math.min(1, (g - base.current.x) / 20)),
-        y: Math.max(-1, Math.min(1, (b - base.current.y) / 20)),
+        x: Math.max(-1, Math.min(1, (g - base.current.x) / 10)),
+        y: Math.max(-1, Math.min(1, (b - base.current.y) / 10)),
       };
     };
 
@@ -89,17 +89,17 @@ function HomeApp() {
         <section className="nv-hero">
           <div className="nv-hero__grid">
             <div className="nv-hero__main">
-              <div style={layer(6)}>
+              <div style={layer(10)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
               </div>
-              <div className="nv-hero__title" style={layer(14)}>
+              <div className="nv-hero__title" style={layer(50)}>
                 <h1 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
                   <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
                   <span><em>{t.hero.title_3}</em></span>
                 </h1>
               </div>
-              <div className="nv-hero__bottom" style={layer(8)}>
+              <div className="nv-hero__bottom" style={layer(20)}>
                 <p className="nv-hero__lede">{t.hero.lede}</p>
                 <div className="nv-hero__ctas">
                   <a href="work.html" onClick={(e) => { e.preventDefault(); navigate('work.html'); }} className="nv-btn nv-btn--primary">
@@ -113,7 +113,7 @@ function HomeApp() {
               </div>
             </div>
 
-            <div className="nv-hero__sidebar" style={layer(10)}>
+            <div className="nv-hero__sidebar" style={layer(30)}>
               <div className="nv-card">
                 <div className="nv-meta">
                   <span className="nv-meta__label">{lang === 'es' ? 'Disciplina' : 'Discipline'}</span>
@@ -135,7 +135,7 @@ function HomeApp() {
             </div>
           </div>
 
-          <div className="nv-hero__meta-strip" style={layer(4)}>
+          <div className="nv-hero__meta-strip" style={layer(8)}>
             <span>{lang === 'es' ? 'Disponible para nuevos proyectos' : 'Available for new projects'}</span>
             <span>{lang === 'es' ? 'Q2 — 2026' : 'Q2 — 2026'}</span>
             <span>{lang === 'es' ? 'Caracas, VEN' : 'Caracas, VEN'}</span>
