@@ -318,7 +318,7 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
         // Close = thin (100), far = bold (800), max radius 300px
         const maxDist = 300;
         const t = Math.min(1, dist / maxDist);
-        return Math.round(100 + t * 700);
+        return Math.round(100 + t * 500); // max 600 instead of 800
       });
       setWeights(newWeights);
     };
@@ -370,7 +370,7 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
                   fontVariationSettings: `'wght' ${weights[i] || 500}`,
                   display: 'inline-block',
                   whiteSpace: ch === ' ' ? 'pre' : 'normal',
-                  transition: 'font-weight 0.3s ease, font-variation-settings 0.3s ease',
+                  transition: 'font-weight 0.1s ease, font-variation-settings 0.1s ease',
                 }}>{ch}</span>
               ))
             : child
@@ -394,7 +394,7 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
             fontVariationSettings: `'wght' ${weights[i] || 500}`,
             display: 'inline-block',
             whiteSpace: ch === ' ' ? 'pre' : 'normal',
-            transition: 'font-weight 0.3s ease, font-variation-settings 0.3s ease',
+            transition: 'font-weight 0.1s ease, font-variation-settings 0.1s ease',
           }}
         >
           {ch}
