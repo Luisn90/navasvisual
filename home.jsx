@@ -62,6 +62,7 @@ function HomeApp() {
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
   const [debug, setDebug] = useStateHome({ gamma: 'esperando...', beta: 'esperando...', motion: 'esperando...' });
+  const gyro = useGyroParallax();
 
   useEffectHome(() => {
     const onOri = (e) => {
