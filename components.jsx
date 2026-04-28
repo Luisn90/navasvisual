@@ -216,97 +216,12 @@ function Footer({ t, lang, onNavigate }) {
   );
 }
 
-// === PAGE TRANSITION (portal triangle effect) ===
+// === PAGE TRANSITION (CSS only - reliable) ===
 function PageTransition({ phase }) {
-  const mountRef = React.useRef(null);
-
-  React.useEffect(() => {
-    if (!phase || !window.THREE) return;
-    const el = mountRef.current;
-    if (!el) return;
-
-    const W = window.innerWidth, H = window.innerHeight;
-    const scene    = new THREE.Scene();
-    const camera   = new THREE.OrthographicCamera(-W/2, W/2, H/2, -H/2, 0.1, 10);
-    camera.position.z = 1;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
-    renderer.setSize(W, H);
-    renderer.setClearColor(0x0a0a0a, 1);
-    el.appendChild(renderer.domElement);
-
-    const COLS = 8, ROWS = 6;
-    const tiles = [];
-
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const tw = W / COLS, th = H / ROWS;
-        const x = c * tw - W/2 + tw/2;
-        const y = H/2 - r * th - th/2;
-
-        const geo = new THREE.PlaneGeometry(tw - 1, th - 1);
-        const mat = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(x, y, 0);
-        mesh.userData = {
-          delay: (c / COLS + r / ROWS) * 0.3,
-          tx: (c - COLS/2) * 200,
-          ty: (r - ROWS/2) * 200,
-        };
-        scene.add(mesh);
-        tiles.push(mesh);
-      }
-    }
-
-    let start = null;
-    const duration = phase === 'out' ? 0.6 : 0.5;
-
-    const animate = (ts) => {
-      if (!start) start = ts;
-      const elapsed = (ts - start) / 1000;
-
-      tiles.forEach((mesh) => {
-        const d = mesh.userData.delay;
-        const t = Math.max(0, Math.min(1, (elapsed - d) / (duration - d)));
-        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
-
-        if (phase === 'out') {
-          mesh.scale.set(1 - ease, 1 - ease, 1);
-          mesh.position.x = mesh.userData.tx * ease + (mesh.position.x === mesh.userData.tx * ease ? mesh.position.x : mesh.position.x);
-        } else {
-          mesh.scale.set(ease, ease, 1);
-        }
-        mesh.material.opacity = phase === 'out' ? 1 - ease * 0.3 : ease;
-      });
-
-      renderer.render(scene, camera);
-      if (elapsed < duration + 0.4) requestAnimationFrame(animate);
-      else {
-        renderer.dispose();
-        if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
-      }
-    };
-    requestAnimationFrame(animate);
-
-    return () => {
-      renderer.dispose();
-      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
-    };
-  }, [phase]);
-
   if (!phase) return null;
-
   return (
-    <div ref={mountRef} style={{
-      position: 'fixed', inset: 0, zIndex: 9500, pointerEvents: 'none',
-    }}>
-      <span className="nv-page-trans__mark" style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%,-50%)',
-        fontFamily: 'var(--font-display)', fontSize: 48,
-        fontWeight: 600, color: 'white', letterSpacing: '-0.04em',
-        zIndex: 1,
-      }}>N</span>
+    <div className={`nv-page-trans ${phase}`}>
+      <span className="nv-page-trans__mark">N</span>
     </div>
   );
 }
@@ -617,6 +532,9 @@ function TiltCard({ children, className = '', style = {} }) {
     </div>
   );
 }
+
+// === REVEAL HOOK COMPONENT ===
+function RevealMount() { useReveal(); return null; }
 
 // Export to window
 Object.assign(window, {
