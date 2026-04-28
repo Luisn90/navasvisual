@@ -89,8 +89,9 @@ function HomeApp() {
 
       <main>
         {/* HERO */}
-        <section className="nv-hero">
-          <div className="nv-hero__grid">
+        <section className="nv-hero" style={{ position: 'relative' }}>
+          <DotGrid />
+          <div className="nv-hero__grid" style={{ position: 'relative', zIndex: 1 }}>
             <div className="nv-hero__main">
               <div style={layer(10)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
@@ -138,7 +139,7 @@ function HomeApp() {
             </div>
           </div>
 
-          <div className="nv-hero__meta-strip" style={layer(8)}>
+          <div className="nv-hero__meta-strip" style={{ position: 'relative', zIndex: 1, ...layer(8) }}>
             <span>{lang === 'es' ? 'Disponible para nuevos proyectos' : 'Available for new projects'}</span>
             <span>{lang === 'es' ? 'Q2 — 2026' : 'Q2 — 2026'}</span>
             <span>{lang === 'es' ? 'Caracas, VEN' : 'Caracas, VEN'}</span>
@@ -183,7 +184,7 @@ function HomeApp() {
               {t.work.items.slice(0, 4).map((w, i) => {
                 const cls = i === 0 ? 'nv-work-card--lg' : 'nv-work-card--md';
                 return (
-                  <div className={`nv-work-card ${cls}`} key={i}>
+                  <TiltCard className={`nv-work-card ${cls}`} key={i}>
                     <div className="nv-work-card__media">
                       <div className={`nv-ph nv-ph--${i + 1}`}>
                         <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
@@ -197,7 +198,7 @@ function HomeApp() {
                       </div>
                       <span className="nv-work-card__tag">{w.tag}</span>
                     </div>
-                  </div>
+                  </TiltCard>
                 );
               })}
             </div>

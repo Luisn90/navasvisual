@@ -216,11 +216,97 @@ function Footer({ t, lang, onNavigate }) {
   );
 }
 
-// === PAGE TRANSITION (snap-style) ===
+// === PAGE TRANSITION (portal triangle effect) ===
 function PageTransition({ phase }) {
+  const mountRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!phase || !window.THREE) return;
+    const el = mountRef.current;
+    if (!el) return;
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const scene    = new THREE.Scene();
+    const camera   = new THREE.OrthographicCamera(-W/2, W/2, H/2, -H/2, 0.1, 10);
+    camera.position.z = 1;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x0a0a0a, 1);
+    el.appendChild(renderer.domElement);
+
+    const COLS = 8, ROWS = 6;
+    const tiles = [];
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const tw = W / COLS, th = H / ROWS;
+        const x = c * tw - W/2 + tw/2;
+        const y = H/2 - r * th - th/2;
+
+        const geo = new THREE.PlaneGeometry(tw - 1, th - 1);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x0a0a0a });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(x, y, 0);
+        mesh.userData = {
+          delay: (c / COLS + r / ROWS) * 0.3,
+          tx: (c - COLS/2) * 200,
+          ty: (r - ROWS/2) * 200,
+        };
+        scene.add(mesh);
+        tiles.push(mesh);
+      }
+    }
+
+    let start = null;
+    const duration = phase === 'out' ? 0.6 : 0.5;
+
+    const animate = (ts) => {
+      if (!start) start = ts;
+      const elapsed = (ts - start) / 1000;
+
+      tiles.forEach((mesh) => {
+        const d = mesh.userData.delay;
+        const t = Math.max(0, Math.min(1, (elapsed - d) / (duration - d)));
+        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+
+        if (phase === 'out') {
+          mesh.scale.set(1 - ease, 1 - ease, 1);
+          mesh.position.x = mesh.userData.tx * ease + (mesh.position.x === mesh.userData.tx * ease ? mesh.position.x : mesh.position.x);
+        } else {
+          mesh.scale.set(ease, ease, 1);
+        }
+        mesh.material.opacity = phase === 'out' ? 1 - ease * 0.3 : ease;
+      });
+
+      renderer.render(scene, camera);
+      if (elapsed < duration + 0.4) requestAnimationFrame(animate);
+      else {
+        renderer.dispose();
+        if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+      }
+    };
+    requestAnimationFrame(animate);
+
+    return () => {
+      renderer.dispose();
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
+    };
+  }, [phase]);
+
+  if (!phase) return null;
+
   return (
-    <div className={`nv-page-trans ${phase || ''}`}>
-      <span className="nv-page-trans__mark">N</span>
+    <div ref={mountRef} style={{
+      position: 'fixed', inset: 0, zIndex: 9500, pointerEvents: 'none',
+    }}>
+      <span className="nv-page-trans__mark" style={{
+        position: 'absolute', top: '50%', left: '50%',
+        transform: 'translate(-50%,-50%)',
+        fontFamily: 'var(--font-display)', fontSize: 48,
+        fontWeight: 600, color: 'white', letterSpacing: '-0.04em',
+        zIndex: 1,
+      }}>N</span>
     </div>
   );
 }
@@ -341,11 +427,199 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
   );
 }
 
-// === REVEAL HOOK COMPONENT ===
-function RevealMount() { useReveal(); return null; }
+// === DOT GRID (Three.js) ===
+function DotGrid() {
+  const mountRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!window.THREE) return;
+    const el = mountRef.current;
+    if (!el) return;
+
+    const W = el.offsetWidth, H = el.offsetHeight;
+    const scene    = new THREE.Scene();
+    const camera   = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(W, H);
+    renderer.setClearColor(0x000000, 0);
+    el.appendChild(renderer.domElement);
+
+    // Build dot grid
+    const COLS = 28, ROWS = 16;
+    const geometry = new THREE.BufferGeometry();
+    const positions = [];
+    const baseY = [];
+
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const x = (c / (COLS - 1) - 0.5) * 9;
+        const y = (r / (ROWS - 1) - 0.5) * 5;
+        positions.push(x, y, 0);
+        baseY.push(y);
+      }
+    }
+
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.045,
+      transparent: true,
+      opacity: 0.5,
+    });
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // Mouse / gyro tracking
+    const mouse = { x: 0, y: 0 };
+    const onMouseMove = (e) => {
+      mouse.x =  (e.clientX / window.innerWidth  - 0.5) * 2;
+      mouse.y = -(e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    const onOrientation = (e) => {
+      if (e.gamma === null) return;
+      mouse.x = Math.max(-1, Math.min(1, (e.gamma || 0) / 30));
+      mouse.y = Math.max(-1, Math.min(1, ((e.beta  || 0) - 45) / 30));
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('deviceorientation', onOrientation, true);
+
+    let frame;
+    const clock = new THREE.Clock();
+    const animate = () => {
+      frame = requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      const pos = geometry.attributes.position;
+
+      for (let i = 0; i < COLS * ROWS; i++) {
+        const x = pos.getX(i);
+        const y = baseY[i];
+        // Wave based on distance to mouse
+        const mx = mouse.x * 4.5;
+        const my = mouse.y * 2.5;
+        const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
+        const wave = Math.sin(dist * 1.5 - t * 2) * 0.18;
+        const lift = Math.max(0, 1 - dist / 2.5) * 0.4;
+        pos.setZ(i, wave + lift);
+        // Opacity via material not per-point, so just animate lift
+      }
+      pos.needsUpdate = true;
+
+      // Subtle camera drift
+      camera.position.x += (mouse.x * 0.3 - camera.position.x) * 0.05;
+      camera.position.y += (mouse.y * 0.2 - camera.position.y) * 0.05;
+      camera.lookAt(scene.position);
+
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    const onResize = () => {
+      const w = el.offsetWidth, h = el.offsetHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('deviceorientation', onOrientation, true);
+      window.removeEventListener('resize', onResize);
+      renderer.dispose();
+      el.removeChild(renderer.domElement);
+    };
+  }, []);
+
+  return (
+    <div ref={mountRef} style={{
+      position: 'absolute', inset: 0,
+      zIndex: 0, pointerEvents: 'none',
+    }} />
+  );
+}
+
+// === TILT CARD ===
+function TiltCard({ children, className = '', style = {} }) {
+  const ref = React.useRef(null);
+  const raf = React.useRef(null);
+  const current = React.useRef({ rx: 0, ry: 0, shine: { x: 50, y: 50 } });
+  const target  = React.useRef({ rx: 0, ry: 0, shine: { x: 50, y: 50 } });
+  const [transform, setTransform] = React.useState('');
+  const [shine, setShine] = React.useState({ x: 50, y: 50 });
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top)  / rect.height;
+      target.current = {
+        rx:  (y - 0.5) * -12,  // -6 to 6 deg
+        ry:  (x - 0.5) *  12,
+        shine: { x: x * 100, y: y * 100 },
+      };
+    };
+
+    const onLeave = () => {
+      target.current = { rx: 0, ry: 0, shine: { x: 50, y: 50 } };
+    };
+
+    const tick = () => {
+      const c = current.current;
+      const t = target.current;
+      c.rx += (t.rx - c.rx) * 0.1;
+      c.ry += (t.ry - c.ry) * 0.1;
+      c.shine.x += (t.shine.x - c.shine.x) * 0.1;
+      c.shine.y += (t.shine.y - c.shine.y) * 0.1;
+      setTransform(`perspective(800px) rotateX(${c.rx.toFixed(2)}deg) rotateY(${c.ry.toFixed(2)}deg) scale3d(1.02,1.02,1.02)`);
+      setShine({ x: +c.shine.x.toFixed(1), y: +c.shine.y.toFixed(1) });
+      raf.current = requestAnimationFrame(tick);
+    };
+
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    raf.current = requestAnimationFrame(tick);
+
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+      cancelAnimationFrame(raf.current);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        ...style,
+        transform,
+        transformStyle: 'preserve-3d',
+        transition: 'box-shadow 0.3s ease',
+        willChange: 'transform',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {children}
+      {/* Specular shine */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10,
+        background: `radial-gradient(circle at ${shine.x}% ${shine.y}%, rgba(255,255,255,0.12) 0%, transparent 60%)`,
+        borderRadius: 'inherit',
+      }} />
+    </div>
+  );
+}
 
 // Export to window
 Object.assign(window, {
   useI18n, useReveal,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid
 });
