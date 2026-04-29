@@ -342,6 +342,47 @@ function VarTitle({ children, className = '', style = {}, gyroX = 0 }) {
   );
 }
 
+// === HERO 3D SCENE ===
+function Hero3DScene() {
+  const mountRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const el = mountRef.current;
+    if (!el) return;
+
+    const tryInit = () => {
+      if (window.THREE && window.Hero3D) {
+        return window.Hero3D.init(el);
+      }
+    };
+
+    let cleanup;
+    if (window.THREE && window.Hero3D) {
+      cleanup = tryInit();
+    } else {
+      const interval = setInterval(() => {
+        if (window.THREE && window.Hero3D) {
+          clearInterval(interval);
+          cleanup = tryInit();
+        }
+      }, 50);
+      return () => clearInterval(interval);
+    }
+    return () => { if (cleanup) cleanup(); };
+  }, []);
+
+  return (
+    <div ref={mountRef} style={{
+      position: 'absolute',
+      top: 0, right: 0,
+      width: '58%',
+      height: '100%',
+      zIndex: 1,
+      pointerEvents: 'none',
+    }} />
+  );
+}
+
 // === DOT GRID (Three.js) ===
 function DotGrid() {
   const mountRef = React.useRef(null);
@@ -539,5 +580,5 @@ function RevealMount() { useReveal(); return null; }
 // Export to window
 Object.assign(window, {
   useI18n, useReveal,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene
 });

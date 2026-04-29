@@ -1072,6 +1072,24 @@ html { scroll-behavior: smooth; }
   .nv-field-row { grid-template-columns: 1fr; }
 }
 
+/* Hero with 3D scene — light background */
+.nv-hero__main {
+  background: #f0f0f0 !important;
+  color: #0a0a0a;
+}
+.nv-hero__main .nv-h1,
+.nv-hero__main .nv-hero__lede,
+.nv-hero__main .nv-eyebrow {
+  color: #0a0a0a;
+}
+.nv-hero__main .nv-btn--ghost {
+  border-color: rgba(0,0,0,0.2);
+  color: #0a0a0a;
+}
+.nv-hero__main .nv-btn--ghost:hover {
+  background: rgba(0,0,0,0.06);
+}
+
 /* Gyro parallax containment */
 .nv-hero { overflow: hidden; }
 @media (max-width: 480px) {
