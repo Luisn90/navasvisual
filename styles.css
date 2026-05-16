@@ -302,7 +302,7 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
 }
 
 @media (min-width: 960px) {
-  .nv-hero__grid { grid-template-columns: 1.6fr 1fr; }
+  .nv-hero__grid { grid-template-columns: 1fr; }
 }
 
 /* === MARQUEE === */

@@ -97,9 +97,9 @@ function HomeApp() {
               </div>
               <div className="nv-hero__title">
                 <h1 className="nv-h1">
-                  <VarTitle gyroX={gyroX}>{t.hero.title_1}</VarTitle>
+                  <span><em>{t.hero.title_1}</em></span>
                   <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
-                  <VarTitle gyroX={gyroX}>{t.hero.title_3}</VarTitle>
+                  <span><em>{t.hero.title_3}</em></span>
                 </h1>
               </div>
               <div className="nv-hero__bottom" style={layer(8)}>
@@ -112,27 +112,6 @@ function HomeApp() {
                   <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost">
                     {t.hero.cta_contact}
                   </a>
-                </div>
-              </div>
-            </div>
-
-            <div className="nv-hero__sidebar" style={layer(10)}>
-              <div className="nv-card">
-                <div className="nv-meta">
-                  <span className="nv-meta__label">{lang === 'es' ? 'Disciplina' : 'Discipline'}</span>
-                  <span className="nv-meta__value">{t.hero.meta_role}</span>
-                </div>
-              </div>
-              <div className="nv-card">
-                <div className="nv-meta">
-                  <span className="nv-meta__label">{lang === 'es' ? 'Ubicación' : 'Location'}</span>
-                  <span className="nv-meta__value">{t.hero.meta_loc}</span>
-                </div>
-              </div>
-              <div className="nv-card nv-card--solid">
-                <div className="nv-meta">
-                  <span className="nv-meta__label" style={{ color: 'rgba(255,255,255,0.5)' }}>{lang === 'es' ? 'Fundado' : 'Founded'}</span>
-                  <span className="nv-meta__value">{t.hero.meta_year}</span>
                 </div>
               </div>
             </div>
