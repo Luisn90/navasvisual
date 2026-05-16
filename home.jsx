@@ -91,21 +91,18 @@ function HomeApp() {
         {/* HERO */}
         <section className="nv-hero" style={{ position: 'relative', overflow: 'hidden' }}>
           <div className="nv-hero__grid" style={{ position: 'relative', zIndex: 1 }}>
-            <div className="nv-hero__main" style={{ position: 'relative', background: '#f0f0f0', overflow: 'hidden' }}>
-              {/* 3D scene — right half */}
-              <Hero3DScene />
-              {/* Text — left side over 3D */}
-              <div style={{ position: 'relative', zIndex: 2, maxWidth: '52%' }}>
+            <div className="nv-hero__main">
+              <div style={layer(6)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
               </div>
-              <div className="nv-hero__title" style={{ position: 'relative', zIndex: 2, maxWidth: '56%' }}>
+              <div className="nv-hero__title">
                 <h1 className="nv-h1">
                   <VarTitle gyroX={gyroX}>{t.hero.title_1}</VarTitle>
                   <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
                   <VarTitle gyroX={gyroX}>{t.hero.title_3}</VarTitle>
                 </h1>
               </div>
-              <div className="nv-hero__bottom" style={{ position: 'relative', zIndex: 2, maxWidth: '48%' }}>
+              <div className="nv-hero__bottom" style={layer(8)}>
                 <p className="nv-hero__lede">{t.hero.lede}</p>
                 <div className="nv-hero__ctas">
                   <a href="work.html" onClick={(e) => { e.preventDefault(); navigate('work.html'); }} className="nv-btn nv-btn--primary">

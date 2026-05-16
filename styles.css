@@ -15,7 +15,7 @@
   --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
   --max: 1440px;
   --pad: clamp(20px, 4vw, 56px);
-  --font-display: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Elms Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-serif: 'Instrument Serif', 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
@@ -1072,11 +1072,6 @@ html { scroll-behavior: smooth; }
   .nv-field-row { grid-template-columns: 1fr; }
 }
 
-/* Hero with 3D scene — light background */
-.nv-hero__main {
-  background: #f0f0f0 !important;
-  color: #0a0a0a;
-}
 .nv-hero__main .nv-h1,
 .nv-hero__main .nv-hero__lede,
 .nv-hero__main .nv-eyebrow {
