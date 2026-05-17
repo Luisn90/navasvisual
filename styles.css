@@ -1097,8 +1097,7 @@ html { scroll-behavior: smooth; }
   object-fit: cover;
   object-position: center top;
   display: block;
-  mix-blend-mode: multiply;
-  opacity: 0.92;
+  opacity: 1;
 }
 
 @media (max-width: 600px) {
