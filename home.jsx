@@ -92,7 +92,7 @@ function HomeApp() {
         <section className="nv-hero" style={{ position: 'relative', overflow: 'hidden' }}>
           <div className="nv-hero__grid" style={{ position: 'relative', zIndex: 1 }}>
             <div className="nv-hero__main">
-              {/* Imagen derecha */}
+              {/* Imagen — derecha en desktop, abajo en móvil */}
               <div className="nv-hero__img">
                 <img src="assets/hero-image.jpg" alt="Composición escultórica" />
               </div>
