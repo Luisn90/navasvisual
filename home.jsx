@@ -94,7 +94,7 @@ function HomeApp() {
             <div className="nv-hero__main">
               {/* Imagen derecha */}
               <div className="nv-hero__img">
-                <img src="assets/hero-image.png" alt="Composición escultórica" />
+                <img src="assets/hero-image.jpg" alt="Composición escultórica" />
               </div>
               <div style={layer(6)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
