@@ -113,16 +113,11 @@ img { display: block; max-width: 100%; }
 .nv-nav.ready .nv-nav__inner { animation: navIn 0.9s var(--easing-out) 0.2s forwards; }
 @keyframes navIn { to { transform: translateY(0); opacity: 1; } }
 .nv-nav__logo {
-  font-weight: 600; font-size: 15px; letter-spacing: -0.02em;
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center;
+  opacity: 0.9; transition: opacity 0.3s ease;
 }
-.nv-nav__logo-mark {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--fg);
-  display: grid; place-items: center;
-  color: var(--bg); font-size: 10px; font-weight: 700;
-  font-family: var(--font-mono); letter-spacing: 0;
-}
+.nv-nav__logo:hover { opacity: 1; }
+.nv-nav__logo svg { display: block; }
 .nv-nav__links { display: flex; gap: 4px; }
 .nv-nav__link {
   font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 999px;

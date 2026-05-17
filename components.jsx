@@ -45,7 +45,7 @@ function Loader({ onDone }) {
   return (
     <div className={`nv-loader ${done ? 'done' : ''}`}>
       <div className="nv-loader__top">
-        <span>Navas Visual</span>
+        <LogoSVG color="white" size={36} />
         <span>2026</span>
       </div>
       <div>
@@ -62,7 +62,14 @@ function Loader({ onDone }) {
   );
 }
 
-// === NAV ===
+// === LOGO SVG ===
+const LogoSVG = ({ color = 'black', size = 28 }) => (
+  <svg width={size} height={size} viewBox="0 0 87 87" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z" fill={color}/>
+    <path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z" fill={color}/>
+    <path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z" fill={color}/>
+  </svg>
+);
 function Nav({ active, lang, setLang, t, ready, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -89,8 +96,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
       <nav className={`nv-nav ${ready ? 'ready' : ''}`}>
         <div className="nv-nav__inner">
           <a href="index.html" onClick={(e) => { e.preventDefault(); handleNav('index.html'); }} className="nv-nav__logo">
-            <span className="nv-nav__logo-mark">N</span>
-            <span>Navas Visual</span>
+            <LogoSVG size={28} />
           </a>
           <div className="nv-nav__links">
             {links.slice(1).map(l => (
@@ -221,7 +227,7 @@ function PageTransition({ phase }) {
   if (!phase) return null;
   return (
     <div className={`nv-page-trans ${phase}`}>
-      <span className="nv-page-trans__mark">N</span>
+      <div className="nv-page-trans__mark"><LogoSVG color="white" size={40} /></div>
     </div>
   );
 }
