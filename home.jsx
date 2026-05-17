@@ -98,7 +98,7 @@ function HomeApp() {
               <div className="nv-hero__title">
                 <h1 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
-                  <span><em className="nv-hero__title-2">{t.hero.title_2}</em></span>
+                  <span><em>{t.hero.title_2}</em></span>
                   <span><em>{t.hero.title_3}</em></span>
                 </h1>
               </div>
