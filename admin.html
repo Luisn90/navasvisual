@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Navas Visual — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:     #0a0a0a;
+    --bg-1:   #111111;
+    --bg-2:   #1a1a1a;
+    --bg-3:   #242424;
+    --line:   rgba(255,255,255,0.08);
+    --fg:     #ffffff;
+    --fg-2:   rgba(255,255,255,0.6);
+    --fg-3:   rgba(255,255,255,0.3);
+    --danger: #ff4444;
+    --success:#22c55e;
+    --radius: 12px;
+    --font:   'Inter Tight', sans-serif;
+    --mono:   'JetBrains Mono', monospace;
+  }
+  body { font-family:var(--font); background:var(--bg); color:var(--fg); min-height:100vh; -webkit-font-smoothing:antialiased; }
+
+  /* LOGIN */
+  .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg); background-image:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,0.04) 0%,transparent 60%); }
+  .login-box { width:100%; max-width:380px; padding:48px 40px; background:var(--bg-1); border:1px solid var(--line); border-radius:20px; }
+  .login-title { font-size:22px; font-weight:600; letter-spacing:-0.03em; margin-bottom:6px; margin-top:24px; }
+  .login-sub { font-size:13px; color:var(--fg-3); margin-bottom:32px; }
+
+  .field { margin-bottom:16px; }
+  .field label { display:block; font-size:11px; font-weight:500; letter-spacing:0.06em; color:var(--fg-3); text-transform:uppercase; margin-bottom:8px; }
+  .field input, .field textarea, .field select { width:100%; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); color:var(--fg); font-family:var(--font); font-size:14px; padding:12px 14px; outline:none; transition:border-color 0.2s; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color:rgba(255,255,255,0.3); }
+  .field textarea { resize:vertical; min-height:90px; }
+  .field select option { background:var(--bg-2); }
+
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:999px; font-family:var(--font); font-size:13px; font-weight:500; cursor:pointer; border:none; transition:all 0.2s; }
+  .btn-primary { background:var(--fg); color:var(--bg); width:100%; justify-content:center; }
+  .btn-primary:hover { background:rgba(255,255,255,0.85); }
+  .btn-ghost { background:transparent; color:var(--fg-2); border:1px solid var(--line); }
+  .btn-ghost:hover { border-color:rgba(255,255,255,0.3); color:var(--fg); }
+  .btn-danger { background:transparent; color:var(--danger); border:1px solid rgba(255,68,68,0.2); }
+  .btn-danger:hover { background:rgba(255,68,68,0.1); }
+  .btn-sm { padding:7px 14px; font-size:12px; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  .error-msg { margin-top:12px; padding:10px 14px; background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.2); border-radius:var(--radius); font-size:13px; color:var(--danger); }
+
+  /* APP */
+  .app { display:none; min-height:100vh; }
+  .app.visible { display:flex; }
+
+  .sidebar { width:220px; flex-shrink:0; background:var(--bg-1); border-right:1px solid var(--line); display:flex; flex-direction:column; padding:24px 0; position:fixed; top:0; left:0; height:100vh; }
+  .sidebar-logo { padding:0 24px 24px; border-bottom:1px solid var(--line); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  .sidebar-logo span { font-size:13px; font-weight:600; letter-spacing:-0.02em; }
+  .sidebar-label { font-size:10px; font-weight:500; letter-spacing:0.08em; color:var(--fg-3); text-transform:uppercase; padding:0 24px; margin-bottom:6px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:10px 24px; font-size:13px; color:var(--fg-2); cursor:pointer; transition:all 0.2s; }
+  .nav-item:hover { color:var(--fg); background:var(--bg-2); }
+  .nav-item.active { color:var(--fg); background:var(--bg-2); }
+  .nav-item .icon { font-size:16px; width:20px; text-align:center; }
+  .sidebar-footer { margin-top:auto; padding:16px 24px; border-top:1px solid var(--line); }
+  .user-info { font-size:12px; color:var(--fg-3); margin-bottom:10px; font-family:var(--mono); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .main { margin-left:220px; flex:1; padding:40px; min-height:100vh; }
+
+  .page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:32px; }
+  .page-title { font-size:24px; font-weight:600; letter-spacing:-0.03em; }
+  .page-sub { font-size:13px; color:var(--fg-3); margin-top:4px; }
+
+  .stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px; }
+  .stat-card { background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
+  .stat-label { font-size:11px; color:var(--fg-3); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px; }
+  .stat-value { font-size:32px; font-weight:600; letter-spacing:-0.04em; }
+
+  .table-wrap { background:var(--bg-1); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .table-toolbar { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--line); gap:12px; flex-wrap:wrap; }
+  .search-input { background:var(--bg-2); border:1px solid var(--line); border-radius:999px; color:var(--fg); font-family:var(--font); font-size:13px; padding:8px 16px; outline:none; width:240px; transition:border-color 0.2s; }
+  .search-input:focus { border-color:rgba(255,255,255,0.3); }
+  .search-input::placeholder { color:var(--fg-3); }
+  .filter-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+  .filter-tab { padding:6px 14px; border-radius:999px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid transparent; color:var(--fg-3); background:transparent; font-family:var(--font); transition:all 0.2s; }
+  .filter-tab:hover { color:var(--fg); }
+  .filter-tab.active { background:var(--bg-2); border-color:var(--line); color:var(--fg); }
+
+  table { width:100%; border-collapse:collapse; }
+  th { text-align:left; font-size:11px; font-weight:500; color:var(--fg-3); letter-spacing:0.06em; text-transform:uppercase; padding:12px 20px; border-bottom:1px solid var(--line); }
+  td { padding:14px 20px; font-size:13px; color:var(--fg-2); border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:var(--bg-2); }
+
+  .project-thumb { width:40px; height:40px; border-radius:8px; object-fit:cover; display:block; }
+  .project-thumb-placeholder { width:40px; height:40px; border-radius:8px; background:var(--bg-3); display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--fg-3); }
+  .project-title-cell { font-weight:500; color:var(--fg); font-size:14px; }
+  .badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:500; border:1px solid var(--line); background:var(--bg-2); color:var(--fg-2); }
+  .badge-green { background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.2); color:var(--success); }
+  .badge-dim { background:var(--bg-3); color:var(--fg-3); }
+  .actions { display:flex; gap:6px; }
+  .empty-state { text-align:center; padding:60px 20px; color:var(--fg-3); }
+  .empty-icon { font-size:40px; margin-bottom:12px; }
+  .empty-title { font-size:15px; color:var(--fg-2); margin-bottom:6px; }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:100; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--bg-1); border:1px solid var(--line); border-radius:20px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; padding:32px; animation:modalIn 0.3s ease; }
+  @keyframes modalIn { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+  .modal-title { font-size:18px; font-weight:600; letter-spacing:-0.02em; }
+  .modal-close { width:32px; height:32px; border-radius:50%; background:var(--bg-2); border:1px solid var(--line); color:var(--fg-2); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .modal-close:hover { color:var(--fg); }
+  .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:24px; padding-top:20px; border-top:1px solid var(--line); }
+
+  .img-upload { border:2px dashed var(--line); border-radius:var(--radius); padding:24px; text-align:center; cursor:pointer; transition:border-color 0.2s; position:relative; }
+  .img-upload:hover { border-color:rgba(255,255,255,0.2); }
+  .img-upload input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; border:none; padding:0; }
+  .img-upload-icon { font-size:28px; margin-bottom:8px; }
+  .img-upload-text { font-size:13px; color:var(--fg-3); }
+  .img-preview { width:100%; max-height:180px; object-fit:cover; border-radius:var(--radius); margin-top:12px; display:none; }
+
+  .toast { position:fixed; bottom:24px; right:24px; background:var(--fg); color:var(--bg); padding:12px 20px; border-radius:999px; font-size:13px; font-weight:500; z-index:999; transform:translateY(80px); opacity:0; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); pointer-events:none; }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.error { background:var(--danger); color:white; }
+  .spinner { width:16px; height:16px; border:2px solid rgba(0,0,0,0.2); border-top-color:var(--bg); border-radius:50%; animation:spin 0.6s linear infinite; display:inline-block; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <svg width="36" height="36" viewBox="0 0 87 87" fill="none">
+      <path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z" fill="white"/>
+      <path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z" fill="white"/>
+      <path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z" fill="white"/>
+    </svg>
+    <div class="login-title">Navas Visual</div>
+    <div class="login-sub">Panel de administración</div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="tu@email.com" />
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()" />
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Iniciar sesión</button>
+    <div class="error-msg" id="loginError" style="display:none"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="24" height="24" viewBox="0 0 87 87" fill="none">
+        <path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z" fill="white"/>
+        <path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z" fill="white"/>
+        <path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z" fill="white"/>
+      </svg>
+      <span>Admin</span>
+    </div>
+    <div class="sidebar-label">Menú</div>
+    <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="icon">▦</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('projects')" id="nav-projects"><span class="icon">◫</span> Proyectos</div>
+    <div class="sidebar-footer">
+      <div class="user-info" id="userEmail">—</div>
+      <button class="btn btn-ghost btn-sm" onclick="handleLogout()" style="width:100%;justify-content:center">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div id="page-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">Dashboard</div><div class="page-sub">Resumen del portafolio</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total proyectos</div><div class="stat-value" id="statTotal">—</div></div>
+        <div class="stat-card"><div class="stat-label">Publicados</div><div class="stat-value" id="statPublished">—</div></div>
+        <div class="stat-card"><div class="stat-label">Categorías</div><div class="stat-value" id="statCategories">—</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar"><span style="font-size:13px;font-weight:500">Últimos proyectos</span></div>
+        <table><thead><tr><th>Imagen</th><th>Título</th><th>Categoría</th><th>Estado</th></tr></thead>
+        <tbody id="dashboardTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div id="page-projects" style="display:none">
+      <div class="page-header">
+        <div><div class="page-title">Proyectos</div><div class="page-sub">Gestiona tu portafolio</div></div>
+        <button class="btn btn-primary" onclick="openModal()">+ Nuevo proyecto</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="search-input" placeholder="Buscar..." oninput="filterProjects(this.value)" />
+          <div class="filter-tabs" id="filterTabs"></div>
+        </div>
+        <table>
+          <thead><tr><th width="56">—</th><th>Título</th><th>Categoría</th><th>Estado</th><th>Orden</th><th>Acciones</th></tr></thead>
+          <tbody id="projectsTable"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <div class="empty-icon">◫</div>
+          <div class="empty-title">Sin proyectos aún</div>
+          <div style="font-size:13px">Crea tu primer proyecto arriba</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Nuevo proyecto</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <input type="hidden" id="projectId" />
+    <div class="field"><label>Título *</label><input type="text" id="fTitle" placeholder="Ej: Identidad Marca X" /></div>
+    <div class="field">
+      <label>Categoría *</label>
+      <select id="fCategory">
+        <option value="">Seleccionar...</option>
+        <option value="Branding">Branding</option>
+        <option value="Identidad">Identidad</option>
+        <option value="UI/UX">UI/UX</option>
+        <option value="Web">Web</option>
+        <option value="Motion">Motion</option>
+        <option value="Ilustración">Ilustración</option>
+        <option value="3D">3D</option>
+        <option value="Editorial">Editorial</option>
+      </select>
+    </div>
+    <div class="field"><label>Descripción</label><textarea id="fDescription" placeholder="Describe brevemente el proyecto..."></textarea></div>
+    <div class="field">
+      <label>Imagen</label>
+      <div class="img-upload">
+        <input type="file" accept="image/*" onchange="handleImageSelect(this)" />
+        <div class="img-upload-icon">🖼</div>
+        <div class="img-upload-text">Arrastra o haz clic para subir</div>
+        <img class="img-preview" id="imgPreview" />
+      </div>
+      <input type="hidden" id="fImageUrl" />
+    </div>
+    <div class="field"><label>Orden</label><input type="number" id="fOrder" value="0" min="0" /></div>
+    <div class="field" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="fPublished" checked style="width:auto;accent-color:white" />
+      <label for="fPublished" style="margin:0;text-transform:none;font-size:13px;color:var(--fg-2);letter-spacing:0">Publicado en la web</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveProject()">Guardar proyecto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://kzbhybcyjjqupojuakuw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allProjects = [];
+let activeFilter = 'all';
+let editingId = null;
+let selectedFile = null;
+
+// TOAST
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// AUTH
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('loginError');
+  if (!email || !pass) { err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Entrando...'; err.style.display='none';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    err.textContent = error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos' : error.message;
+    err.style.display='block'; btn.disabled=false; btn.innerHTML='Iniciar sesión';
+  } else {
+    showApp(data.user.email);
+  }
+}
+
+function showApp(email) {
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('userEmail').textContent = email;
+  loadProjects();
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+// PAGES
+function showPage(page) {
+  ['dashboard','projects'].forEach(p => {
+    document.getElementById('page-'+p).style.display = p===page ? 'block' : 'none';
+    document.getElementById('nav-'+p).classList.toggle('active', p===page);
+  });
+}
+
+// PROJECTS
+async function loadProjects() {
+  const { data, error } = await sb.from('projects').select('*').order('order_index', { ascending: true });
+  if (!error) { allProjects = data || []; renderAll(); }
+  else { showToast('Error cargando proyectos: ' + error.message, 'error'); }
+}
+
+function renderAll() {
+  renderDashboard();
+  renderProjects();
+  renderFilters();
+}
+
+function renderDashboard() {
+  document.getElementById('statTotal').textContent     = allProjects.length;
+  document.getElementById('statPublished').textContent = allProjects.filter(p=>p.published).length;
+  document.getElementById('statCategories').textContent = new Set(allProjects.map(p=>p.category)).size;
+  const tbody = document.getElementById('dashboardTable');
+  tbody.innerHTML = allProjects.slice(0,5).map(p=>`
+    <tr>
+      <td>${p.image_url ? `<img class="project-thumb" src="${p.image_url}" />` : `<div class="project-thumb-placeholder">◫</div>`}</td>
+      <td class="project-title-cell">${p.title}</td>
+      <td><span class="badge">${p.category}</span></td>
+      <td><span class="badge ${p.published?'badge-green':'badge-dim'}">${p.published?'Publicado':'Borrador'}</span></td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--fg-3);padding:40px">Sin proyectos aún</td></tr>';
+}
+
+function renderProjects(filter=activeFilter, search='') {
+  let list = allProjects;
+  if (filter !== 'all') list = list.filter(p=>p.category===filter);
+  if (search) list = list.filter(p=>p.title.toLowerCase().includes(search.toLowerCase()));
+  const tbody = document.getElementById('projectsTable');
+  const empty = document.getElementById('emptyState');
+  if (!list.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = list.map(p=>`
+    <tr>
+      <td>${p.image_url ? `<img class="project-thumb" src="${p.image_url}" />` : `<div class="project-thumb-placeholder">◫</div>`}</td>
+      <td class="project-title-cell">${p.title}</td>
+      <td><span class="badge">${p.category}</span></td>
+      <td><span class="badge ${p.published?'badge-green':'badge-dim'}" style="cursor:pointer" onclick="togglePublish('${p.id}',${p.published})">${p.published?'● Publicado':'○ Borrador'}</span></td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--fg-3)">${p.order_index}</td>
+      <td><div class="actions">
+        <button class="btn btn-ghost btn-sm" onclick="openModal('${p.id}')">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">Eliminar</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function renderFilters() {
+  const cats = ['all', ...new Set(allProjects.map(p=>p.category))];
+  document.getElementById('filterTabs').innerHTML = cats.map(c=>`
+    <button class="filter-tab ${c===activeFilter?'active':''}" onclick="setFilter('${c}',this)">${c==='all'?'Todos':c}</button>`).join('');
+}
+
+function setFilter(cat, el) {
+  activeFilter = cat;
+  document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderProjects(cat);
+}
+
+function filterProjects(val) { renderProjects(activeFilter, val); }
+
+async function togglePublish(id, current) {
+  const { error } = await sb.from('projects').update({ published: !current }).eq('id', id);
+  if (!error) { allProjects = allProjects.map(p=>p.id===id?{...p,published:!current}:p); renderAll(); showToast(current?'Despublicado':'✓ Publicado'); }
+}
+
+async function deleteProject(id) {
+  if (!confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if (!error) { allProjects = allProjects.filter(p=>p.id!==id); renderAll(); showToast('Proyecto eliminado'); }
+  else showToast('Error: '+error.message, 'error');
+}
+
+// MODAL
+function openModal(id=null) {
+  editingId=id; selectedFile=null;
+  document.getElementById('modalTitle').textContent = id ? 'Editar proyecto' : 'Nuevo proyecto';
+  document.getElementById('imgPreview').style.display = 'none';
+  if (id) {
+    const p = allProjects.find(x=>x.id===id);
+    if (!p) return;
+    document.getElementById('fTitle').value       = p.title;
+    document.getElementById('fCategory').value    = p.category;
+    document.getElementById('fDescription').value = p.description || '';
+    document.getElementById('fOrder').value       = p.order_index || 0;
+    document.getElementById('fPublished').checked = p.published;
+    document.getElementById('fImageUrl').value    = p.image_url || '';
+    if (p.image_url) { const img=document.getElementById('imgPreview'); img.src=p.image_url; img.style.display='block'; }
+  } else {
+    document.getElementById('fTitle').value='';
+    document.getElementById('fCategory').value='';
+    document.getElementById('fDescription').value='';
+    document.getElementById('fOrder').value=allProjects.length;
+    document.getElementById('fPublished').checked=true;
+    document.getElementById('fImageUrl').value='';
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); editingId=null; selectedFile=null; }
+
+function handleImageSelect(input) {
+  const file = input.files[0]; if (!file) return;
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => { const img=document.getElementById('imgPreview'); img.src=e.target.result; img.style.display='block'; };
+  reader.readAsDataURL(file);
+}
+
+async function uploadImage(file, projectId) {
+  const ext  = file.name.split('.').pop();
+  const path = `${projectId}-${Date.now()}.${ext}`;
+  const { error } = await sb.storage.from('projects').upload(path, file, { upsert: true });
+  if (error) { console.error(error); return ''; }
+  return sb.storage.from('projects').getPublicUrl(path).data.publicUrl;
+}
+
+async function saveProject() {
+  const title    = document.getElementById('fTitle').value.trim();
+  const category = document.getElementById('fCategory').value;
+  const desc     = document.getElementById('fDescription').value.trim();
+  const order    = parseInt(document.getElementById('fOrder').value)||0;
+  const published= document.getElementById('fPublished').checked;
+  if (!title||!category) { showToast('Título y categoría son obligatorios','error'); return; }
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Guardando...';
+  let imageUrl = document.getElementById('fImageUrl').value;
+  if (selectedFile) {
+    const tmpId = editingId || `p-${Date.now()}`;
+    imageUrl = await uploadImage(selectedFile, tmpId);
+  }
+  const payload = { title, category, description:desc, image_url:imageUrl, order_index:order, published };
+  let error;
+  if (editingId) {
+    const res = await sb.from('projects').update(payload).eq('id', editingId);
+    error=res.error;
+    if (!error) allProjects=allProjects.map(p=>p.id===editingId?{...p,...payload}:p);
+  } else {
+    const res = await sb.from('projects').insert([payload]).select();
+    error=res.error;
+    if (!error && res.data) allProjects.push(res.data[0]);
+  }
+  if (error) showToast('Error: '+error.message,'error');
+  else { renderAll(); closeModal(); showToast('✓ Proyecto guardado'); }
+  btn.disabled=false; btn.innerHTML='Guardar proyecto';
+}
+
+// INIT
+document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) showApp(data.session.user.email);
+});
+</script>
+</body>
+</html>
