@@ -641,12 +641,20 @@ function TiltCard({ children, className = '', style = {}, ...rest }) {
 
 // === PROJECT MODAL (lightbox de caso de estudio) ===
 function ProjectModal({ project, lang, onClose }) {
+  const [closing, setClosing] = useState(false);
+
+  const requestClose = () => {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(onClose, 280); // debe coincidir con la duración de la animación de salida en CSS
+  };
+
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e) => { if (e.key === 'Escape') requestClose(); };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, [onClose]);
+  }, []);
 
   if (!project) return null;
 
@@ -654,24 +662,15 @@ function ProjectModal({ project, lang, onClose }) {
 
   return (
     <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 200,
-        background: 'rgba(10,10,10,0.92)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        overflowY: 'auto', padding: '64px 24px',
-      }}
+      onClick={requestClose}
+      className={`nv-modal-overlay ${closing ? 'nv-modal-overlay--out' : 'nv-modal-overlay--in'}`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'var(--bg)', color: 'var(--fg)',
-          width: '100%', maxWidth: 880, borderRadius: 16, overflow: 'hidden',
-          position: 'relative',
-        }}
+        className={`nv-modal-box ${closing ? 'nv-modal-box--out' : 'nv-modal-box--in'}`}
       >
         <button
-          onClick={onClose}
+          onClick={requestClose}
           aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
           style={{
             position: 'absolute', top: 16, right: 16, zIndex: 2,
