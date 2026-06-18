@@ -4,6 +4,7 @@ function WorkApp() {
   const [ready, setReady] = React.useState(false);
   const [transPhase, setTransPhase] = React.useState('in');
   const [filter, setFilter] = React.useState('all');
+  const [selectedProject, setSelectedProject] = React.useState(null);
   const { projects } = useProjects(t.work.items);
 
   React.useEffect(() => {
@@ -57,7 +58,7 @@ function WorkApp() {
 
             <div className="nv-work-page-grid reveal-stagger" style={{ marginTop: 56 }}>
               {items.map((w, i) => (
-                <div className="nv-work-card" key={i}>
+                <div className="nv-work-card" key={i} onClick={() => setSelectedProject(w)} style={{ cursor: 'pointer' }}>
                   <div className="nv-work-card__media">
                     {w.image ? (
                       <img src={w.image} alt={w.project} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -86,6 +87,9 @@ function WorkApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
+      {selectedProject && (
+        <ProjectModal project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
+      )}
     </React.Fragment>
   );
 }

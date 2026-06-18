@@ -239,9 +239,14 @@
         <option value="Editorial">Editorial</option>
       </select>
     </div>
+    <div style="display:flex;gap:12px">
+      <div class="field" style="flex:1"><label>Cliente</label><input type="text" id="fClient" placeholder="Ej: Cliente confidencial" /></div>
+      <div class="field" style="width:120px"><label>Año</label><input type="text" id="fYear" placeholder="2026" /></div>
+    </div>
+    <div class="field"><label>URL del sitio (opcional)</label><input type="text" id="fProjectUrl" placeholder="https://..." /></div>
     <div class="field"><label>Descripción</label><textarea id="fDescription" placeholder="Describe brevemente el proyecto..."></textarea></div>
     <div class="field">
-      <label>Imagen</label>
+      <label>Imagen principal</label>
       <div class="img-upload">
         <input type="file" accept="image/*" onchange="handleImageSelect(this)" />
         <div class="img-upload-icon">🖼</div>
@@ -249,6 +254,16 @@
         <img class="img-preview" id="imgPreview" />
       </div>
       <input type="hidden" id="fImageUrl" />
+    </div>
+    <div class="field">
+      <label>Galería adicional (opcional)</label>
+      <div class="img-upload">
+        <input type="file" accept="image/*" multiple onchange="handleGallerySelect(this)" />
+        <div class="img-upload-icon">🖼</div>
+        <div class="img-upload-text">Selecciona una o varias imágenes</div>
+      </div>
+      <div id="galleryPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+      <input type="hidden" id="fGalleryUrls" />
     </div>
     <div class="field"><label>Orden</label><input type="number" id="fOrder" value="0" min="0" /></div>
     <div class="field" style="display:flex;align-items:center;gap:10px">
@@ -399,23 +414,35 @@ async function deleteProject(id) {
 }
 
 // MODAL
+let selectedGalleryFiles = [];
+let existingGalleryUrls = [];
+
 function openModal(id=null) {
-  editingId=id; selectedFile=null;
+  editingId=id; selectedFile=null; selectedGalleryFiles=[]; existingGalleryUrls=[];
   document.getElementById('modalTitle').textContent = id ? 'Editar proyecto' : 'Nuevo proyecto';
   document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('galleryPreview').innerHTML = '';
   if (id) {
     const p = allProjects.find(x=>x.id===id);
     if (!p) return;
     document.getElementById('fTitle').value       = p.title;
     document.getElementById('fCategory').value    = p.category;
+    document.getElementById('fClient').value      = p.client || '';
+    document.getElementById('fYear').value        = p.year || '';
+    document.getElementById('fProjectUrl').value  = p.project_url || '';
     document.getElementById('fDescription').value = p.description || '';
     document.getElementById('fOrder').value       = p.order_index || 0;
     document.getElementById('fPublished').checked = p.published;
     document.getElementById('fImageUrl').value    = p.image_url || '';
     if (p.image_url) { const img=document.getElementById('imgPreview'); img.src=p.image_url; img.style.display='block'; }
+    existingGalleryUrls = Array.isArray(p.gallery) ? [...p.gallery] : [];
+    renderGalleryPreview();
   } else {
     document.getElementById('fTitle').value='';
     document.getElementById('fCategory').value='';
+    document.getElementById('fClient').value='';
+    document.getElementById('fYear').value='';
+    document.getElementById('fProjectUrl').value='';
     document.getElementById('fDescription').value='';
     document.getElementById('fOrder').value=allProjects.length;
     document.getElementById('fPublished').checked=true;
@@ -424,7 +451,7 @@ function openModal(id=null) {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); editingId=null; selectedFile=null; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); editingId=null; selectedFile=null; selectedGalleryFiles=[]; existingGalleryUrls=[]; }
 
 function handleImageSelect(input) {
   const file = input.files[0]; if (!file) return;
@@ -434,29 +461,76 @@ function handleImageSelect(input) {
   reader.readAsDataURL(file);
 }
 
-async function uploadImage(file, projectId) {
+function handleGallerySelect(input) {
+  const files = Array.from(input.files || []);
+  selectedGalleryFiles = selectedGalleryFiles.concat(files);
+  renderGalleryPreview();
+}
+
+function removeExistingGalleryImage(idx) {
+  existingGalleryUrls.splice(idx, 1);
+  renderGalleryPreview();
+}
+
+function removeNewGalleryFile(idx) {
+  selectedGalleryFiles.splice(idx, 1);
+  renderGalleryPreview();
+}
+
+function renderGalleryPreview() {
+  const wrap = document.getElementById('galleryPreview');
+  wrap.innerHTML = '';
+  const thumb = (src, onRemove) => {
+    const box = document.createElement('div');
+    box.style.cssText = 'position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;background:var(--bg-2)';
+    const img = document.createElement('img');
+    img.src = src; img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+    const btn = document.createElement('button');
+    btn.textContent = '×';
+    btn.style.cssText = 'position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;border:none;background:rgba(0,0,0,0.7);color:#fff;font-size:12px;cursor:pointer;line-height:1';
+    btn.onclick = onRemove;
+    box.appendChild(img); box.appendChild(btn);
+    return box;
+  };
+  existingGalleryUrls.forEach((url, i) => wrap.appendChild(thumb(url, () => removeExistingGalleryImage(i))));
+  selectedGalleryFiles.forEach((file, i) => {
+    const url = URL.createObjectURL(file);
+    wrap.appendChild(thumb(url, () => removeNewGalleryFile(i)));
+  });
+}
+
+async function uploadImage(file, projectId, suffix='') {
   const ext  = file.name.split('.').pop();
-  const path = `${projectId}-${Date.now()}.${ext}`;
+  const path = `${projectId}-${Date.now()}${suffix}.${ext}`;
   const { error } = await sb.storage.from('projects').upload(path, file, { upsert: true });
   if (error) { console.error(error); return ''; }
   return sb.storage.from('projects').getPublicUrl(path).data.publicUrl;
 }
 
 async function saveProject() {
-  const title    = document.getElementById('fTitle').value.trim();
-  const category = document.getElementById('fCategory').value;
-  const desc     = document.getElementById('fDescription').value.trim();
-  const order    = parseInt(document.getElementById('fOrder').value)||0;
-  const published= document.getElementById('fPublished').checked;
+  const title      = document.getElementById('fTitle').value.trim();
+  const category   = document.getElementById('fCategory').value;
+  const client     = document.getElementById('fClient').value.trim();
+  const year       = document.getElementById('fYear').value.trim();
+  const projectUrl = document.getElementById('fProjectUrl').value.trim();
+  const desc       = document.getElementById('fDescription').value.trim();
+  const order      = parseInt(document.getElementById('fOrder').value)||0;
+  const published  = document.getElementById('fPublished').checked;
   if (!title||!category) { showToast('Título y categoría son obligatorios','error'); return; }
   const btn=document.getElementById('saveBtn');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Guardando...';
+  const tmpId = editingId || `p-${Date.now()}`;
   let imageUrl = document.getElementById('fImageUrl').value;
   if (selectedFile) {
-    const tmpId = editingId || `p-${Date.now()}`;
     imageUrl = await uploadImage(selectedFile, tmpId);
   }
-  const payload = { title, category, description:desc, image_url:imageUrl, order_index:order, published };
+  const newGalleryUrls = [];
+  for (let i=0; i<selectedGalleryFiles.length; i++) {
+    const url = await uploadImage(selectedGalleryFiles[i], tmpId, `-g${i}`);
+    if (url) newGalleryUrls.push(url);
+  }
+  const gallery = [...existingGalleryUrls, ...newGalleryUrls];
+  const payload = { title, category, client, year, project_url: projectUrl, description:desc, image_url:imageUrl, order_index:order, published, gallery };
   let error;
   if (editingId) {
     const res = await sb.from('projects').update(payload).eq('id', editingId);

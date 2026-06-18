@@ -63,6 +63,7 @@ function HomeApp() {
   const [transPhase, setTransPhase] = useStateHome(null);
   const gyro = useGyroParallax();
   const { projects } = useProjects(t.work.items);
+  const [selectedProject, setSelectedProject] = useStateHome(null);
 
   const layer = (strength) => ({
     transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
@@ -167,7 +168,7 @@ function HomeApp() {
               {projects.slice(0, 4).map((w, i) => {
                 const cls = i === 0 ? 'nv-work-card--lg' : 'nv-work-card--md';
                 return (
-                  <TiltCard className={`nv-work-card ${cls}`} key={i}>
+                  <TiltCard className={`nv-work-card ${cls}`} key={i} onClick={() => setSelectedProject(w)} style={{ cursor: 'pointer' }}>
                     <div className="nv-work-card__media">
                       {w.image ? (
                         <img src={w.image} alt={w.project} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -213,6 +214,9 @@ function HomeApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
+      {selectedProject && (
+        <ProjectModal project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
+      )}
     </React.Fragment>
   );
 }
