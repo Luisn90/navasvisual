@@ -170,7 +170,7 @@ function HomeApp() {
                   <TiltCard className={`nv-work-card ${cls}`} key={i}>
                     <div className="nv-work-card__media">
                       {w.image ? (
-                        <img src={w.image} alt={w.project} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        <img src={w.image} alt={w.project} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       ) : (
                         <div className={`nv-ph nv-ph--${i + 1}`}>
                           <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
