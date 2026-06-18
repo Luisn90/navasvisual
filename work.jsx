@@ -4,6 +4,7 @@ function WorkApp() {
   const [ready, setReady] = React.useState(false);
   const [transPhase, setTransPhase] = React.useState('in');
   const [filter, setFilter] = React.useState('all');
+  const { projects } = useProjects(t.work.items);
 
   React.useEffect(() => {
     setTimeout(() => setReady(true), 100);
@@ -15,8 +16,8 @@ function WorkApp() {
     setTimeout(() => { window.location.href = href; }, 600);
   };
 
-  const allTags = ['all', ...new Set(t.work.items.map(i => i.tag))];
-  const items = filter === 'all' ? t.work.items : t.work.items.filter(i => i.tag === filter);
+  const allTags = ['all', ...new Set(projects.map(i => i.tag))];
+  const items = filter === 'all' ? projects : projects.filter(i => i.tag === filter);
 
   return (
     <React.Fragment>
@@ -58,9 +59,13 @@ function WorkApp() {
               {items.map((w, i) => (
                 <div className="nv-work-card" key={i}>
                   <div className="nv-work-card__media">
-                    <div className={`nv-ph nv-ph--${(i % 6) + 1}`}>
-                      <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
-                    </div>
+                    {w.image ? (
+                      <img src={w.image} alt={w.project} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                      <div className={`nv-ph nv-ph--${(i % 6) + 1}`}>
+                        <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
+                      </div>
+                    )}
                     <div className="nv-work-card__overlay" />
                   </div>
                   <div className="nv-work-card__info">

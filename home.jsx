@@ -62,6 +62,7 @@ function HomeApp() {
   const [ready, setReady] = useStateHome(false);
   const [transPhase, setTransPhase] = useStateHome(null);
   const gyro = useGyroParallax();
+  const { projects } = useProjects(t.work.items);
 
   const layer = (strength) => ({
     transform: `translate(${gyro.x * strength}px, ${gyro.y * strength}px)`,
@@ -163,14 +164,18 @@ function HomeApp() {
               </a>
             </div>
             <div className="nv-work-grid reveal-stagger">
-              {t.work.items.slice(0, 4).map((w, i) => {
+              {projects.slice(0, 4).map((w, i) => {
                 const cls = i === 0 ? 'nv-work-card--lg' : 'nv-work-card--md';
                 return (
                   <TiltCard className={`nv-work-card ${cls}`} key={i}>
                     <div className="nv-work-card__media">
-                      <div className={`nv-ph nv-ph--${i + 1}`}>
-                        <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
-                      </div>
+                      {w.image ? (
+                        <img src={w.image} alt={w.project} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      ) : (
+                        <div className={`nv-ph nv-ph--${i + 1}`}>
+                          <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
+                        </div>
+                      )}
                       <div className="nv-work-card__overlay" />
                     </div>
                     <div className="nv-work-card__info">

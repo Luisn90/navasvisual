@@ -9,6 +9,61 @@ function useI18n() {
   return { lang, setLang, t };
 }
 
+// === SUPABASE (proyectos) ===
+const NV_SUPABASE_URL = 'https://kzbhybcyjjqupojuakuw.supabase.co';
+const NV_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
+
+function getNvSupabase() {
+  if (!window._nvSupabaseClient && window.supabase) {
+    window._nvSupabaseClient = window.supabase.createClient(NV_SUPABASE_URL, NV_SUPABASE_KEY);
+  }
+  return window._nvSupabaseClient;
+}
+
+// Carga proyectos publicados desde Supabase. Si falla o no hay datos, usa
+// el fallback estático de i18n (t.work.items) para que la web nunca quede vacía.
+function useProjects(fallbackItems) {
+  const [projects, setProjects] = useState(null); // null = cargando
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const sb = getNvSupabase();
+        if (!sb) throw new Error('Supabase client not available');
+        const { data, error } = await sb
+          .from('projects')
+          .select('*')
+          .eq('published', true)
+          .order('order_index', { ascending: true });
+        if (error) throw error;
+        if (!cancelled) {
+          if (data && data.length > 0) {
+            setProjects(data.map(p => ({
+              client: p.client || '',
+              project: p.title,
+              year: p.year || '',
+              tag: p.category,
+              image: p.image_url || null,
+            })));
+          } else {
+            setProjects(fallbackItems);
+          }
+        }
+      } catch (err) {
+        console.warn('useProjects: fallback a datos estáticos', err);
+        if (!cancelled) setProjects(fallbackItems);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return { projects: projects || fallbackItems || [], loading };
+}
+
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal, .reveal-stagger');
@@ -585,6 +640,6 @@ function RevealMount() { useReveal(); return null; }
 
 // Export to window
 Object.assign(window, {
-  useI18n, useReveal,
+  useI18n, useReveal, useProjects,
   Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene
 });
