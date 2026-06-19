@@ -165,8 +165,7 @@ function HomeApp() {
               </a>
             </div>
           </div>
-
-          <WorkCarousel projects={projects} lang={lang} onSelect={setSelectedProject} />
+          <HScrollCards projects={projects} lang={lang} onSelect={setSelectedProject} />
         </section>
 
         {/* PROCESS */}

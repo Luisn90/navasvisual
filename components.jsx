@@ -640,91 +640,76 @@ function TiltCard({ children, className = '', style = {}, ...rest }) {
 }
 
 // === PROJECT MODAL (lightbox de caso de estudio) ===
-// === WORK CAROUSEL (home) ===
-function WorkCarousel({ projects, lang, onSelect }) {
-  const items = projects.slice(0, 6); // máximo 6 slides
-  const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const timerRef = useRef(null);
-  const INTERVAL = 4800; // ms entre slides
-
-  const goTo = (idx) => setCurrent((idx + items.length) % items.length);
-  const prev = () => { goTo(current - 1); setPaused(true); };
-  const next = () => { goTo(current + 1); setPaused(true); };
+// === HORIZONTAL SCROLL CARDS (home work section) ===
+function HScrollCards({ projects, lang, onSelect }) {
+  const items = projects.slice(0, 6);
+  const outerRef = useRef(null);
+  const trackRef = useRef(null);
 
   useEffect(() => {
-    if (paused || items.length < 2) return;
-    timerRef.current = setTimeout(() => setCurrent((c) => (c + 1) % items.length), INTERVAL);
-    return () => clearTimeout(timerRef.current);
-  }, [current, paused, items.length]);
+    const outer = outerRef.current;
+    const track = trackRef.current;
+    if (!outer || !track) return;
 
-  // Reanuda auto-avance 6s después de la última interacción manual
-  useEffect(() => {
-    if (!paused) return;
-    const t = setTimeout(() => setPaused(false), 6000);
-    return () => clearTimeout(t);
-  }, [paused]);
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const rect = outer.getBoundingClientRect();
+        const totalScroll = outer.offsetHeight - window.innerHeight;
+        // progress: 0 cuando el top de la sección llega al viewport, 1 cuando el bottom sale
+        const progress = Math.max(0, Math.min(1, -rect.top / totalScroll));
+        const maxShift = track.scrollWidth - window.innerWidth;
+        track.style.transform = `translateX(${-progress * maxShift}px)`;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // posición inicial
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [items.length]);
 
   if (!items.length) return null;
 
   return (
-    <div className="nv-wc" aria-label={lang === 'es' ? 'Proyectos destacados' : 'Featured projects'}>
-      {items.map((w, i) => {
-        const isActive = i === current;
-        const ph = `nv-ph--${(i % 6) + 1}`;
-        return (
-          <div
-            key={i}
-            className={`nv-wc__slide ${isActive ? 'is-active' : ''}`}
-            aria-hidden={!isActive}
-          >
-            {w.image ? (
-              <img src={w.image} alt={w.project} className="nv-wc__img" />
-            ) : (
-              <div className={`nv-ph ${ph} nv-wc__ph`} />
-            )}
-            <div className="nv-wc__gradient" />
-            <div className="nv-wc__info">
-              <div className="nv-wc__info-inner">
-                <span className="nv-wc__tag">{w.tag}</span>
-                <h3 className="nv-wc__title">{w.project}</h3>
-                <p className="nv-wc__client">{[w.client, w.year].filter(Boolean).join(' · ')}</p>
-              </div>
-              <button
-                className="nv-wc__cta"
-                onClick={() => onSelect(w)}
-                aria-label={lang === 'es' ? `Ver ${w.project}` : `View ${w.project}`}
-              >
-                {lang === 'es' ? 'Ver proyecto' : 'View project'} ↗
-              </button>
-            </div>
-          </div>
-        );
-      })}
-
-      {items.length > 1 && (
-        <React.Fragment>
-          <button className="nv-wc__arrow nv-wc__arrow--prev" onClick={prev} aria-label={lang === 'es' ? 'Anterior' : 'Previous'}>←</button>
-          <button className="nv-wc__arrow nv-wc__arrow--next" onClick={next} aria-label={lang === 'es' ? 'Siguiente' : 'Next'}>→</button>
-          <div className="nv-wc__dots">
-            {items.map((_, i) => (
-              <button
-                key={i}
-                className={`nv-wc__dot ${i === current ? 'is-active' : ''}`}
-                onClick={() => { goTo(i); setPaused(true); }}
-                aria-label={`${lang === 'es' ? 'Proyecto' : 'Project'} ${i + 1}`}
-              />
-            ))}
-          </div>
-          <div className="nv-wc__progress">
+    <div ref={outerRef} className="nv-hsc__outer">
+      <div className="nv-hsc__sticky">
+        <div ref={trackRef} className="nv-hsc__track">
+          {items.map((w, i) => (
             <div
-              key={current + '-' + paused}
-              className={`nv-wc__progress-bar ${!paused ? 'is-running' : ''}`}
-              style={{ animationDuration: `${INTERVAL}ms` }}
-            />
-          </div>
-        </React.Fragment>
-      )}
+              key={i}
+              className="nv-work-card nv-hsc__card"
+              onClick={() => onSelect(w)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="nv-work-card__media">
+                {w.image ? (
+                  <img
+                    src={w.image}
+                    alt={w.project}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <div className={`nv-ph nv-ph--${(i % 6) + 1}`}>
+                    <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
+                  </div>
+                )}
+                <div className="nv-work-card__overlay" />
+              </div>
+              <div className="nv-work-card__info">
+                <div>
+                  <div className="nv-work-card__title">{w.project}</div>
+                  <div className="nv-work-card__client">{[w.client, w.year].filter(Boolean).join(' · ')}</div>
+                </div>
+                <span className="nv-work-card__tag">{w.tag}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -876,5 +861,5 @@ function RevealMount() { useReveal(); return null; }
 // Export to window
 Object.assign(window, {
   useI18n, useReveal, useProjects,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, WorkCarousel
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, HScrollCards
 });
