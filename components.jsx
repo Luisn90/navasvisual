@@ -642,6 +642,7 @@ function TiltCard({ children, className = '', style = {}, ...rest }) {
 // === PROJECT MODAL (lightbox de caso de estudio) ===
 function ProjectModal({ project, lang, onClose }) {
   const [closing, setClosing] = useState(false);
+  const [slide, setSlide] = useState(0);
 
   const requestClose = () => {
     if (closing) return;
@@ -649,16 +650,23 @@ function ProjectModal({ project, lang, onClose }) {
     setTimeout(onClose, 280); // debe coincidir con la duración de la animación de salida en CSS
   };
 
+  const images = project ? [project.image, ...(project.gallery || [])].filter(Boolean) : [];
+
+  const prevSlide = () => setSlide((s) => (s - 1 + images.length) % images.length);
+  const nextSlide = () => setSlide((s) => (s + 1) % images.length);
+
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') requestClose(); };
+    const onKey = (e) => {
+      if (e.key === 'Escape') requestClose();
+      if (e.key === 'ArrowLeft' && images.length > 1) prevSlide();
+      if (e.key === 'ArrowRight' && images.length > 1) nextSlide();
+    };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
-  }, []);
+  }, [images.length]);
 
   if (!project) return null;
-
-  const images = [project.image, ...(project.gallery || [])].filter(Boolean);
 
   return (
     <div
@@ -673,7 +681,7 @@ function ProjectModal({ project, lang, onClose }) {
           onClick={requestClose}
           aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
           style={{
-            position: 'absolute', top: 16, right: 16, zIndex: 2,
+            position: 'absolute', top: 16, right: 16, zIndex: 3,
             width: 40, height: 40, borderRadius: '50%', border: 'none',
             background: 'var(--bg)', color: 'var(--fg)', cursor: 'pointer',
             fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -683,9 +691,51 @@ function ProjectModal({ project, lang, onClose }) {
           ✕
         </button>
 
-        <div style={{ position: 'relative', width: '100%', paddingTop: '62%', background: 'var(--bg-line)' }}>
-          {images[0] && (
-            <img src={images[0]} alt={project.project} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ position: 'relative', width: '100%', paddingTop: '62%', background: 'var(--bg-line)', overflow: 'hidden' }}>
+          {images.map((src, i) => (
+            <img
+              key={src + i}
+              src={src}
+              alt={`${project.project} ${i + 1}`}
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                opacity: i === slide ? 1 : 0,
+                transition: 'opacity 0.4s var(--easing)',
+                pointerEvents: i === slide ? 'auto' : 'none',
+              }}
+            />
+          ))}
+
+          {images.length > 1 && (
+            <React.Fragment>
+              <button
+                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                aria-label={lang === 'es' ? 'Anterior' : 'Previous'}
+                className="nv-modal-carousel__arrow nv-modal-carousel__arrow--prev"
+              >
+                ←
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                aria-label={lang === 'es' ? 'Siguiente' : 'Next'}
+                className="nv-modal-carousel__arrow nv-modal-carousel__arrow--next"
+              >
+                →
+              </button>
+
+              <div className="nv-modal-carousel__counter">{slide + 1} / {images.length}</div>
+
+              <div className="nv-modal-carousel__dots">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => { e.stopPropagation(); setSlide(i); }}
+                    aria-label={`${lang === 'es' ? 'Imagen' : 'Image'} ${i + 1}`}
+                    className={`nv-modal-carousel__dot ${i === slide ? 'is-active' : ''}`}
+                  />
+                ))}
+              </div>
+            </React.Fragment>
           )}
         </div>
 
@@ -711,16 +761,6 @@ function ProjectModal({ project, lang, onClose }) {
             <p style={{ marginTop: 24, fontSize: 15, lineHeight: 1.7, color: 'var(--fg-muted)', maxWidth: 640 }}>
               {project.description}
             </p>
-          )}
-
-          {images.length > 1 && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8, marginTop: 28 }}>
-              {images.slice(1).map((src, i) => (
-                <div key={i} style={{ position: 'relative', paddingTop: '75%', borderRadius: 8, overflow: 'hidden', background: 'var(--bg-line)' }}>
-                  <img src={src} alt={`${project.project} ${i + 2}`} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-              ))}
-            </div>
           )}
 
           {project.url && (

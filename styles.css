@@ -891,6 +891,44 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   .nv-modal-box--in, .nv-modal-box--out { animation: none; }
 }
 
+/* === MODAL CAROUSEL === */
+.nv-modal-carousel__arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.9); color: var(--fg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; z-index: 2;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.nv-modal-carousel__arrow:hover { background: #fff; transform: translateY(-50%) scale(1.06); }
+.nv-modal-carousel__arrow--prev { left: 16px; }
+.nv-modal-carousel__arrow--next { right: 16px; }
+
+.nv-modal-carousel__counter {
+  position: absolute; top: 16px; left: 16px; z-index: 2;
+  background: rgba(0,0,0,0.55); color: #fff;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
+  padding: 6px 10px; border-radius: 999px;
+}
+
+.nv-modal-carousel__dots {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 2;
+}
+.nv-modal-carousel__dot {
+  width: 6px; height: 6px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.5); cursor: pointer; padding: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.nv-modal-carousel__dot.is-active { background: #fff; transform: scale(1.3); }
+
+@media (max-width: 640px) {
+  .nv-modal-carousel__arrow { width: 36px; height: 36px; font-size: 15px; }
+  .nv-modal-carousel__arrow--prev { left: 10px; }
+  .nv-modal-carousel__arrow--next { right: 10px; }
+}
+
 .nv-drawer__inner {
   position: absolute;
   top: 0; right: 0;
