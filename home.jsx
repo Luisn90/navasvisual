@@ -164,33 +164,9 @@ function HomeApp() {
                 {t.work.view_all} <span className="nv-btn__arrow">↗</span>
               </a>
             </div>
-            <div className="nv-work-grid reveal-stagger">
-              {projects.slice(0, 4).map((w, i) => {
-                const cls = i === 0 ? 'nv-work-card--lg' : 'nv-work-card--md';
-                return (
-                  <TiltCard className={`nv-work-card ${cls}`} key={i} onClick={() => setSelectedProject(w)} style={{ cursor: 'pointer' }}>
-                    <div className="nv-work-card__media">
-                      {w.image ? (
-                        <img src={w.image} alt={w.project} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      ) : (
-                        <div className={`nv-ph nv-ph--${i + 1}`}>
-                          <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
-                        </div>
-                      )}
-                      <div className="nv-work-card__overlay" />
-                    </div>
-                    <div className="nv-work-card__info">
-                      <div>
-                        <div className="nv-work-card__title">{w.project}</div>
-                        <div className="nv-work-card__client">{w.client} · {w.year}</div>
-                      </div>
-                      <span className="nv-work-card__tag">{w.tag}</span>
-                    </div>
-                  </TiltCard>
-                );
-              })}
-            </div>
           </div>
+
+          <WorkCarousel projects={projects} lang={lang} onSelect={setSelectedProject} />
         </section>
 
         {/* PROCESS */}

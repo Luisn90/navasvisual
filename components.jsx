@@ -640,6 +640,95 @@ function TiltCard({ children, className = '', style = {}, ...rest }) {
 }
 
 // === PROJECT MODAL (lightbox de caso de estudio) ===
+// === WORK CAROUSEL (home) ===
+function WorkCarousel({ projects, lang, onSelect }) {
+  const items = projects.slice(0, 6); // máximo 6 slides
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const timerRef = useRef(null);
+  const INTERVAL = 4800; // ms entre slides
+
+  const goTo = (idx) => setCurrent((idx + items.length) % items.length);
+  const prev = () => { goTo(current - 1); setPaused(true); };
+  const next = () => { goTo(current + 1); setPaused(true); };
+
+  useEffect(() => {
+    if (paused || items.length < 2) return;
+    timerRef.current = setTimeout(() => setCurrent((c) => (c + 1) % items.length), INTERVAL);
+    return () => clearTimeout(timerRef.current);
+  }, [current, paused, items.length]);
+
+  // Reanuda auto-avance 6s después de la última interacción manual
+  useEffect(() => {
+    if (!paused) return;
+    const t = setTimeout(() => setPaused(false), 6000);
+    return () => clearTimeout(t);
+  }, [paused]);
+
+  if (!items.length) return null;
+
+  return (
+    <div className="nv-wc" aria-label={lang === 'es' ? 'Proyectos destacados' : 'Featured projects'}>
+      {items.map((w, i) => {
+        const isActive = i === current;
+        const ph = `nv-ph--${(i % 6) + 1}`;
+        return (
+          <div
+            key={i}
+            className={`nv-wc__slide ${isActive ? 'is-active' : ''}`}
+            aria-hidden={!isActive}
+          >
+            {w.image ? (
+              <img src={w.image} alt={w.project} className="nv-wc__img" />
+            ) : (
+              <div className={`nv-ph ${ph} nv-wc__ph`} />
+            )}
+            <div className="nv-wc__gradient" />
+            <div className="nv-wc__info">
+              <div className="nv-wc__info-inner">
+                <span className="nv-wc__tag">{w.tag}</span>
+                <h3 className="nv-wc__title">{w.project}</h3>
+                <p className="nv-wc__client">{[w.client, w.year].filter(Boolean).join(' · ')}</p>
+              </div>
+              <button
+                className="nv-wc__cta"
+                onClick={() => onSelect(w)}
+                aria-label={lang === 'es' ? `Ver ${w.project}` : `View ${w.project}`}
+              >
+                {lang === 'es' ? 'Ver proyecto' : 'View project'} ↗
+              </button>
+            </div>
+          </div>
+        );
+      })}
+
+      {items.length > 1 && (
+        <React.Fragment>
+          <button className="nv-wc__arrow nv-wc__arrow--prev" onClick={prev} aria-label={lang === 'es' ? 'Anterior' : 'Previous'}>←</button>
+          <button className="nv-wc__arrow nv-wc__arrow--next" onClick={next} aria-label={lang === 'es' ? 'Siguiente' : 'Next'}>→</button>
+          <div className="nv-wc__dots">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                className={`nv-wc__dot ${i === current ? 'is-active' : ''}`}
+                onClick={() => { goTo(i); setPaused(true); }}
+                aria-label={`${lang === 'es' ? 'Proyecto' : 'Project'} ${i + 1}`}
+              />
+            ))}
+          </div>
+          <div className="nv-wc__progress">
+            <div
+              key={current + '-' + paused}
+              className={`nv-wc__progress-bar ${!paused ? 'is-running' : ''}`}
+              style={{ animationDuration: `${INTERVAL}ms` }}
+            />
+          </div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
 function ProjectModal({ project, lang, onClose }) {
   const [closing, setClosing] = useState(false);
   const [slide, setSlide] = useState(0);
@@ -787,5 +876,5 @@ function RevealMount() { useReveal(); return null; }
 // Export to window
 Object.assign(window, {
   useI18n, useReveal, useProjects,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, WorkCarousel
 });
