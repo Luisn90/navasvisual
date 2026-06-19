@@ -856,52 +856,54 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* === HORIZONTAL SCROLL CARDS (home work section) === */
+/* === WORK SLIDER (home — 3/2/1 cols) === */
+.nv-wslider { padding: 0 var(--pad); }
 
-/* El outer define la altura "virtual" del scroll — cuanto más alto, más lento se desplaza */
-.nv-hsc__outer {
-  height: 300vh; /* espacio de scroll que "consume" el efecto horizontal */
+.nv-wslider__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
 }
 
-/* El sticky mantiene el track visible mientras el usuario scrollea */
-.nv-hsc__sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+.nv-wslider__card { width: 100%; }
+
+/* Navegación */
+.nv-wslider__nav {
   display: flex;
   align-items: center;
-  overflow: hidden;
-  padding: 0 var(--pad);
+  justify-content: center;
+  gap: 16px;
+  margin-top: 40px;
 }
 
-/* El track es el contenedor que se mueve horizontalmente */
-.nv-hsc__track {
-  display: flex;
-  gap: 24px;
-  will-change: transform;
-  transition: transform 0.08s linear; /* micro-suavizado */
+.nv-wslider__arrow {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--bg-line);
+  background: transparent; color: var(--fg);
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
-
-/* Las cards reutilizando los estilos existentes de .nv-work-card */
-.nv-hsc__card {
-  flex: 0 0 420px;
-  width: 420px;
+.nv-wslider__arrow:hover:not(:disabled) {
+  background: var(--fg); color: var(--bg);
+  transform: scale(1.05);
 }
+.nv-wslider__arrow:disabled { opacity: 0.25; cursor: default; }
 
-@media (max-width: 900px) {
-  .nv-hsc__card { flex: 0 0 80vw; width: 80vw; }
-  .nv-hsc__outer { height: 250vh; }
+.nv-wslider__dots { display: flex; gap: 8px; align-items: center; }
+.nv-wslider__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  border: none; background: var(--bg-line);
+  cursor: pointer; padding: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
+.nv-wslider__dot.is-active { background: var(--fg); transform: scale(1.4); }
 
-@media (max-width: 540px) {
-  .nv-hsc__card { flex: 0 0 88vw; width: 88vw; }
-  .nv-hsc__outer { height: 220vh; }
+@media (max-width: 1024px) {
+  .nv-wslider__grid { grid-template-columns: repeat(2, 1fr); }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .nv-hsc__outer { height: auto; }
-  .nv-hsc__sticky { position: relative; height: auto; overflow-x: auto; }
-  .nv-hsc__track { transform: none !important; }
+@media (max-width: 640px) {
+  .nv-wslider__grid { grid-template-columns: 1fr; }
 }
 
 /* === PROJECT MODAL === */

@@ -640,76 +640,98 @@ function TiltCard({ children, className = '', style = {}, ...rest }) {
 }
 
 // === PROJECT MODAL (lightbox de caso de estudio) ===
-// === HORIZONTAL SCROLL CARDS (home work section) ===
-function HScrollCards({ projects, lang, onSelect }) {
-  const items = projects.slice(0, 6);
-  const outerRef = useRef(null);
-  const trackRef = useRef(null);
+// === WORK SLIDER (home — 3/2/1 cols, carrusel por página) ===
+function WorkSlider({ projects, lang, onSelect }) {
+  const items = projects.slice(0, 9);
+  const [page, setPage] = useState(0);
+  const [cols, setCols] = useState(3);
 
+  // Detectar cuántas columnas mostrar según el ancho
   useEffect(() => {
-    const outer = outerRef.current;
-    const track = trackRef.current;
-    if (!outer || !track) return;
-
-    let ticking = false;
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const rect = outer.getBoundingClientRect();
-        const totalScroll = outer.offsetHeight - window.innerHeight;
-        // progress: 0 cuando el top de la sección llega al viewport, 1 cuando el bottom sale
-        const progress = Math.max(0, Math.min(1, -rect.top / totalScroll));
-        const maxShift = track.scrollWidth - window.innerWidth;
-        track.style.transform = `translateX(${-progress * maxShift}px)`;
-        ticking = false;
-      });
+    const update = () => {
+      const w = window.innerWidth;
+      setCols(w < 640 ? 1 : w < 1024 ? 2 : 3);
     };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // posición inicial
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [items.length]);
+  const totalPages = Math.ceil(items.length / cols);
+  const safePage = Math.min(page, totalPages - 1);
+  const visible = items.slice(safePage * cols, safePage * cols + cols);
+
+  const prev = () => setPage((p) => Math.max(0, p - 1));
+  const next = () => setPage((p) => Math.min(totalPages - 1, p + 1));
+
+  // Resetear página al cambiar cols
+  useEffect(() => { setPage(0); }, [cols]);
 
   if (!items.length) return null;
 
   return (
-    <div ref={outerRef} className="nv-hsc__outer">
-      <div className="nv-hsc__sticky">
-        <div ref={trackRef} className="nv-hsc__track">
-          {items.map((w, i) => (
-            <div
-              key={i}
-              className="nv-work-card nv-hsc__card"
-              onClick={() => onSelect(w)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="nv-work-card__media">
-                {w.image ? (
-                  <img
-                    src={w.image}
-                    alt={w.project}
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                ) : (
-                  <div className={`nv-ph nv-ph--${(i % 6) + 1}`}>
-                    <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
-                  </div>
-                )}
-                <div className="nv-work-card__overlay" />
-              </div>
-              <div className="nv-work-card__info">
-                <div>
-                  <div className="nv-work-card__title">{w.project}</div>
-                  <div className="nv-work-card__client">{[w.client, w.year].filter(Boolean).join(' · ')}</div>
+    <div className="nv-wslider">
+      <div className="nv-wslider__grid">
+        {visible.map((w, i) => (
+          <div
+            key={safePage + '-' + i}
+            className="nv-work-card nv-wslider__card"
+            onClick={() => onSelect(w)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="nv-work-card__media">
+              {w.image ? (
+                <img
+                  src={w.image}
+                  alt={w.project}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <div className={`nv-ph nv-ph--${(i % 6) + 1}`}>
+                  <span className="nv-ph__label">[{lang === 'es' ? 'imagen del proyecto' : 'project image'}]</span>
                 </div>
-                <span className="nv-work-card__tag">{w.tag}</span>
-              </div>
+              )}
+              <div className="nv-work-card__overlay" />
             </div>
-          ))}
-        </div>
+            <div className="nv-work-card__info">
+              <div>
+                <div className="nv-work-card__title">{w.project}</div>
+                <div className="nv-work-card__client">{[w.client, w.year].filter(Boolean).join(' · ')}</div>
+              </div>
+              <span className="nv-work-card__tag">{w.tag}</span>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className="nv-wslider__nav">
+          <button
+            className="nv-wslider__arrow"
+            onClick={prev}
+            disabled={safePage === 0}
+            aria-label={lang === 'es' ? 'Anterior' : 'Previous'}
+          >←</button>
+
+          <div className="nv-wslider__dots">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                className={`nv-wslider__dot ${i === safePage ? 'is-active' : ''}`}
+                onClick={() => setPage(i)}
+                aria-label={`${lang === 'es' ? 'Página' : 'Page'} ${i + 1}`}
+              />
+            ))}
+          </div>
+
+          <button
+            className="nv-wslider__arrow"
+            onClick={next}
+            disabled={safePage === totalPages - 1}
+            aria-label={lang === 'es' ? 'Siguiente' : 'Next'}
+          >→</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -861,5 +883,5 @@ function RevealMount() { useReveal(); return null; }
 // Export to window
 Object.assign(window, {
   useI18n, useReveal, useProjects,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, HScrollCards
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, WorkSlider
 });
