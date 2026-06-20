@@ -64,7 +64,10 @@ function useProjects(fallbackItems) {
     return () => { cancelled = true; };
   }, []);
 
-  return { projects: projects || fallbackItems || [], loading };
+  // Mientras carga, no mostrar el fallback estático (evita el parpadeo de
+  // datos hardcodeados antes de que lleguen los reales de Supabase).
+  // El fallback solo se usa si Supabase responde vacío o falla.
+  return { projects: projects || [], loading };
 }
 
 function useReveal() {
@@ -789,7 +792,7 @@ function WhatsAppModal({ lang }) {
   return (
     <div
       onClick={requestClose}
-      className={`nv-modal-overlay ${closing ? 'nv-modal-overlay--out' : 'nv-modal-overlay--in'}`}
+      className={`nv-modal-overlay nv-modal-overlay--wa ${closing ? 'nv-modal-overlay--out' : 'nv-modal-overlay--in'}`}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -971,12 +974,18 @@ function ProjectModal({ project, lang, onClose }) {
             )}
 
             <div className="nv-modal-cta-row">
-              <button
-                onClick={() => openWhatsApp(project.project)}
+              <a
+                href={`https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  lang === 'es'
+                    ? `Hola Luis, vi el proyecto "${project.project}" en tu portafolio y me gustaría conversar.`
+                    : `Hi Luis, I saw the "${project.project}" project in your portfolio and I'd like to talk.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="nv-btn nv-btn--ghost nv-modal-cta--wa"
               >
                 WhatsApp
-              </button>
+              </a>
               <a
                 href={`mailto:${NV_CONTACT_EMAIL}?subject=${encodeURIComponent(
                   (lang === 'es' ? 'Sobre el proyecto: ' : 'About the project: ') + project.project
