@@ -736,6 +736,109 @@ function WorkSlider({ projects, lang, onSelect }) {
   );
 }
 
+// === WHATSAPP MODAL ===
+const NV_WHATSAPP_NUMBER = '584127449626'; // formato internacional sin '+' ni espacios
+const NV_WHATSAPP_EVENT = 'nv:open-whatsapp';
+
+// Dispara el modal de WhatsApp desde cualquier botón/link de la app,
+// sin necesidad de pasar props en cascada. Uso: onClick={() => openWhatsApp()}
+function openWhatsApp() {
+  window.dispatchEvent(new CustomEvent(NV_WHATSAPP_EVENT));
+}
+
+function WhatsAppModal({ lang }) {
+  const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
+
+  useEffect(() => {
+    const onOpen = () => { setClosing(false); setOpen(true); };
+    window.addEventListener(NV_WHATSAPP_EVENT, onOpen);
+    return () => window.removeEventListener(NV_WHATSAPP_EVENT, onOpen);
+  }, []);
+
+  const requestClose = () => {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(() => { setOpen(false); setClosing(false); }, 280);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') requestClose(); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [open]);
+
+  if (!open) return null;
+
+  const message = lang === 'es'
+    ? 'Hola Luis, vi tu portafolio y me gustaría conversar sobre un proyecto.'
+    : "Hi Luis, I saw your portfolio and I'd like to talk about a project.";
+
+  const waUrl = `https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waUrl)}`;
+
+  return (
+    <div
+      onClick={requestClose}
+      className={`nv-modal-overlay ${closing ? 'nv-modal-overlay--out' : 'nv-modal-overlay--in'}`}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`nv-modal-box nv-wa-modal ${closing ? 'nv-modal-box--out' : 'nv-modal-box--in'}`}
+      >
+        <button
+          onClick={requestClose}
+          aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
+          style={{
+            position: 'absolute', top: 16, right: 16, zIndex: 3,
+            width: 40, height: 40, borderRadius: '50%', border: 'none',
+            background: 'var(--bg)', color: 'var(--fg)', cursor: 'pointer',
+            fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+          }}
+        >
+          ✕
+        </button>
+
+        <div className="nv-wa-modal__content">
+          <span className="nv-wa-modal__eyebrow">WhatsApp</span>
+          <h3 className="nv-wa-modal__title">
+            {lang === 'es' ? 'Hablemos por WhatsApp' : "Let's talk on WhatsApp"}
+          </h3>
+          <p className="nv-wa-modal__lede">
+            {lang === 'es'
+              ? 'Escanea el código con tu teléfono o abre WhatsApp Web directamente.'
+              : 'Scan the code with your phone, or open WhatsApp Web directly.'}
+          </p>
+
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="nv-btn nv-btn--primary"
+            style={{ marginTop: 24 }}
+          >
+            {lang === 'es' ? 'Abrir WhatsApp' : 'Open WhatsApp'}
+            <span className="nv-btn__arrow">↗</span>
+          </a>
+
+          <div className="nv-wa-modal__divider">
+            <span>{lang === 'es' ? 'o escanea' : 'or scan'}</span>
+          </div>
+
+          <div className="nv-wa-modal__qr">
+            <img src={qrUrl} alt="WhatsApp QR" width="160" height="160" loading="lazy" />
+          </div>
+
+          <span className="nv-wa-modal__number">+{NV_WHATSAPP_NUMBER.replace(/^(\d{2})(\d{3})(\d{7})$/, '$1 $2 $3')}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProjectModal({ project, lang, onClose }) {
   const [closing, setClosing] = useState(false);
   const [slide, setSlide] = useState(0);
@@ -885,5 +988,5 @@ function RevealMount() { useReveal(); return null; }
 // Export to window
 Object.assign(window, {
   useI18n, useReveal, useProjects,
-  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, WorkSlider
+  Loader, Nav, Footer, PageTransition, Cursor, Marquee, Eyebrow, SectionHead, RevealMount, VarTitle, TiltCard, DotGrid, Hero3DScene, ProjectModal, WorkSlider, WhatsAppModal, openWhatsApp
 });

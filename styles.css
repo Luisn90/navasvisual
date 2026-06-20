@@ -979,6 +979,58 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   }
 }
 
+/* === WHATSAPP MODAL === */
+.nv-wa-modal {
+  max-width: 420px;
+}
+.nv-wa-modal__content {
+  padding: 48px 36px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.nv-wa-modal__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #25D366;
+  font-weight: 500;
+}
+.nv-wa-modal__title {
+  font-size: 26px; font-weight: 600; letter-spacing: -0.02em;
+  margin: 10px 0 0;
+}
+.nv-wa-modal__lede {
+  font-size: 14px; line-height: 1.6; color: var(--fg-muted);
+  margin: 12px 0 0; max-width: 320px;
+}
+.nv-wa-modal .nv-btn--primary {
+  background: #25D366; color: #fff;
+}
+.nv-wa-modal .nv-btn--primary:hover {
+  background: #1ebe5a;
+}
+.nv-wa-modal__divider {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; margin: 28px 0 20px;
+  color: var(--fg-soft); font-size: 12px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.nv-wa-modal__divider::before,
+.nv-wa-modal__divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--bg-line);
+}
+.nv-wa-modal__qr {
+  padding: 12px; background: #fff; border: 1px solid var(--bg-line); border-radius: 12px;
+}
+.nv-wa-modal__qr img { display: block; width: 160px; height: 160px; }
+.nv-wa-modal__number {
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
 /* === MODAL CAROUSEL === */
 .nv-modal-carousel__arrow {
   position: absolute; top: 50%; transform: translateY(-50%);

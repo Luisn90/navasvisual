@@ -189,6 +189,7 @@ function HomeApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
+      <WhatsAppModal lang={lang} />
       {selectedProject && (
         <ProjectModal project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
       )}

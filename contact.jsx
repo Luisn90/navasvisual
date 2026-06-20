@@ -93,10 +93,22 @@ function ContactApp() {
 
                 <div className="nv-socials">
                   {t.contact.socials.map((s, i) => (
-                    <a href="#" className="nv-social-row" key={i}>
-                      <span className="nv-social-row__name">{s.n}</span>
-                      <span className="nv-social-row__handle">{s.h} ↗</span>
-                    </a>
+                    s.n === 'WhatsApp' ? (
+                      <a
+                        href="#"
+                        className="nv-social-row"
+                        key={i}
+                        onClick={(e) => { e.preventDefault(); openWhatsApp(); }}
+                      >
+                        <span className="nv-social-row__name">{s.n}</span>
+                        <span className="nv-social-row__handle">{s.h} ↗</span>
+                      </a>
+                    ) : (
+                      <a href="#" className="nv-social-row" key={i}>
+                        <span className="nv-social-row__name">{s.n}</span>
+                        <span className="nv-social-row__handle">{s.h} ↗</span>
+                      </a>
+                    )
                   ))}
                 </div>
               </div>
@@ -124,6 +136,7 @@ function ContactApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
+      <WhatsAppModal lang={lang} />
     </React.Fragment>
   );
 }

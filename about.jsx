@@ -83,6 +83,7 @@ function AboutApp() {
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
+      <WhatsAppModal lang={lang} />
     </React.Fragment>
   );
 }
