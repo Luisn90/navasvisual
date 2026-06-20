@@ -5,7 +5,9 @@ function ContactApp() {
   const [transPhase, setTransPhase] = React.useState('in');
   const [openFaq, setOpenFaq] = React.useState(0);
   const [sent, setSent] = React.useState(false);
-  const [form, setForm] = React.useState({ name: '', email: '', company: '', budget: '', service: '', message: '' });
+  const [sending, setSending] = React.useState(false);
+  const [sendError, setSendError] = React.useState(false);
+  const [form, setForm] = React.useState({ name: '', email: '', company: '', service: '', message: '' });
 
   React.useEffect(() => {
     setTimeout(() => setReady(true), 100);
@@ -17,11 +19,30 @@ function ContactApp() {
     setTimeout(() => { window.location.href = href; }, 600);
   };
 
-  const submit = (e) => {
+  // Formspree: reemplazar 'YOUR_FORM_ID' por el ID real una vez creado
+  // el formulario en https://formspree.io (destino: hola@navasvisual.com)
+  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+  const submit = async (e) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    setForm({ name: '', email: '', company: '', budget: '', service: '', message: '' });
+    setSending(true);
+    setSendError(false);
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Formspree error');
+      setSent(true);
+      setTimeout(() => setSent(false), 4000);
+      setForm({ name: '', email: '', company: '', service: '', message: '' });
+    } catch (err) {
+      console.error('Contact form submit failed:', err);
+      setSendError(true);
+    } finally {
+      setSending(false);
+    }
   };
 
   const upd = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -61,28 +82,28 @@ function ContactApp() {
                     <input type="text" value={form.company} onChange={upd('company')} />
                   </div>
                   <div className="nv-field">
-                    <label>{t.contact.form.budget}</label>
-                    <select value={form.budget} onChange={upd('budget')}>
+                    <label>{t.contact.form.service}</label>
+                    <select value={form.service} onChange={upd('service')}>
                       <option value="">—</option>
-                      {t.contact.form.budget_options.map(b => <option key={b} value={b}>{b}</option>)}
+                      {t.services.list.map(s => <option key={s.n} value={s.t}>{s.t}</option>)}
                     </select>
                   </div>
-                </div>
-                <div className="nv-field">
-                  <label>{t.contact.form.service}</label>
-                  <select value={form.service} onChange={upd('service')}>
-                    <option value="">—</option>
-                    {t.services.list.map(s => <option key={s.n} value={s.t}>{s.t}</option>)}
-                  </select>
                 </div>
                 <div className="nv-field">
                   <label>{t.contact.form.message}</label>
                   <textarea required value={form.message} onChange={upd('message')} rows="4" />
                 </div>
-                <button type="submit" className="nv-btn nv-btn--primary nv-form__submit">
-                  {sent ? t.contact.form.sent : t.contact.form.send}
+                <button type="submit" className="nv-btn nv-btn--primary nv-form__submit" disabled={sending}>
+                  {sent ? t.contact.form.sent : sending ? (lang === 'es' ? 'Enviando…' : 'Sending…') : t.contact.form.send}
                   <span className="nv-btn__arrow">↗</span>
                 </button>
+                {sendError && (
+                  <p style={{ marginTop: 12, fontSize: 13, color: '#e5484d' }}>
+                    {lang === 'es'
+                      ? `No se pudo enviar. Escríbeme directo a ${t.contact.email}.`
+                      : `Couldn't send. Please email me directly at ${t.contact.email}.`}
+                  </p>
+                )}
               </form>
 
               <div className="reveal">
