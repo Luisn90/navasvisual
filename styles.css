@@ -941,6 +941,41 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   .nv-modal-box--in, .nv-modal-box--out { animation: none; }
 }
 
+/* Layout interno: media + contenido. Apilado por defecto (tablet/móvil). */
+.nv-modal-layout {
+  display: flex;
+  flex-direction: column;
+}
+.nv-modal-media {
+  width: 100%;
+  padding-top: 62%;
+}
+.nv-modal-content {
+  padding: 32px 36px 40px;
+  overflow-y: auto;
+}
+
+/* Desktop: media a la izquierda, contenido a la derecha, lado a lado */
+@media (min-width: 900px) {
+  .nv-modal-box { max-width: 1080px; }
+  .nv-modal-layout {
+    flex-direction: row;
+    align-items: stretch;
+    max-height: calc(100vh - 128px);
+  }
+  .nv-modal-media {
+    width: 56%;
+    padding-top: 0;
+    flex-shrink: 0;
+  }
+  .nv-modal-content {
+    width: 44%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
 /* === MODAL CAROUSEL === */
 .nv-modal-carousel__arrow {
   position: absolute; top: 50%; transform: translateY(-50%);

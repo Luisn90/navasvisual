@@ -787,90 +787,92 @@ function ProjectModal({ project, lang, onClose }) {
           ✕
         </button>
 
-        <div style={{ position: 'relative', width: '100%', paddingTop: '62%', background: 'var(--bg-line)', overflow: 'hidden' }}>
-          {images.map((src, i) => (
-            <img
-              key={src + i}
-              src={src}
-              alt={`${project.project} ${i + 1}`}
-              style={{
-                position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-                opacity: i === slide ? 1 : 0,
-                transition: 'opacity 0.4s var(--easing)',
-                pointerEvents: i === slide ? 'auto' : 'none',
-              }}
-            />
-          ))}
+        <div className="nv-modal-layout">
+          <div className="nv-modal-media" style={{ position: 'relative', background: 'var(--bg-line)', overflow: 'hidden' }}>
+            {images.map((src, i) => (
+              <img
+                key={src + i}
+                src={src}
+                alt={`${project.project} ${i + 1}`}
+                style={{
+                  position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                  opacity: i === slide ? 1 : 0,
+                  transition: 'opacity 0.4s var(--easing)',
+                  pointerEvents: i === slide ? 'auto' : 'none',
+                }}
+              />
+            ))}
 
-          {images.length > 1 && (
-            <React.Fragment>
-              <button
-                onClick={(e) => { e.stopPropagation(); prevSlide(); }}
-                aria-label={lang === 'es' ? 'Anterior' : 'Previous'}
-                className="nv-modal-carousel__arrow nv-modal-carousel__arrow--prev"
-              >
-                ←
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); nextSlide(); }}
-                aria-label={lang === 'es' ? 'Siguiente' : 'Next'}
-                className="nv-modal-carousel__arrow nv-modal-carousel__arrow--next"
-              >
-                →
-              </button>
+            {images.length > 1 && (
+              <React.Fragment>
+                <button
+                  onClick={(e) => { e.stopPropagation(); prevSlide(); }}
+                  aria-label={lang === 'es' ? 'Anterior' : 'Previous'}
+                  className="nv-modal-carousel__arrow nv-modal-carousel__arrow--prev"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); nextSlide(); }}
+                  aria-label={lang === 'es' ? 'Siguiente' : 'Next'}
+                  className="nv-modal-carousel__arrow nv-modal-carousel__arrow--next"
+                >
+                  →
+                </button>
 
-              <div className="nv-modal-carousel__counter">{slide + 1} / {images.length}</div>
+                <div className="nv-modal-carousel__counter">{slide + 1} / {images.length}</div>
 
-              <div className="nv-modal-carousel__dots">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={(e) => { e.stopPropagation(); setSlide(i); }}
-                    aria-label={`${lang === 'es' ? 'Imagen' : 'Image'} ${i + 1}`}
-                    className={`nv-modal-carousel__dot ${i === slide ? 'is-active' : ''}`}
-                  />
-                ))}
-              </div>
-            </React.Fragment>
-          )}
-        </div>
-
-        <div style={{ padding: '32px 36px 40px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <h3 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>{project.project}</h3>
-              <div style={{ color: 'var(--fg-muted)', fontSize: 14, marginTop: 6 }}>
-                {[project.client, project.year].filter(Boolean).join(' · ')}
-              </div>
-            </div>
-            {project.tag && (
-              <span style={{
-                fontSize: 12, padding: '6px 14px', borderRadius: 999,
-                border: '1px solid var(--bg-line)', color: 'var(--fg-muted)', whiteSpace: 'nowrap',
-              }}>
-                {project.tag}
-              </span>
+                <div className="nv-modal-carousel__dots">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.stopPropagation(); setSlide(i); }}
+                      aria-label={`${lang === 'es' ? 'Imagen' : 'Image'} ${i + 1}`}
+                      className={`nv-modal-carousel__dot ${i === slide ? 'is-active' : ''}`}
+                    />
+                  ))}
+                </div>
+              </React.Fragment>
             )}
           </div>
 
-          {project.description && (
-            <p style={{ marginTop: 24, fontSize: 15, lineHeight: 1.7, color: 'var(--fg-muted)', maxWidth: 640 }}>
-              {project.description}
-            </p>
-          )}
+          <div className="nv-modal-content">
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <div>
+                <h3 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>{project.project}</h3>
+                <div style={{ color: 'var(--fg-muted)', fontSize: 14, marginTop: 6 }}>
+                  {[project.client, project.year].filter(Boolean).join(' · ')}
+                </div>
+              </div>
+              {project.tag && (
+                <span style={{
+                  fontSize: 12, padding: '6px 14px', borderRadius: 999,
+                  border: '1px solid var(--bg-line)', color: 'var(--fg-muted)', whiteSpace: 'nowrap',
+                }}>
+                  {project.tag}
+                </span>
+              )}
+            </div>
 
-          {project.url && (
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nv-btn nv-btn--primary"
-              style={{ marginTop: 28, display: 'inline-flex' }}
-            >
-              {lang === 'es' ? 'Visitar sitio' : 'Visit site'}
-              <span className="nv-btn__arrow">↗</span>
-            </a>
-          )}
+            {project.description && (
+              <p style={{ marginTop: 24, fontSize: 15, lineHeight: 1.7, color: 'var(--fg-muted)', maxWidth: 640 }}>
+                {project.description}
+              </p>
+            )}
+
+            {project.url && (
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nv-btn nv-btn--primary"
+                style={{ marginTop: 28, display: 'inline-flex' }}
+              >
+                {lang === 'es' ? 'Visitar sitio' : 'Visit site'}
+                <span className="nv-btn__arrow">↗</span>
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>
