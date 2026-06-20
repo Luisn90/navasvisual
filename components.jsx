@@ -738,20 +738,23 @@ function WorkSlider({ projects, lang, onSelect }) {
 
 // === WHATSAPP MODAL ===
 const NV_WHATSAPP_NUMBER = '584127449626'; // formato internacional sin '+' ni espacios
+const NV_CONTACT_EMAIL = 'hola@navasvisual.com';
 const NV_WHATSAPP_EVENT = 'nv:open-whatsapp';
 
 // Dispara el modal de WhatsApp desde cualquier botón/link de la app,
 // sin necesidad de pasar props en cascada. Uso: onClick={() => openWhatsApp()}
-function openWhatsApp() {
-  window.dispatchEvent(new CustomEvent(NV_WHATSAPP_EVENT));
+// o con contexto: onClick={() => openWhatsApp('Nombre del proyecto')}
+function openWhatsApp(projectName) {
+  window.dispatchEvent(new CustomEvent(NV_WHATSAPP_EVENT, { detail: { projectName } }));
 }
 
 function WhatsAppModal({ lang }) {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [projectName, setProjectName] = useState(null);
 
   useEffect(() => {
-    const onOpen = () => { setClosing(false); setOpen(true); };
+    const onOpen = (e) => { setClosing(false); setProjectName(e.detail && e.detail.projectName); setOpen(true); };
     window.addEventListener(NV_WHATSAPP_EVENT, onOpen);
     return () => window.removeEventListener(NV_WHATSAPP_EVENT, onOpen);
   }, []);
@@ -772,9 +775,13 @@ function WhatsAppModal({ lang }) {
 
   if (!open) return null;
 
-  const message = lang === 'es'
-    ? 'Hola Luis, vi tu portafolio y me gustaría conversar sobre un proyecto.'
-    : "Hi Luis, I saw your portfolio and I'd like to talk about a project.";
+  const message = projectName
+    ? (lang === 'es'
+        ? `Hola Luis, vi el proyecto "${projectName}" en tu portafolio y me gustaría conversar.`
+        : `Hi Luis, I saw the "${projectName}" project in your portfolio and I'd like to talk.`)
+    : (lang === 'es'
+        ? 'Hola Luis, vi tu portafolio y me gustaría conversar sobre un proyecto.'
+        : "Hi Luis, I saw your portfolio and I'd like to talk about a project.");
 
   const waUrl = `https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(waUrl)}`;
@@ -963,18 +970,33 @@ function ProjectModal({ project, lang, onClose }) {
               </p>
             )}
 
-            {project.url && (
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nv-btn nv-btn--primary"
-                style={{ marginTop: 28, display: 'inline-flex' }}
+            <div className="nv-modal-cta-row">
+              <button
+                onClick={() => openWhatsApp(project.project)}
+                className="nv-btn nv-btn--ghost nv-modal-cta--wa"
               >
-                {lang === 'es' ? 'Visitar sitio' : 'Visit site'}
-                <span className="nv-btn__arrow">↗</span>
+                WhatsApp
+              </button>
+              <a
+                href={`mailto:${NV_CONTACT_EMAIL}?subject=${encodeURIComponent(
+                  (lang === 'es' ? 'Sobre el proyecto: ' : 'About the project: ') + project.project
+                )}`}
+                className="nv-btn nv-btn--ghost"
+              >
+                {lang === 'es' ? 'Correo' : 'Email'}
               </a>
-            )}
+              {project.url && (
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nv-btn nv-btn--primary"
+                >
+                  {lang === 'es' ? 'Visitar sitio' : 'Visit site'}
+                  <span className="nv-btn__arrow">↗</span>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>

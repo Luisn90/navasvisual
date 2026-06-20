@@ -979,6 +979,20 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   }
 }
 
+/* === PROJECT MODAL — CTA ROW === */
+.nv-modal-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.nv-modal-cta-row .nv-btn { white-space: nowrap; }
+.nv-modal-cta--wa:hover {
+  background: #25D366;
+  border-color: #25D366;
+  color: #fff;
+}
+
 /* === WHATSAPP MODAL === */
 .nv-wa-modal {
   max-width: 420px;
