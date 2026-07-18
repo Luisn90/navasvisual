@@ -90,14 +90,14 @@ function Loader({ onDone }) {
   useEffect(() => {
     let raf;
     const start = performance.now();
-    const dur = 1800;
+    const dur = 900; // antes 1800 — menos espera, mejor conversión
     const step = (now) => {
       const p = Math.min((now - start) / dur, 1);
       const eased = 1 - Math.pow(1 - p, 3);
       setCount(Math.floor(eased * 100));
       if (p < 1) raf = requestAnimationFrame(step);
       else {
-        setTimeout(() => { setDone(true); setTimeout(onDone, 900); }, 280);
+        setTimeout(() => { setDone(true); setTimeout(onDone, 600); }, 150);
       }
     };
     raf = requestAnimationFrame(step);

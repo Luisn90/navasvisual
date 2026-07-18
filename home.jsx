@@ -96,7 +96,7 @@ function HomeApp() {
             <div className="nv-hero__main">
               {/* Imagen — derecha en desktop, abajo en móvil */}
               <div className="nv-hero__img">
-                <img src="assets/hero-image.jpg" alt="Composición escultórica" />
+                <img src="assets/hero-premium.webp" alt="Composición escultórica en mármol y travertino" />
               </div>
               <div style={layer(6)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
@@ -104,7 +104,7 @@ function HomeApp() {
               <div className="nv-hero__title">
                 <h1 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
-                  <span><em>{t.hero.title_2}</em></span>
+                  <span><em className="nv-serif">{t.hero.title_2}</em></span>
                   <span><em>{t.hero.title_3}</em></span>
                 </h1>
               </div>
@@ -115,7 +115,8 @@ function HomeApp() {
                     {t.hero.cta_work}
                     <span className="nv-btn__arrow">↗</span>
                   </a>
-                  <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost">
+                  <a href="#" onClick={(e) => { e.preventDefault(); openWhatsApp(); }} className="nv-btn nv-btn--ghost">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.16-1.32A10 10 0 1 0 12 2Zm5.46 14.12c-.23.65-1.35 1.24-1.86 1.28-.5.05-1.13.24-3.8-.79-3.2-1.26-5.26-4.52-5.42-4.73-.16-.21-1.3-1.73-1.3-3.3s.82-2.34 1.11-2.66c.29-.32.63-.4.84-.4h.6c.2 0 .46-.07.72.55.27.64.9 2.21.98 2.37.08.16.13.35.03.56-.11.21-.16.34-.32.53-.16.19-.34.42-.48.56-.16.16-.33.34-.14.66.19.32.83 1.37 1.79 2.22 1.23 1.1 2.26 1.44 2.58 1.6.32.16.51.13.7-.08.19-.21.8-.93 1.01-1.25.21-.32.43-.27.72-.16.29.11 1.85.87 2.17 1.03.32.16.53.24.61.37.08.14.08.79-.16 1.44Z"/></svg>
                     {t.hero.cta_contact}
                   </a>
                 </div>
@@ -124,9 +125,10 @@ function HomeApp() {
           </div>
 
           <div className="nv-hero__meta-strip" style={{ position: 'relative', zIndex: 1, ...layer(4) }}>
-            <span>{lang === 'es' ? 'Disponible para nuevos proyectos' : 'Available for new projects'}</span>
-            <span>{lang === 'es' ? 'Q2 — 2026' : 'Q2 — 2026'}</span>
-            <span>{lang === 'es' ? 'Caracas, VEN' : 'Caracas, VEN'}</span>
+            <span>{lang === 'es' ? 'Disponible · Q3 — 2026' : 'Available · Q3 — 2026'}</span>
+            {(t.hero.proof || []).map((p, i) => (
+              <span key={i} className="nv-meta-strip__proof">{p}</span>
+            ))}
             <span>↓</span>
           </div>
         </section>
@@ -185,7 +187,55 @@ function HomeApp() {
             </div>
           </div>
         </section>
+        {/* TESTIMONIALS — solo se muestra con testimonios reales en i18n.js */}
+        {t.testimonials && t.testimonials.items.length > 0 && (
+          <section className="nv-section nv-section--soft">
+            <div className="nv-container">
+              <SectionHead eyebrow={t.testimonials.eyebrow} title={t.testimonials.title} />
+              <div className="nv-testimonials reveal-stagger">
+                {t.testimonials.items.map((tm, i) => (
+                  <figure className="nv-testimonial" key={i}>
+                    <blockquote className="nv-testimonial__quote">“{tm.quote}”</blockquote>
+                    <figcaption className="nv-testimonial__meta">
+                      <span className="nv-testimonial__name">{tm.name}</span>
+                      <span className="nv-testimonial__role">{tm.role}</span>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* CTA BAND */}
+        <section className="nv-section nv-cta-band">
+          <div className="nv-container nv-cta-band__inner reveal">
+            <h2 className="nv-h2">
+              {t.cta_band.title_1}{' '}
+              <span className="nv-serif">{t.cta_band.title_2}</span>
+            </h2>
+            <p className="nv-cta-band__lede">{t.cta_band.lede}</p>
+            <div className="nv-hero__ctas nv-cta-band__ctas">
+              <button onClick={() => openWhatsApp()} className="nv-btn nv-btn--light">
+                {t.cta_band.cta_primary}
+                <span className="nv-btn__arrow">↗</span>
+              </button>
+              <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost-light">
+                {t.cta_band.cta_secondary}
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
+
+      {/* Botón flotante de WhatsApp */}
+      <button
+        className="nv-float-wa"
+        aria-label="WhatsApp"
+        onClick={() => openWhatsApp()}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.66 15L2 22l5.16-1.32A10 10 0 1 0 12 2Zm5.46 14.12c-.23.65-1.35 1.24-1.86 1.28-.5.05-1.13.24-3.8-.79-3.2-1.26-5.26-4.52-5.42-4.73-.16-.21-1.3-1.73-1.3-3.3s.82-2.34 1.11-2.66c.29-.32.63-.4.84-.4h.6c.2 0 .46-.07.72.55.27.64.9 2.21.98 2.37.08.16.13.35.03.56-.11.21-.16.34-.32.53-.16.19-.34.42-.48.56-.16.16-.33.34-.14.66.19.32.83 1.37 1.79 2.22 1.23 1.1 2.26 1.44 2.58 1.6.32.16.51.13.7-.08.19-.21.8-.93 1.01-1.25.21-.32.43-.27.72-.16.29.11 1.85.87 2.17 1.03.32.16.53.24.61.37.08.14.08.79-.16 1.44Z"/></svg>
+      </button>
 
       <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />

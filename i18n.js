@@ -4,13 +4,14 @@ window.NV_I18N = {
     nav: { work: "Trabajo", about: "Sobre mí", services: "Servicios", contact: "Contacto" },
     loader: { based: "Basado en Venezuela", role: "Diseñador visual", since: "Desde 2019" },
     hero: {
-      eyebrow: "Estudio de diseño · Venezuela",
-      title_1: "Diseño visual",
-      title_2: "con intención",
-      title_3: "y oficio.",
-      lede: "Navas Visual es el estudio independiente de Luis Navas. Construyo identidades, productos digitales y sistemas visuales para marcas que buscan claridad y permanencia.",
-      cta_work: "Ver trabajo",
-      cta_contact: "Iniciar proyecto",
+      eyebrow: "Estudio de diseño · ES / LATAM · Remoto",
+      title_1: "Diseño premium",
+      title_2: "que convierte",
+      title_3: "visitas en clientes.",
+      lede: "Navas Visual es el estudio independiente de Luis Navas. Identidades, webs y productos digitales que se ven impecables — y están construidos para vender. Más de 60 proyectos entregados en 12 países.",
+      cta_work: "Ver proyectos",
+      cta_contact: "Hablemos por WhatsApp",
+      proof: ["60+ proyectos entregados", "Clientes en 12 países", "Respuesta en < 24 h", "Est. 2019"],
       meta_role: "Diseñador independiente",
       meta_loc: "Venezuela / Remoto",
       meta_year: "Est. 2019"
@@ -19,15 +20,12 @@ window.NV_I18N = {
     services: {
       eyebrow: "Servicios",
       title: "Lo que ofrezco",
-      lede: "Siete disciplinas, un mismo enfoque: trabajo riguroso, comunicación clara y entregables medibles.",
+      lede: "Cuatro ofertas claras, un mismo enfoque: trabajo riguroso, comunicación directa y entregables que mueven el negocio. ¿Ilustración o consultoría puntual? También, dentro de cada proyecto.",
       list: [
-        { n: "01", t: "Diseño web", d: "Sitios responsivos enfocados en conversión, performance y accesibilidad. Desde landing pages hasta plataformas." },
-        { n: "02", t: "Diseño gráfico", d: "Material editorial, redes sociales, posters, papelería. Sistemas gráficos que escalan y mantienen consistencia." },
-        { n: "03", t: "Diseño de apps", d: "Aplicaciones móviles iOS/Android pensadas para uso real: arquitectura, flujos, prototipos navegables y handoff." },
-        { n: "04", t: "UX / UI", d: "Investigación, wireframes, prototipos y sistemas de diseño. Decisiones basadas en datos, no en suposiciones." },
-        { n: "05", t: "Branding", d: "Identidades verbales y visuales completas: naming, logotipo, sistema, manuales y aplicaciones." },
-        { n: "06", t: "Ilustración", d: "Ilustración editorial, técnica y de marca. Trazo limpio, geometría precisa, narrativa en cada pieza." },
-        { n: "07", t: "Consultoría", d: "Auditorías de diseño, dirección de arte, mentorías para equipos internos. Acompañamiento estratégico." }
+        { n: "01", t: "Diseño web & Framer", d: "Sitios que cargan rápido, se ven premium y convierten. Framer, WordPress o código a medida — de landing a plataforma completa." },
+        { n: "02", t: "Branding & identidad", d: "Naming, logotipo, sistema visual y manual de marca. Coherencia que transmite valor desde el primer vistazo." },
+        { n: "03", t: "Producto & UX/UI", d: "Apps y plataformas digitales: investigación, flujos, prototipos navegables y sistemas de diseño listos para desarrollo." },
+        { n: "04", t: "E-commerce", d: "Tiendas Shopify y WooCommerce diseñadas para vender: catálogo, checkout y optimización continua de conversión." }
       ]
     },
     work: {
@@ -66,7 +64,7 @@ window.NV_I18N = {
         { n: "60+", l: "Proyectos entregados" },
         { n: "6", l: "Años de experiencia" },
         { n: "12", l: "Países" },
-        { n: "100%", l: "Compromiso" }
+        { n: "< 24 h", l: "Tiempo de respuesta" }
       ],
       tools_label: "Herramientas",
       tools: ["Figma", "Adobe CC", "Webflow", "Framer", "Notion", "Principle", "Cinema 4D"],
@@ -95,6 +93,21 @@ window.NV_I18N = {
         { n: "WhatsApp", h: "+58 ··· ····" }
       ]
     },
+    testimonials: {
+      eyebrow: "Clientes",
+      title: "Lo que dicen de trabajar conmigo",
+      // IMPORTANTE: añade aquí SOLO testimonios reales con permiso del cliente.
+      // Formato: { quote: "…", name: "Nombre", role: "Cargo, Empresa" }
+      // La sección no se renderiza mientras el array esté vacío.
+      items: []
+    },
+    cta_band: {
+      title_1: "¿Listo para una web que",
+      title_2: "trabaje por ti?",
+      lede: "Cuéntame tu proyecto hoy y recibe una propuesta detallada esta misma semana.",
+      cta_primary: "Escríbeme por WhatsApp",
+      cta_secondary: "O usa el formulario"
+    },
     faq: {
       eyebrow: "Preguntas",
       title: "Preguntas frecuentes",
@@ -118,13 +131,14 @@ window.NV_I18N = {
     nav: { work: "Work", about: "About", services: "Services", contact: "Contact" },
     loader: { based: "Based in Venezuela", role: "Visual designer", since: "Since 2019" },
     hero: {
-      eyebrow: "Design studio · Venezuela",
-      title_1: "Visual design",
-      title_2: "with intent",
-      title_3: "and craft.",
-      lede: "Navas Visual is the independent studio of Luis Navas. I build identities, digital products and visual systems for brands that pursue clarity and longevity.",
-      cta_work: "View work",
-      cta_contact: "Start a project",
+      eyebrow: "Design studio · Worldwide · Remote",
+      title_1: "Premium design",
+      title_2: "that turns",
+      title_3: "visitors into clients.",
+      lede: "Navas Visual is the independent studio of Luis Navas. Identities, websites and digital products that look impeccable — and are built to sell. 60+ projects delivered across 12 countries.",
+      cta_work: "View projects",
+      cta_contact: "Chat on WhatsApp",
+      proof: ["60+ projects delivered", "Clients in 12 countries", "Reply in < 24 h", "Est. 2019"],
       meta_role: "Independent designer",
       meta_loc: "Venezuela / Remote",
       meta_year: "Est. 2019"
@@ -133,15 +147,12 @@ window.NV_I18N = {
     services: {
       eyebrow: "Services",
       title: "What I offer",
-      lede: "Seven disciplines, one approach: rigorous work, clear communication, measurable outputs.",
+      lede: "Four clear offers, one approach: rigorous work, direct communication and deliverables that move the business. Need illustration or one-off consulting? Also covered, within each project.",
       list: [
-        { n: "01", t: "Web design", d: "Responsive sites focused on conversion, performance and accessibility. From landing pages to platforms." },
-        { n: "02", t: "Graphic design", d: "Editorial, social, posters, stationery. Graphic systems that scale while keeping consistency." },
-        { n: "03", t: "App design", d: "iOS/Android apps designed for real use: architecture, flows, navigable prototypes and handoff." },
-        { n: "04", t: "UX / UI", d: "Research, wireframes, prototypes and design systems. Decisions based on data, not assumptions." },
-        { n: "05", t: "Branding", d: "Complete verbal and visual identities: naming, logo, system, guidelines and applications." },
-        { n: "06", t: "Illustration", d: "Editorial, technical and brand illustration. Clean strokes, precise geometry, narrative in every piece." },
-        { n: "07", t: "Consulting", d: "Design audits, art direction, mentoring for in-house teams. Strategic accompaniment." }
+        { n: "01", t: "Web design & Framer", d: "Sites that load fast, look premium and convert. Framer, WordPress or custom code — from landing page to full platform." },
+        { n: "02", t: "Branding & identity", d: "Naming, logo, visual system and brand guidelines. Coherence that signals value at first glance." },
+        { n: "03", t: "Product & UX/UI", d: "Apps and digital platforms: research, flows, navigable prototypes and design systems ready for development." },
+        { n: "04", t: "E-commerce", d: "Shopify and WooCommerce stores designed to sell: catalog, checkout and continuous conversion optimization." }
       ]
     },
     work: {
@@ -180,7 +191,7 @@ window.NV_I18N = {
         { n: "60+", l: "Delivered projects" },
         { n: "6", l: "Years of experience" },
         { n: "12", l: "Countries" },
-        { n: "100%", l: "Commitment" }
+        { n: "< 24 h", l: "Response time" }
       ],
       tools_label: "Tools",
       tools: ["Figma", "Adobe CC", "Webflow", "Framer", "Notion", "Principle", "Cinema 4D"],
@@ -208,6 +219,21 @@ window.NV_I18N = {
         { n: "LinkedIn", h: "in/luis-navas" },
         { n: "WhatsApp", h: "+58 ··· ····" }
       ]
+    },
+    testimonials: {
+      eyebrow: "Clients",
+      title: "What it's like to work with me",
+      // IMPORTANT: add ONLY real testimonials with client permission.
+      // Format: { quote: "…", name: "Name", role: "Role, Company" }
+      // The section stays hidden while this array is empty.
+      items: []
+    },
+    cta_band: {
+      title_1: "Ready for a website that",
+      title_2: "works for you?",
+      lede: "Tell me about your project today and get a detailed proposal this week.",
+      cta_primary: "Message me on WhatsApp",
+      cta_secondary: "Or use the form"
     },
     faq: {
       eyebrow: "FAQ",
