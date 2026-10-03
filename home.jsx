@@ -56,6 +56,167 @@ function useGyroParallax() {
   return offset;
 }
 
+// === HERO: vitrina con una marca de ejemplo (Olea) en todas sus piezas ===
+function OleaMark({ size = 40, color = 'currentColor' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="20" fill="none" stroke={color} strokeWidth="3" />
+      <path d="M24 34c-6-4-8-11-4-18 6 2 9 8 4 18z" fill={color} />
+      <path d="M24 34c2-6 6-9 11-9-1 5-5 8-11 9z" fill={color} opacity="0.55" />
+    </svg>
+  );
+}
+
+const SHOW_INTERVAL = 3600;
+
+function HeroShowcase({ t, lang }) {
+  const tabs = t.hero.show_tabs;
+  const [active, setActive] = useStateHome(0);
+  const [paused, setPaused] = useStateHome(false);
+  const reduced = React.useMemo(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches, []);
+  const es = lang === 'es';
+
+  useEffectHome(() => {
+    if (paused || reduced) return;
+    const id = setInterval(() => setActive(a => (a + 1) % tabs.length), SHOW_INTERVAL);
+    return () => clearInterval(id);
+  }, [paused, reduced, tabs.length]);
+
+  const cls = (i) => `nv-show__scene ${i === active ? 'is-active' : ''}`;
+
+  return (
+    <div
+      className="nv-show"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      <div className="nv-show__stage" aria-live="polite">
+        {/* 1. Marca */}
+        <div className={cls(0)} aria-hidden={active !== 0}>
+          <div className="olea-brand">
+            <div className="olea-brand__tile">
+              <OleaMark size="100%" />
+              <span className="olea-word">olea</span>
+            </div>
+            <div className="olea-brand__side">
+              <div className="olea-swatches">
+                <span style={{ background: '#4B5A2A' }}><i>#4B5A2A</i></span>
+                <span style={{ background: '#8A9A4B' }}><i>#8A9A4B</i></span>
+                <span style={{ background: '#E2B43A' }}><i>#E2B43A</i></span>
+                <span style={{ background: '#F1EBDD', color: '#1F2418' }}><i>#F1EBDD</i></span>
+              </div>
+              <div className="olea-type">
+                <span className="olea-type__aa">Aa</span>
+                <span className="olea-type__line">Instrument Serif</span>
+                <span className="olea-type__line olea-type__line--sans">Elms Sans</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Gráfico */}
+        <div className={cls(1)} aria-hidden={active !== 1}>
+          <div className="olea-print">
+            <div className="olea-card">
+              <OleaMark size="2.2em" color="#4B5A2A" />
+              <div className="olea-card__info">
+                <strong>Marta Ríos</strong>
+                <span>{es ? 'Maestra de almazara' : 'Head of the mill'}</span>
+                <span>hola@olea.com</span>
+              </div>
+            </div>
+            <div className="olea-post">
+              <span className="olea-post__sun" />
+              <span className="olea-post__kicker">olea</span>
+              <span className="olea-post__title">{es ? 'Cosecha' : 'Harvest'}<br />2026</span>
+              <span className="olea-post__cta">{es ? 'Ya disponible' : 'Out now'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Web */}
+        <div className={cls(2)} aria-hidden={active !== 2}>
+          <div className="olea-browser">
+            <div className="olea-browser__bar"><i /><i /><i /><span>olea.com</span></div>
+            <div className="olea-site">
+              <div className="olea-site__nav">
+                <span className="olea-site__logo"><OleaMark size="1.4em" /> olea</span>
+                <span className="olea-site__links"><i /><i /><i /></span>
+              </div>
+              <div className="olea-site__hero">
+                <div>
+                  <span className="olea-site__h">{es ? 'Aceite de oliva de origen.' : 'Single-origin olive oil.'}</span>
+                  <span className="olea-site__p" /><span className="olea-site__p olea-site__p--short" />
+                  <span className="olea-site__btn">{es ? 'Comprar' : 'Shop now'}</span>
+                </div>
+                <div className="olea-site__img"><span /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. App a medida */}
+        <div className={cls(3)} aria-hidden={active !== 3}>
+          <div className="olea-app">
+            <aside className="olea-app__side">
+              <OleaMark size="1.8em" color="#F1EBDD" />
+              <i className="is-on" /><i /><i /><i />
+            </aside>
+            <div className="olea-app__main">
+              <span className="olea-app__title">{es ? 'Pedidos' : 'Orders'}</span>
+              <div className="olea-app__kpis">
+                <div><b>124</b><span>{es ? 'pedidos' : 'orders'}</span></div>
+                <div><b>$3.420</b><span>{es ? 'ventas' : 'sales'}</span></div>
+                <div><b>98%</b><span>{es ? 'a tiempo' : 'on time'}</span></div>
+              </div>
+              <div className="olea-app__chart">
+                {[38, 54, 46, 70, 62, 88, 76].map((h, i) => <span key={i} style={{ height: `${h}%` }} />)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 5. UI/UX */}
+        <div className={cls(4)} aria-hidden={active !== 4}>
+          <div className="olea-ux">
+            <div className="olea-phone olea-phone--wire">
+              <i className="w-h" /><i className="w-b" /><i className="w-b" /><i className="w-b" /><i className="w-c" />
+            </div>
+            <span className="olea-ux__arrow" />
+            <div className="olea-phone">
+              <span className="olea-phone__hi">{es ? 'Hola, Ana' : 'Hi, Ana'}</span>
+              {[['Picual', '12'], ['Arbequina', '14'], ['Hojiblanca', '13']].map(([n, p]) => (
+                <div className="olea-phone__item" key={n}><span className="olea-phone__dot" /><span>{n}</span><b>${p}</b></div>
+              ))}
+              <span className="olea-phone__cta">{es ? 'Comprar' : 'Buy'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="nv-show__foot">
+        <div className="nv-show__tabs">
+          {tabs.map((label, i) => (
+            <button
+              key={label}
+              type="button"
+              className={`nv-show__tab ${i === active ? 'is-active' : ''} ${paused || reduced ? 'is-paused' : ''}`}
+              onClick={() => setActive(i)}
+              aria-pressed={i === active}
+            >
+              <span>{label}</span>
+              <i className="nv-show__progress" key={i === active ? `on-${active}` : 'off'} style={{ animationDuration: `${SHOW_INTERVAL}ms` }} />
+            </button>
+          ))}
+        </div>
+        <p className="nv-show__caption">{t.hero.show_caption}</p>
+      </div>
+    </div>
+  );
+}
+
 // Busca la imagen de un proyecto cuya categoría coincida con alguna de las dadas
 function imageForCats(projects, cats) {
   const lc = cats.map(c => c.toLowerCase());
@@ -244,33 +405,29 @@ function HomeApp() {
       <main>
         {/* HERO */}
         <section className="nv-hero" style={{ position: 'relative', overflow: 'hidden' }}>
-          <div className="nv-hero__grid" style={{ position: 'relative', zIndex: 1 }}>
-            <div className="nv-hero__main">
-              <div className="nv-hero__img">
-                <img src="assets/hero-image.jpg" alt="" />
-              </div>
+          <div className="nv-hero2">
+            <div className="nv-hero2__text">
               <div style={layer(6)}>
                 <Eyebrow>{t.hero.eyebrow}</Eyebrow>
               </div>
-              <div className="nv-hero__title">
+              <div className="nv-hero__title nv-hero2__title">
                 <h1 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
                   <span><em>{t.hero.title_2}</em></span>
                   <span><em>{t.hero.title_3}</em></span>
                 </h1>
               </div>
-              <div className="nv-hero__bottom" style={layer(8)}>
-                <p className="nv-hero__lede">{t.hero.lede}</p>
-                <div className="nv-hero__ctas">
-                  <a href="#planes" onClick={(e) => { e.preventDefault(); navigate('#planes'); }} className="nv-btn nv-btn--primary">
-                    {t.hero.cta_packages}
-                  </a>
-                  <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost">
-                    {t.hero.cta_custom}
-                  </a>
-                </div>
+              <p className="nv-hero__lede nv-hero2__lede">{t.hero.lede}</p>
+              <div className="nv-hero__ctas nv-hero2__ctas">
+                <a href="#planes" onClick={(e) => { e.preventDefault(); navigate('#planes'); }} className="nv-btn nv-btn--primary">
+                  {t.hero.cta_packages}
+                </a>
+                <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost">
+                  {t.hero.cta_custom}
+                </a>
               </div>
             </div>
+            <HeroShowcase t={t} lang={lang} />
           </div>
 
           <div className="nv-hero__meta-strip" style={{ position: 'relative', zIndex: 1, ...layer(4) }}>
