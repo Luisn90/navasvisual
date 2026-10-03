@@ -1,21 +1,24 @@
 // Internacionalización ES/EN para Navas Visual
 window.NV_I18N = {
   es: {
-    nav: { work: "Trabajo", about: "Sobre mí", services: "Servicios", contact: "Contacto" },
+    nav: { work: "Trabajo", services: "Paquetes", about: "Sobre mí", contact: "Contacto" },
     loader: { based: "Basado en Venezuela", role: "Diseñador visual", since: "Desde 2019" },
     hero: {
-      eyebrow: "Estudio de diseño · Venezuela",
-      title_1: "Diseño visual",
-      title_2: "con intención",
-      title_3: "y oficio.",
-      lede: "Navas Visual es el estudio independiente de Luis Navas. Construyo identidades, productos digitales y sistemas visuales para marcas que buscan claridad y permanencia.",
+      eyebrow: "Diseño de marca y web · Venezuela",
+      title_1: "Tu logo y tu web,",
+      title_2: "con precio claro",
+      title_3: "desde el primer día.",
+      lede: "Soy Luis Navas, diseñador visual. Elige un paquete con precio cerrado y entrega en días, o cuéntame tu proyecto si necesitas algo a medida.",
+      cta_packages: "Ver paquetes",
+      cta_custom: "Cuéntame tu proyecto",
       cta_work: "Ver trabajo",
       cta_contact: "Iniciar proyecto",
+      strip: ["Disponible para nuevos proyectos", "Pagos en USDT y bolívares", "Caracas, VEN"],
       meta_role: "Diseñador independiente",
       meta_loc: "Venezuela / Remoto",
       meta_year: "Est. 2019"
     },
-    marquee: ["Diseño web", "Branding", "Apps móviles", "UX/UI", "Ilustración", "Consultoría", "Diseño gráfico"],
+    marquee: ["Logos", "Identidad de marca", "Páginas web", "Shopify", "Framer", "UX/UI", "Diseño gráfico"],
     services: {
       eyebrow: "Servicios",
       title: "Lo que ofrezco",
@@ -107,29 +110,136 @@ window.NV_I18N = {
         { q: "¿Tienes contrato y NDAs?", a: "Siempre. Todo proyecto se firma con contrato. Para clientes que lo requieran, firmo acuerdos de confidencialidad antes de cualquier conversación." }
       ]
     },
+    featured: {
+      eyebrow: "Trabajo destacado",
+      title: "Proyectos recientes",
+      lede: "Una selección de marcas y webs que he diseñado. Cada paquete tiene ejemplos de su nivel.",
+      view_all: "Ver todos los trabajos"
+    },
+    shop: {
+      eyebrow: "Paquetes",
+      title: "Elige y empieza hoy",
+      lede: "Precio cerrado, plazo definido y revisiones incluidas. Pagas, me envías tu brief y empiezo a trabajar.",
+      currency_note: "Precios en dólares. Si pagas en bolívares, se calcula a la tasa BCV del día.",
+      delivery: "Entrega",
+      revisions: "Revisiones",
+      days: "días",
+      order: "Pedir",
+      examples: "Ver ejemplos",
+      groups: [
+        {
+          id: "logos", name: "Logos", category: "Branding",
+          desc: "Para negocios que arrancan o necesitan renovar su imagen.",
+          items: [
+            { id: "logo-basico", name: "Logo Básico", price: 60, days: 3, revisions: 2,
+              includes: ["2 propuestas de logo", "Versión a color y en negro", "Archivos PNG, JPG y SVG"] },
+            { id: "logo-estandar", name: "Logo Estándar", price: 120, days: 5, revisions: 3,
+              includes: ["3 propuestas de logo", "Versiones color, negativo y monocromo", "Paleta de colores y tipografías", "Mini guía de uso en PDF"] },
+            { id: "identidad", name: "Identidad de marca", price: 300, days: 10, revisions: 3,
+              includes: ["Logo con todas sus versiones", "Paleta, tipografías y recursos gráficos", "Manual de marca", "Tarjeta de presentación y 3 plantillas para redes"] }
+          ]
+        },
+        {
+          id: "grafico", name: "Diseño gráfico", category: "Diseño gráfico",
+          desc: "Piezas listas para usar en redes y material impreso.",
+          items: [
+            { id: "pack-redes", name: "Pack para redes", price: 90, days: 4, revisions: 2,
+              includes: ["10 plantillas para posts e historias", "Adaptadas a tu marca", "Editables en Canva o Figma"] }
+          ]
+        },
+        {
+          id: "web", name: "Páginas web", category: "Diseño web",
+          desc: "Webs rápidas y adaptadas al móvil, pensadas para que te contacten.",
+          items: [
+            { id: "landing", name: "Landing page", price: 250, days: 7, revisions: 2,
+              includes: ["Una página responsive", "Botón de WhatsApp y formulario", "Integración de tus textos y fotos", "Lista para publicar en tu dominio"] },
+            { id: "web-corporativa", name: "Web corporativa", price: 600, days: 14, revisions: 3,
+              includes: ["Hasta 5 secciones", "Diseño responsive", "Formulario de contacto y WhatsApp", "SEO básico y publicación"] }
+          ]
+        }
+      ]
+    },
+    how: {
+      eyebrow: "Cómo funciona",
+      title: "Cuatro pasos y listo",
+      lede: "Sin reuniones largas ni presupuestos que tardan una semana en llegar.",
+      steps: [
+        { n: "01", t: "Elige tu paquete", d: "Revisa qué incluye cada uno y pulsa Pedir en el que encaje contigo." },
+        { n: "02", t: "Haz el pago", d: "Paga por Binance (USDT) o por transferencia en bolívares con los datos que te muestro." },
+        { n: "03", t: "Envía tu brief", d: "Mándame el comprobante y cuéntame sobre tu marca por WhatsApp o correo." },
+        { n: "04", t: "Recibe tu diseño", d: "Te entrego las propuestas en el plazo del paquete y ajustamos con las revisiones incluidas." }
+      ]
+    },
+    custom: {
+      title: "¿Tu proyecto no cabe en un paquete?",
+      lede: "Tiendas en Shopify, webs en Framer, branding completo o proyectos con varias fases. Cuéntame qué necesitas y te envío una propuesta con alcance, plazos y precio.",
+      tags: ["Shopify", "Framer", "WordPress", "UI/UX", "Branding integral"],
+      cta: "Cuéntame tu proyecto",
+      cta_wa: "Escribir por WhatsApp"
+    },
+    shop_faq: {
+      eyebrow: "Preguntas",
+      title: "Antes de pedir",
+      items: [
+        { q: "¿Cómo pago?", a: "Por Binance (USDT) o por transferencia y Pago Móvil en bolívares. Los datos aparecen al pulsar Pedir en cualquier paquete." },
+        { q: "¿Cuándo empieza a contar el plazo?", a: "Desde que confirmo tu pago y recibo el brief con la información de tu marca." },
+        { q: "¿Y si necesito más cambios de los incluidos?", a: "Las revisiones del paquete sirven para ajustar el diseño hasta que encaje con tu marca. Si necesitas rondas extra, te las cotizo antes de hacerlas." },
+        { q: "¿Los archivos son míos?", a: "Sí. Al terminar recibes los archivos finales y los derechos de uso de tu diseño." },
+        { q: "¿Puedo pedir algo que no está en los paquetes?", a: "Claro. Escríbeme y lo cotizamos como proyecto a medida." },
+        { q: "¿Emites factura?", a: "Sí. Si la necesitas, indícalo cuando me envíes el comprobante." }
+      ]
+    },
+    order: {
+      title: "Pedir",
+      step_pay: "Haz el pago",
+      step_send: "Envía el comprobante y tu brief",
+      send_lede: "Cuéntame el nombre de tu marca, a qué se dedica y colores o referencias que te gusten.",
+      binance: "Binance (USDT)",
+      bank: "Transferencia o Pago Móvil (Bs.)",
+      pay_id: "Binance Pay ID",
+      pay_email: "Correo Binance",
+      bank_name: "Banco",
+      holder: "Titular",
+      id_doc: "Cédula",
+      account: "Cuenta",
+      phone: "Teléfono Pago Móvil",
+      copy: "Copiar",
+      copied: "Copiado",
+      no_pay: "Escríbeme y te paso los datos de pago en el momento.",
+      send_wa: "Enviar por WhatsApp",
+      send_email: "Enviar por correo",
+      note: "Empiezo a trabajar cuando confirmo el pago. El plazo de entrega cuenta desde ese momento.",
+      close: "Cerrar",
+      wa_msg: (pkg, price) => `Hola Luis, quiero el paquete ${pkg} (${price}). Te envío el comprobante de pago.\n\nMi marca: \nA qué se dedica: \nColores o referencias que me gustan: `
+    },
     footer: {
       cta: "¿Tienes un proyecto en mente?",
       cta_action: "Escríbeme",
       copy: "© 2026 Navas Visual. Todos los derechos reservados.",
-      build: "Diseñado y construido en Venezuela"
+      build: "Diseñado y construido en Venezuela",
+      legal: "Luis Navas, RIF V-18783269-8",
+      services: "Paquetes"
     }
   },
   en: {
-    nav: { work: "Work", about: "About", services: "Services", contact: "Contact" },
+    nav: { work: "Work", services: "Packages", about: "About", contact: "Contact" },
     loader: { based: "Based in Venezuela", role: "Visual designer", since: "Since 2019" },
     hero: {
-      eyebrow: "Design studio · Venezuela",
-      title_1: "Visual design",
-      title_2: "with intent",
-      title_3: "and craft.",
-      lede: "Navas Visual is the independent studio of Luis Navas. I build identities, digital products and visual systems for brands that pursue clarity and longevity.",
+      eyebrow: "Brand and web design · Venezuela",
+      title_1: "Your logo and website,",
+      title_2: "clearly priced",
+      title_3: "from day one.",
+      lede: "I'm Luis Navas, a visual designer. Pick a fixed-price package delivered in days, or tell me about your project if you need something custom.",
+      cta_packages: "See packages",
+      cta_custom: "Tell me about your project",
       cta_work: "View work",
       cta_contact: "Start a project",
+      strip: ["Available for new projects", "Payments in USDT and bolívares", "Caracas, VEN"],
       meta_role: "Independent designer",
       meta_loc: "Venezuela / Remote",
       meta_year: "Est. 2019"
     },
-    marquee: ["Web design", "Branding", "Mobile apps", "UX/UI", "Illustration", "Consulting", "Graphic design"],
+    marquee: ["Logos", "Brand identity", "Websites", "Shopify", "Framer", "UX/UI", "Graphic design"],
     services: {
       eyebrow: "Services",
       title: "What I offer",
@@ -221,11 +331,115 @@ window.NV_I18N = {
         { q: "Do you work with contracts and NDAs?", a: "Always. Every project is signed with a contract. For clients who require it, I sign NDAs before any conversation." }
       ]
     },
+    featured: {
+      eyebrow: "Featured work",
+      title: "Recent projects",
+      lede: "A selection of brands and websites I've designed. Every package has examples at its level.",
+      view_all: "See all work"
+    },
+    shop: {
+      eyebrow: "Packages",
+      title: "Pick one and start today",
+      lede: "Fixed price, set timeline and revisions included. You pay, send me your brief and I get to work.",
+      currency_note: "Prices in US dollars. Bolívar payments use the official BCV rate of the day.",
+      delivery: "Delivery",
+      revisions: "Revisions",
+      days: "days",
+      order: "Order",
+      examples: "See examples",
+      groups: [
+        {
+          id: "logos", name: "Logos", category: "Branding",
+          desc: "For businesses starting out or refreshing their image.",
+          items: [
+            { id: "logo-basico", name: "Basic Logo", price: 60, days: 3, revisions: 2,
+              includes: ["2 logo concepts", "Color and black versions", "PNG, JPG and SVG files"] },
+            { id: "logo-estandar", name: "Standard Logo", price: 120, days: 5, revisions: 3,
+              includes: ["3 logo concepts", "Color, reversed and mono versions", "Color palette and typefaces", "Short usage guide (PDF)"] },
+            { id: "identidad", name: "Brand identity", price: 300, days: 10, revisions: 3,
+              includes: ["Logo in all versions", "Palette, typefaces and graphic assets", "Brand guidelines", "Business card and 3 social templates"] }
+          ]
+        },
+        {
+          id: "grafico", name: "Graphic design", category: "Diseño gráfico",
+          desc: "Ready-to-use pieces for social media and print.",
+          items: [
+            { id: "pack-redes", name: "Social media pack", price: 90, days: 4, revisions: 2,
+              includes: ["10 post and story templates", "Tailored to your brand", "Editable in Canva or Figma"] }
+          ]
+        },
+        {
+          id: "web", name: "Websites", category: "Diseño web",
+          desc: "Fast, mobile-ready sites built to get you contacted.",
+          items: [
+            { id: "landing", name: "Landing page", price: 250, days: 7, revisions: 2,
+              includes: ["One responsive page", "WhatsApp button and form", "Your copy and photos integrated", "Ready to publish on your domain"] },
+            { id: "web-corporativa", name: "Business website", price: 600, days: 14, revisions: 3,
+              includes: ["Up to 5 sections", "Responsive design", "Contact form and WhatsApp", "Basic SEO and launch"] }
+          ]
+        }
+      ]
+    },
+    how: {
+      eyebrow: "How it works",
+      title: "Four steps, done",
+      lede: "No long meetings, no quotes that take a week to arrive.",
+      steps: [
+        { n: "01", t: "Pick a package", d: "Check what each one includes and press Order on the one that fits." },
+        { n: "02", t: "Make the payment", d: "Pay via Binance (USDT) or bank transfer in bolívares with the details I show you." },
+        { n: "03", t: "Send your brief", d: "Send me the receipt and tell me about your brand via WhatsApp or email." },
+        { n: "04", t: "Get your design", d: "I deliver within the package timeline and we refine it with the included revisions." }
+      ]
+    },
+    custom: {
+      title: "Project doesn't fit a package?",
+      lede: "Shopify stores, Framer sites, full branding or multi-phase projects. Tell me what you need and I'll send a proposal with scope, timeline and price.",
+      tags: ["Shopify", "Framer", "WordPress", "UI/UX", "Full branding"],
+      cta: "Tell me about your project",
+      cta_wa: "Message on WhatsApp"
+    },
+    shop_faq: {
+      eyebrow: "FAQ",
+      title: "Before you order",
+      items: [
+        { q: "How do I pay?", a: "Via Binance (USDT), or bank transfer and Pago Móvil in bolívares. Details appear when you press Order on any package." },
+        { q: "When does the timeline start?", a: "Once I confirm your payment and receive your brief with your brand details." },
+        { q: "What if I need more changes than included?", a: "Package revisions are for refining the design until it fits your brand. If you need extra rounds, I'll quote them before doing them." },
+        { q: "Do I own the files?", a: "Yes. When we finish you get the final files and the usage rights to your design." },
+        { q: "Can I ask for something not listed?", a: "Of course. Message me and we'll quote it as a custom project." },
+        { q: "Do you issue invoices?", a: "Yes. If you need one, mention it when you send the receipt." }
+      ]
+    },
+    order: {
+      title: "Order",
+      step_pay: "Make the payment",
+      step_send: "Send the receipt and your brief",
+      send_lede: "Tell me your brand name, what it does, and any colors or references you like.",
+      binance: "Binance (USDT)",
+      bank: "Bank transfer or Pago Móvil (Bs.)",
+      pay_id: "Binance Pay ID",
+      pay_email: "Binance email",
+      bank_name: "Bank",
+      holder: "Account holder",
+      id_doc: "ID",
+      account: "Account",
+      phone: "Pago Móvil phone",
+      copy: "Copy",
+      copied: "Copied",
+      no_pay: "Message me and I'll send you the payment details right away.",
+      send_wa: "Send via WhatsApp",
+      send_email: "Send via email",
+      note: "I start working once I confirm the payment. The delivery timeline counts from then.",
+      close: "Close",
+      wa_msg: (pkg, price) => `Hi Luis, I'd like the ${pkg} package (${price}). Here's my payment receipt.\n\nMy brand: \nWhat it does: \nColors or references I like: `
+    },
     footer: {
       cta: "Have a project in mind?",
       cta_action: "Write me",
       copy: "© 2026 Navas Visual. All rights reserved.",
-      build: "Designed and built in Venezuela"
+      build: "Designed and built in Venezuela",
+      legal: "Luis Navas, RIF V-18783269-8",
+      services: "Packages"
     }
   }
 };

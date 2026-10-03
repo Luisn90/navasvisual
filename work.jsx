@@ -17,8 +17,19 @@ function WorkApp() {
     setTimeout(() => { window.location.href = href; }, 600);
   };
 
-  const allTags = ['all', ...new Set(projects.map(i => i.tag))];
-  const items = filter === 'all' ? projects : projects.filter(i => i.tag === filter);
+  // Categorías con su número de proyectos; los destacados primero dentro de cada filtro
+  const tagCounts = projects.reduce((acc, p) => { if (p.tag) acc[p.tag] = (acc[p.tag] || 0) + 1; return acc; }, {});
+  const allTags = ['all', ...Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a])];
+  const sorted = [...projects].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+  const items = filter === 'all' ? sorted : sorted.filter(i => i.tag === filter);
+
+  // Filtro desde la URL (work.html?cat=Branding), usado por los enlaces "Ver ejemplos" de los paquetes
+  React.useEffect(() => {
+    const cat = new URLSearchParams(window.location.search).get('cat');
+    if (!cat || !projects.length) return;
+    const match = Object.keys(tagCounts).find(tg => tg.toLowerCase() === cat.toLowerCase());
+    if (match) setFilter(match);
+  }, [projects.length]);
 
   return (
     <React.Fragment>
@@ -54,6 +65,7 @@ function WorkApp() {
                   }}
                 >
                   {tag === 'all' ? (lang === 'es' ? 'Todos' : 'All') : tag}
+                  <span style={{ opacity: 0.5, marginLeft: 2 }}>{tag === 'all' ? projects.length : tagCounts[tag]}</span>
                 </button>
               ))}
             </div>

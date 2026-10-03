@@ -1362,3 +1362,148 @@ html { scroll-behavior: smooth; }
   .nv-hero__title { margin-top: 20px; }
   .nv-hero__bottom { margin-top: 24px; }
 }
+
+/* ============================================================
+   TIENDA: paquetes en formato tarifa, proyectos a medida, pedido
+   ============================================================ */
+html { scroll-padding-top: 96px; }
+
+/* Grupos de paquetes */
+.nv-shop__groups { margin-top: clamp(40px, 6vw, 72px); }
+.nv-shop__group {
+  display: grid; grid-template-columns: 1fr; gap: 24px;
+  padding: clamp(32px, 4vw, 48px) 0;
+  border-top: 1px solid var(--bg-line);
+}
+.nv-shop__group:last-of-type { border-bottom: 1px solid var(--bg-line); }
+@media (min-width: 960px) {
+  .nv-shop__group { grid-template-columns: minmax(220px, 300px) 1fr; gap: 56px; }
+  .nv-shop__group-head { position: sticky; top: 110px; align-self: start; }
+}
+.nv-shop__group-name { font-size: clamp(28px, 3vw, 40px); font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
+.nv-shop__group-desc { margin-top: 12px; color: var(--fg-muted); font-size: 15px; line-height: 1.5; max-width: 30ch; }
+.nv-shop__examples {
+  display: inline-block; margin-top: 18px; font-size: 14px; font-weight: 500;
+  border-bottom: 1px solid currentColor; padding-bottom: 2px;
+  transition: opacity 0.3s var(--easing);
+}
+.nv-shop__examples:hover { opacity: 0.6; }
+
+/* Fila de paquete */
+.nv-shop__list { display: flex; flex-direction: column; }
+.nv-pkg {
+  display: grid; grid-template-columns: 1fr; gap: 20px;
+  padding: 28px 0;
+  border-top: 1px solid var(--bg-line);
+}
+.nv-pkg:first-child { border-top: none; padding-top: 0; }
+@media (min-width: 720px) {
+  .nv-pkg { grid-template-columns: 1fr auto; grid-template-areas: "main buy" "terms buy"; column-gap: 40px; }
+  .nv-pkg__main { grid-area: main; }
+  .nv-pkg__terms { grid-area: terms; }
+  .nv-pkg__buy { grid-area: buy; }
+}
+@media (min-width: 1200px) {
+  .nv-pkg { grid-template-columns: 1fr 180px auto; grid-template-areas: "main terms buy"; align-items: start; }
+}
+.nv-pkg__name { font-size: clamp(20px, 1.8vw, 24px); font-weight: 600; letter-spacing: -0.02em; }
+.nv-pkg__includes { list-style: none; margin-top: 12px; display: grid; gap: 6px; }
+.nv-pkg__includes li { font-size: 15px; color: var(--fg-muted); line-height: 1.45; padding-left: 18px; position: relative; }
+.nv-pkg__includes li::before {
+  content: ""; position: absolute; left: 0; top: 0.6em;
+  width: 8px; height: 1px; background: var(--fg-soft);
+}
+.nv-pkg__terms { display: flex; gap: 28px; }
+@media (min-width: 1200px) { .nv-pkg__terms { flex-direction: column; gap: 12px; padding-top: 4px; } }
+.nv-pkg__terms dt { font-size: 12px; color: var(--fg-soft); }
+.nv-pkg__terms dd { font-size: 15px; font-weight: 500; margin-top: 2px; }
+.nv-pkg__buy { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+@media (min-width: 720px) {
+  .nv-pkg__buy { flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 14px; }
+}
+.nv-pkg__price {
+  font-family: var(--font-serif); font-style: italic; font-weight: 400;
+  font-size: clamp(48px, 5vw, 72px); line-height: 0.9; letter-spacing: -0.02em;
+  font-variant-numeric: lining-nums;
+}
+.nv-shop__note { margin-top: 24px; font-size: 13px; color: var(--fg-soft); }
+
+/* Proyectos a medida */
+.nv-custom {
+  background: var(--fg); color: var(--bg);
+  border-radius: var(--radius-lg);
+  padding: clamp(32px, 6vw, 80px);
+  display: grid; grid-template-columns: 1fr; gap: 40px;
+}
+@media (min-width: 960px) { .nv-custom { grid-template-columns: 1fr auto; align-items: end; } }
+.nv-custom__title { font-size: clamp(32px, 4.6vw, 72px); font-weight: 500; letter-spacing: -0.035em; line-height: 0.98; max-width: 16ch; }
+.nv-custom__lede { margin-top: 20px; max-width: 56ch; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.55; color: rgba(255,255,255,0.68); }
+.nv-custom__tags { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+.nv-custom__tags li { font-size: 13px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.22); }
+.nv-custom__ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (min-width: 960px) { .nv-custom__ctas { flex-direction: column; align-items: stretch; } }
+.nv-custom__btn--primary { background: var(--bg); color: var(--fg); justify-content: center; }
+.nv-custom__btn--primary:hover { transform: translateY(-2px); }
+.nv-custom__btn--ghost { border-color: rgba(255,255,255,0.3); color: var(--bg); justify-content: center; }
+.nv-custom__btn--ghost:hover { background: #25D366; border-color: #25D366; color: #fff; }
+
+/* FAQ como botón accesible */
+button.nv-faq-item__head { width: 100%; text-align: left; }
+.nv-faq-item__head:focus-visible { outline: 2px solid var(--fg); outline-offset: 4px; }
+
+/* Modal de pedido */
+.nv-order { max-width: 560px; padding: clamp(28px, 4vw, 44px); }
+.nv-order__close {
+  position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg-soft); font-size: 16px; display: flex; align-items: center; justify-content: center;
+  transition: background 0.3s var(--easing);
+}
+.nv-order__close:hover { background: var(--bg-line); }
+.nv-order__head { padding-right: 48px; }
+.nv-order__title { font-size: clamp(26px, 3vw, 34px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
+.nv-order__price { font-family: var(--font-serif); font-style: italic; font-size: 56px; line-height: 1; margin-top: 10px; }
+.nv-order__meta { margin-top: 8px; font-size: 14px; color: var(--fg-muted); }
+.nv-order__steps { list-style: none; counter-reset: step; margin-top: 28px; display: grid; gap: 24px; }
+.nv-order__step { counter-increment: step; padding-top: 22px; border-top: 1px solid var(--bg-line); }
+.nv-order__step-title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; display: flex; gap: 10px; align-items: baseline; }
+.nv-order__step-title::before { content: counter(step); font-family: var(--font-mono); font-size: 12px; color: var(--fg-soft); font-weight: 400; }
+.nv-order__text { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--fg-muted); }
+.nv-order__method { margin-top: 14px; background: var(--bg-soft); border-radius: var(--radius-sm); padding: 14px 16px; }
+.nv-order__method-name { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.nv-order__row {
+  display: grid; grid-template-columns: 1fr auto; grid-template-areas: "label copy" "value copy";
+  column-gap: 12px; padding: 8px 0; border-top: 1px solid var(--bg-line);
+}
+.nv-order__row:first-of-type { border-top: none; }
+.nv-order__row-label { grid-area: label; font-size: 12px; color: var(--fg-soft); }
+.nv-order__row-value { grid-area: value; font-size: 15px; font-weight: 500; word-break: break-all; }
+.nv-order__copy {
+  grid-area: copy; align-self: center; font-size: 12px; font-weight: 500;
+  padding: 7px 12px; border-radius: 999px; border: 1px solid var(--bg-line); background: var(--bg);
+  transition: background 0.3s var(--easing), color 0.3s var(--easing);
+}
+.nv-order__copy:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.nv-order__fine { margin-top: 10px; font-size: 12px; color: var(--fg-soft); }
+.nv-order__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.nv-order__note { margin-top: 24px; font-size: 13px; line-height: 1.5; color: var(--fg-muted); padding: 14px 16px; border: 1px dashed var(--bg-line); border-radius: var(--radius-sm); }
+
+/* Footer: tres datos en la línea inferior */
+.nv-footer__bottom { flex-wrap: wrap; gap: 12px 24px; }
+
+/* Foco visible en botones nuevos */
+.nv-pkg .nv-btn:focus-visible, .nv-custom .nv-btn:focus-visible, .nv-order .nv-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+/* Ajustes: columnas fijas para que precios y plazos queden alineados entre filas */
+@media (min-width: 720px) {
+  .nv-pkg { grid-template-columns: 1fr 170px; }
+}
+@media (min-width: 1200px) {
+  .nv-pkg { grid-template-columns: 1fr 150px 170px; }
+}
+/* Botón secundario del hero legible sobre la imagen */
+.nv-hero__main .nv-btn--ghost {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(0,0,0,0.08);
+}
+.nv-hero__main .nv-btn--ghost:hover { background: #fff; }
