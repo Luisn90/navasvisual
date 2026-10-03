@@ -56,49 +56,136 @@ function useGyroParallax() {
   return offset;
 }
 
-// Lista de paquetes en formato tarifa: una fila por paquete, agrupadas por servicio
-function PackageList({ t, lang, onOrder, onNavigate }) {
-  const sh = t.shop;
+// Busca la imagen de un proyecto cuya categoría coincida con alguna de las dadas
+function imageForCats(projects, cats) {
+  const lc = cats.map(c => c.toLowerCase());
+  const hit = projects.find(p => p.image && p.tag && lc.includes(String(p.tag).toLowerCase()));
+  return hit ? hit.image : null;
+}
+
+// Índice de servicios: filas tipográficas grandes; en escritorio, al pasar el
+// cursor aparece una imagen de un trabajo de esa categoría.
+function ServicesIndex({ t, projects, onPlans, onNavigate }) {
+  const sv = t.svc;
   return (
-    <div className="nv-shop__groups">
-      {sh.groups.map((g) => (
-        <div className="nv-shop__group reveal" key={g.id}>
-          <div className="nv-shop__group-head">
-            <h3 className="nv-shop__group-name">{g.name}</h3>
-            <p className="nv-shop__group-desc">{g.desc}</p>
-            <a
-              href={`work.html?cat=${encodeURIComponent(g.category)}`}
-              onClick={(e) => { e.preventDefault(); onNavigate(`work.html?cat=${encodeURIComponent(g.category)}`); }}
-              className="nv-shop__examples"
+    <ul className="nv-sidx">
+      {sv.items.map((it) => {
+        const img = imageForCats(projects, it.cats);
+        const workHref = `work.html?cat=${encodeURIComponent(it.cats[0])}`;
+        return (
+          <li
+            className="nv-sidx__row reveal"
+            key={it.id}
+            onMouseMove={img ? (e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+              e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+            } : undefined}
+          >
+            <h3 className="nv-sidx__name">{it.name}</h3>
+            <p className="nv-sidx__desc">{it.d}</p>
+            <div className="nv-sidx__links">
+              {it.tab ? (
+                <button type="button" className="nv-sidx__link nv-sidx__link--strong" onClick={() => onPlans(it.tab)}>{sv.plans_link}</button>
+              ) : (
+                <a href="contact.html" className="nv-sidx__link nv-sidx__link--strong" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{sv.custom_link}</a>
+              )}
+              <a href={workHref} className="nv-sidx__link" onClick={(e) => { e.preventDefault(); onNavigate(workHref); }}>{sv.work_link}</a>
+            </div>
+            {img && (
+              <div className="nv-sidx__peek" aria-hidden="true">
+                <img src={img} alt="" loading="lazy" />
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+// Planes: pestañas por servicio y tres niveles por pestaña
+function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
+  const sh = t.shop;
+  const current = sh.tabs.find(x => x.id === tab) || sh.tabs[0];
+  const tabRefs = React.useRef([]);
+
+  const onKeyDown = (e, i) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    const n = sh.tabs.length;
+    const next = e.key === 'ArrowRight' ? (i + 1) % n : (i - 1 + n) % n;
+    setTab(sh.tabs[next].id);
+    tabRefs.current[next] && tabRefs.current[next].focus();
+  };
+
+  const examplesHref = `work.html?cat=${encodeURIComponent(current.cats[0])}`;
+
+  return (
+    <div className="nv-plans">
+      <div className="nv-plans__bar">
+        <div className="nv-plans__tabs" role="tablist" aria-label={sh.eyebrow}>
+          {sh.tabs.map((tb, i) => (
+            <button
+              key={tb.id}
+              ref={el => tabRefs.current[i] = el}
+              role="tab"
+              id={`tab-${tb.id}`}
+              aria-selected={tb.id === current.id}
+              aria-controls="nv-plans-panel"
+              tabIndex={tb.id === current.id ? 0 : -1}
+              className={`nv-plans__tab ${tb.id === current.id ? 'is-active' : ''}`}
+              onClick={() => setTab(tb.id)}
+              onKeyDown={(e) => onKeyDown(e, i)}
             >
-              {sh.examples}
-            </a>
-          </div>
-          <div className="nv-shop__list">
-            {g.items.map((pkg) => (
-              <article className="nv-pkg" key={pkg.id}>
-                <div className="nv-pkg__main">
-                  <h4 className="nv-pkg__name">{pkg.name}</h4>
-                  <ul className="nv-pkg__includes">
-                    {pkg.includes.map((inc) => <li key={inc}>{inc}</li>)}
-                  </ul>
-                </div>
-                <dl className="nv-pkg__terms">
-                  <div><dt>{sh.delivery}</dt><dd>{pkg.days} {sh.days}</dd></div>
-                  <div><dt>{sh.revisions}</dt><dd>{pkg.revisions}</dd></div>
-                </dl>
-                <div className="nv-pkg__buy">
-                  <div className="nv-pkg__price">${pkg.price}</div>
-                  <button type="button" className="nv-btn nv-btn--primary" onClick={() => onOrder(pkg)}>
-                    {sh.order}
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+              {tb.name}
+            </button>
+          ))}
         </div>
-      ))}
-      <p className="nv-shop__note">{sh.currency_note}</p>
+      </div>
+
+      <div className="nv-plans__context">
+        <p className="nv-plans__note">{current.note}</p>
+        <a href={examplesHref} className="nv-plans__examples" onClick={(e) => { e.preventDefault(); onNavigate(examplesHref); }}>{sh.examples}</a>
+      </div>
+
+      <div className="nv-plans__grid" role="tabpanel" id="nv-plans-panel" aria-labelledby={`tab-${current.id}`} key={current.id}>
+        {current.plans.map((pl, i) => {
+          const tier = sh.tiers[i];
+          const name = `${current.name} ${tier}`;
+          return (
+            <article className={`nv-plan ${pl.featured ? 'nv-plan--featured' : ''}`} key={i}>
+              <header className="nv-plan__head">
+                <h3 className="nv-plan__tier">{tier}</h3>
+                {pl.featured && <span className="nv-plan__badge">{sh.popular}</span>}
+              </header>
+              <div className="nv-plan__price"><span className="nv-plan__cur">$</span>{pl.price.toLocaleString(lang === 'es' ? 'de-DE' : 'en-US')}</div>
+              <dl className="nv-plan__terms">
+                <div><dt>{sh.delivery}</dt><dd>{pl.days} {sh.days}</dd></div>
+                <div><dt>{sh.revisions}</dt><dd>{pl.revisions}</dd></div>
+              </dl>
+              <ul className="nv-plan__includes">
+                {pl.includes.map(inc => <li key={inc}>{inc}</li>)}
+              </ul>
+              <button
+                type="button"
+                className={`nv-btn nv-plan__cta ${pl.featured ? 'nv-plan__cta--light' : 'nv-btn--primary'}`}
+                onClick={() => onOrder({ name, price: pl.price, days: pl.days, revisions: pl.revisions })}
+              >
+                {sh.order}
+              </button>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="nv-plans__foot">
+        <p className="nv-plans__more">
+          {sh.more}{' '}
+          <a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{sh.more_link}</a>
+        </p>
+        <p className="nv-plans__cur-note">{sh.currency_note}</p>
+      </div>
     </div>
   );
 }
@@ -113,6 +200,8 @@ function HomeApp() {
   const [selectedProject, setSelectedProject] = useStateHome(null);
   const [orderPkg, setOrderPkg] = useStateHome(null);
   const [openFaq, setOpenFaq] = useStateHome(-1);
+  const [planTab, setPlanTab] = useStateHome(t.shop.tabs[0].id);
+  const goPlans = (tabId) => { setPlanTab(tabId); scrollToId('planes'); };
 
   const featured = projects.some(p => p.featured) ? projects.filter(p => p.featured) : projects;
 
@@ -173,7 +262,7 @@ function HomeApp() {
               <div className="nv-hero__bottom" style={layer(8)}>
                 <p className="nv-hero__lede">{t.hero.lede}</p>
                 <div className="nv-hero__ctas">
-                  <a href="#paquetes" onClick={(e) => { e.preventDefault(); navigate('#paquetes'); }} className="nv-btn nv-btn--primary">
+                  <a href="#planes" onClick={(e) => { e.preventDefault(); navigate('#planes'); }} className="nv-btn nv-btn--primary">
                     {t.hero.cta_packages}
                   </a>
                   <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost">
@@ -186,6 +275,14 @@ function HomeApp() {
 
           <div className="nv-hero__meta-strip" style={{ position: 'relative', zIndex: 1, ...layer(4) }}>
             {t.hero.strip.map((s) => <span key={s}>{s}</span>)}
+          </div>
+        </section>
+
+        {/* SERVICIOS */}
+        <section className="nv-section nv-svcx" id="servicios">
+          <div className="nv-container">
+            <SectionHead eyebrow={t.svc.eyebrow} title={t.svc.title} lede={t.svc.lede} />
+            <ServicesIndex t={t} projects={projects} onPlans={goPlans} onNavigate={navigate} />
           </div>
         </section>
 
@@ -206,16 +303,40 @@ function HomeApp() {
           <WorkSlider projects={featured} lang={lang} onSelect={setSelectedProject} />
         </section>
 
-        {/* PAQUETES */}
-        <section className="nv-section nv-shop" id="paquetes">
+        {/* PLANES */}
+        <section className="nv-section nv-shop" id="planes">
           <div className="nv-container">
             <SectionHead eyebrow={t.shop.eyebrow} title={t.shop.title} lede={t.shop.lede} />
-            <PackageList t={t} lang={lang} onOrder={setOrderPkg} onNavigate={navigate} />
+            <PlansSection t={t} lang={lang} tab={planTab} setTab={setPlanTab} onOrder={setOrderPkg} onNavigate={navigate} />
           </div>
         </section>
 
-        {/* CÓMO FUNCIONA */}
+        {/* CÓMO TRABAJO */}
         <section className="nv-section nv-section--soft">
+          <div className="nv-container">
+            <div className="nv-approach">
+              <div className="nv-approach__photo reveal">
+                <img src="assets/luis-portrait.png" alt="Luis Navas" loading="lazy" />
+              </div>
+              <div className="nv-approach__text reveal">
+                <Eyebrow>{t.approach.eyebrow}</Eyebrow>
+                <h2 className="nv-approach__title">{t.approach.title}</h2>
+                <p className="nv-approach__body">{t.approach.body}</p>
+                <dl className="nv-approach__points">
+                  {t.approach.points.map((pt) => (
+                    <div className="nv-approach__point" key={pt.t}>
+                      <dt>{pt.t}</dt>
+                      <dd>{pt.d}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CÓMO COMPRAR */}
+        <section className="nv-section">
           <div className="nv-container">
             <SectionHead eyebrow={t.how.eyebrow} title={t.how.title} lede={t.how.lede} />
             <div className="nv-process__steps reveal-stagger">

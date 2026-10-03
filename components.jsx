@@ -138,7 +138,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
   const links = [
     { k: 'home', href: 'index.html' },
     { k: 'work', href: 'work.html' },
-    { k: 'services', href: 'index.html#paquetes' },
+    { k: 'services', href: 'index.html#planes' },
     { k: 'about', href: 'about.html' },
     { k: 'contact', href: 'contact.html' },
   ];
@@ -257,7 +257,7 @@ function Footer({ t, lang, onNavigate }) {
             <ul>
               <li><a href="about.html" onClick={(e) => { e.preventDefault(); onNavigate('about.html'); }}>{t.nav.about}</a></li>
               <li><a href="work.html" onClick={(e) => { e.preventDefault(); onNavigate('work.html'); }}>{t.nav.work}</a></li>
-              <li><a href="index.html#paquetes" onClick={(e) => { e.preventDefault(); onNavigate('index.html#paquetes'); }}>{t.footer.services}</a></li>
+              <li><a href="index.html#planes" onClick={(e) => { e.preventDefault(); onNavigate('index.html#planes'); }}>{t.footer.services}</a></li>
               <li><a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{t.nav.contact}</a></li>
             </ul>
           </div>
@@ -308,7 +308,7 @@ function Cursor() {
       tx = e.clientX; ty = e.clientY;
       el.classList.add('visible');
       const target = e.target;
-      const isHover = target.closest('a, button, .nv-svc-row, .nv-faq-item, .nv-work-card, .nv-process-step');
+      const isHover = target.closest('a, button, .nv-svc-row, .nv-faq-item, .nv-work-card, .nv-process-step, .nv-sidx__row');
       el.classList.toggle('hover', !!isHover);
     };
     const tick = () => {
