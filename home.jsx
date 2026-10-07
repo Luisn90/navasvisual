@@ -94,26 +94,13 @@ function HeroShowcase({ t, lang }) {
     >
       <div className="nv-show__stage" aria-live="polite">
         {/* 1. Marca */}
-        <div className={cls(0)} aria-hidden={active !== 0}>
-          <div className="olea-brand">
-            <div className="olea-brand__tile">
-              <OleaMark size="100%" />
-              <span className="olea-word">olea</span>
-            </div>
-            <div className="olea-brand__side">
-              <div className="olea-swatches">
-                <span style={{ background: '#4B5A2A' }}><i>#4B5A2A</i></span>
-                <span style={{ background: '#8A9A4B' }}><i>#8A9A4B</i></span>
-                <span style={{ background: '#E2B43A' }}><i>#E2B43A</i></span>
-                <span style={{ background: '#F1EBDD', color: '#1F2418' }}><i>#F1EBDD</i></span>
-              </div>
-              <div className="olea-type">
-                <span className="olea-type__aa">Aa</span>
-                <span className="olea-type__line">Instrument Serif</span>
-                <span className="olea-type__line olea-type__line--sans">Elms Sans</span>
-              </div>
-            </div>
-          </div>
+        <div className={`${cls(0)} nv-show__scene--brand`} aria-hidden={active !== 0}>
+          <img
+            className="nv-show__brand-image"
+            src="assets/Candy%20conos%20principal%402x-100.jpg"
+            alt={es ? 'Diseño de marca Candy Conos: helado con galletas sobre fondo azul' : 'Candy Conos brand design: ice cream with cookies on a blue background'}
+            fetchPriority="high"
+          />
         </div>
 
         {/* 2. Gráfico */}
