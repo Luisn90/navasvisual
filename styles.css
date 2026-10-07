@@ -1856,3 +1856,14 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 .nv-brief .nv-order__actions { margin-top: 24px; }
 .nv-brief button:disabled { opacity: .5; cursor: wait; }
 @media (max-width: 600px) { .nv-brief { padding: 24px 18px; } .nv-brief .nv-order__actions { flex-direction: column; } }
+.nv-brief__trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); pointer-events: none; }
+.nv-brief__payments { display: grid; gap: 18px; margin-top: 24px; }
+.nv-brief__payment { border: 1px solid var(--bg-line); border-radius: 14px; padding: 18px; }
+.nv-brief__payment h3 { font-size: 18px; margin-bottom: 14px; }
+.nv-brief__payment-row { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; margin-top: 14px; }
+.nv-brief__payment-row > span { grid-column: 1; font-size: 12px; color: var(--fg-muted); }
+.nv-brief__payment-row strong { grid-column: 1; overflow-wrap: anywhere; font-size: 14px; }
+.nv-brief__payment-row button { grid-column: 2; grid-row: span 2; border: 1px solid var(--bg-line); border-radius: 8px; padding: 8px; background: var(--bg); color: var(--fg); font: inherit; font-size: 12px; cursor: pointer; }
+.nv-brief__payment-row small { grid-column: 1 / -1; }
+
+.nv-brief__payment-qr { display: block; width: min(100%, 280px); height: auto; margin: 18px auto; object-fit: contain; background: #fff; }

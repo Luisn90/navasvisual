@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { parseBcv, handleRate } from '../api/payment-rate.mjs';
+const html = date => `<div id="euro"><strong>120,25</strong></div><div id="dolar"><div><strong> 100,12345678 </strong></div></div><span class="date-display-single" content="${date}T00:00:00-04:00">Fecha</span>`;
+test('parses the official USD section and effective date, without using the euro value', () => { const quote = parseBcv(html('2026-10-07')); assert.equal(quote.rate, 100.12345678); assert.equal(quote.date, '2026-10-07'); });
+test('does not return a stale or future rate as today', async () => { for (const date of ['2026-10-06', '2026-10-08']) { const res = await handleRate(new Request('https://site.example/api/payment-rate'), { now: new Date('2026-10-07T12:00:00Z'), fetcher: async () => new Response(html(date)) }); assert.equal(res.status, 503); assert.equal((await res.json()).rate, undefined); } });
+test('handles blocked sources without inventing a rate', async () => { const res = await handleRate(new Request('https://site.example/api/payment-rate'), { now: new Date('2026-10-09T12:00:00Z'), fetcher: async () => new Response('', { status: 403 }) }); assert.equal(res.status, 503); });
+test('returns the dated quote only after a successful official-source fetch', async () => { const res = await handleRate(new Request('https://site.example/api/payment-rate'), { now: new Date('2026-10-07T12:00:00Z'), fetcher: async url => { assert.equal(url, 'https://www.bcv.org.ve/'); return new Response(html('2026-10-07')); } }); assert.equal(res.status, 200); assert.equal((await res.json()).rate, 100.12345678); });
+test('rejects missing or malformed quote data', () => { assert.throws(() => parseBcv('<div id="dolar"><strong>NaN</strong></div>')); });

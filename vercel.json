@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/brief.mjs": {
+      "maxDuration": 30
+    }
+  }
+}

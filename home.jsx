@@ -318,7 +318,7 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
               <button
                 type="button"
                 className={`nv-btn nv-plan__cta ${pl.featured ? 'nv-plan__cta--light' : 'nv-btn--primary'}`}
-                onClick={() => onOrder({ name, service: current.id, price: pl.price, days: pl.days, revisions: pl.revisions, reference: new URLSearchParams(window.location.search).get("reference") || "" })}
+                onClick={() => onOrder({ name, tier: i, service: current.id, price: pl.price, days: pl.days, revisions: pl.revisions, reference: new URLSearchParams(window.location.search).get("reference") || "" })}
               >
                 {sh.order}
               </button>
