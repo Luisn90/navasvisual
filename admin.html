@@ -149,8 +149,22 @@
       <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()" />
     </div>
     <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">Iniciar sesión</button>
-    <div class="error-msg" id="loginError" style="display:none"></div>
+    <button class="btn btn-ghost btn-sm" id="forgotBtn" onclick="requestPasswordRecovery()" style="margin-top:12px">¿Olvidaste tu contraseña?</button>
+    <div class="error-msg" id="loginError" style="display:none" role="status"></div>
   </div>
+</div>
+
+<!-- PASSWORD RECOVERY -->
+<div class="login-screen" id="recoveryScreen" style="display:none">
+  <form class="login-box" onsubmit="saveRecoveryPassword(event)">
+    <div class="login-title">Nueva contraseña</div>
+    <p class="login-sub" id="recoveryStatus" role="status">Verificando el enlace de recuperación…</p>
+    <div class="field"><label for="newPassword">Nueva contraseña</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8" required disabled /></div>
+    <div class="field"><label for="confirmPassword">Repite la contraseña</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" required disabled /></div>
+    <button class="btn btn-primary" id="recoveryBtn" type="submit" disabled>Guardar contraseña</button>
+    <div class="error-msg" id="recoveryError" role="alert" style="display:none"></div>
+    <a class="btn btn-ghost btn-sm" href="admin.html" style="margin-top:12px">Volver al inicio de sesión</a>
+  </form>
 </div>
 
 <!-- APP -->
@@ -283,6 +297,9 @@
 const SUPABASE_URL = 'https://kzbhybcyjjqupojuakuw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
 
+const authHash = new URLSearchParams(window.location.hash.slice(1));
+let recoveringPassword = authHash.get('type') === 'recovery' || authHash.has('error');
+let recoveryReady = false;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allProjects = [];
@@ -300,6 +317,77 @@ function showToast(msg, type='') {
 }
 
 // AUTH
+function showRecovery(ready=false) {
+  recoveringPassword = true;
+  recoveryReady = ready;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('recoveryScreen').style.display = 'flex';
+  document.getElementById('recoveryStatus').textContent = ready
+    ? 'Elige una contraseña de al menos 8 caracteres.'
+    : 'El enlace no es válido o ha caducado. Solicita un nuevo correo de recuperación.';
+  ['newPassword','confirmPassword','recoveryBtn'].forEach(id => document.getElementById(id).disabled = !ready);
+}
+
+async function requestPasswordRecovery() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const status = document.getElementById('loginError');
+  status.style.display = 'block';
+  if (!email || !document.getElementById('loginEmail').checkValidity()) {
+    status.textContent = 'Escribe tu correo electrónico para recuperar la contraseña.';
+    return;
+  }
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true;
+  try {
+    const redirectTo = new URL('admin.html', window.location.href).href;
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw error;
+    status.textContent = 'Si el correo corresponde a una cuenta, recibirás un enlace de recuperación. Revisa también spam.';
+  } catch (error) {
+    status.textContent = error.status === 429 || /rate.limit/i.test(error.message || '')
+      ? 'Se alcanzó el límite de correos. Espera antes de volver a solicitar uno.'
+      : 'No se pudo enviar el correo de recuperación. Inténtalo más tarde.';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function saveRecoveryPassword(event) {
+  event.preventDefault();
+  if (!recoveryReady) return;
+  const password = document.getElementById('newPassword').value;
+  const confirmation = document.getElementById('confirmPassword').value;
+  const err = document.getElementById('recoveryError');
+  err.style.display = 'none';
+  if (password.length < 8 || password !== confirmation) {
+    err.textContent = password.length < 8 ? 'Usa al menos 8 caracteres.' : 'Las contraseñas no coinciden.';
+    err.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('recoveryBtn');
+  btn.disabled = true;
+  try {
+    const { error } = await sb.auth.updateUser({ password });
+    if (error) throw error;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    recoveryReady = false;
+    ['newPassword','confirmPassword'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('recoveryStatus').textContent = 'Contraseña actualizada. Ya puedes iniciar sesión con tu nueva contraseña.';
+    history.replaceState(null, '', window.location.pathname);
+  } catch (error) {
+    err.textContent = error.message || 'No se pudo guardar la contraseña. Solicita un nuevo enlace si ha caducado.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = !recoveryReady;
+  }
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') showRecovery(Boolean(session));
+});
+
 async function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pass  = document.getElementById('loginPassword').value;
@@ -317,6 +405,7 @@ async function handleLogin() {
 }
 
 function showApp(email) {
+  if (recoveringPassword) return;
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').classList.add('visible');
   document.getElementById('userEmail').textContent = email;
@@ -550,9 +639,14 @@ async function saveProject() {
 document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
-sb.auth.getSession().then(({ data }) => {
-  if (data.session) showApp(data.session.user.email);
-});
+if (recoveringPassword) showRecovery(false);
+sb.auth.getSession().then(({ data, error }) => {
+  if (recoveringPassword) {
+    showRecovery(!error && Boolean(data.session) && !authHash.has('error'));
+  } else if (data.session) {
+    showApp(data.session.user.email);
+  }
+}).catch(() => { if (recoveringPassword) showRecovery(false); });
 </script>
 </body>
 </html>
