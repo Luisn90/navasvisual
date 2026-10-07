@@ -26,7 +26,7 @@ function AboutApp() {
             <div className="nv-about-grid">
               <div className="nv-about-portrait reveal">
                 <span className="nv-about-portrait__tag">{t.about.eyebrow}</span>
-                <img src="assets/luis-portrait.png" alt="Luis Navas" />
+                <img src="assets/Thoughtful%20Man%20in%20Black%20Sweater.png" alt="Luis Navas" />
               </div>
               <div className="nv-about-text reveal">
                 <Eyebrow>{t.about.role}</Eyebrow>

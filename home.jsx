@@ -473,7 +473,7 @@ function HomeApp() {
           <div className="nv-container">
             <div className="nv-approach">
               <div className="nv-approach__photo reveal">
-                <img src="assets/luis-portrait.png" alt="Luis Navas" loading="lazy" />
+                <img src="assets/Thoughtful%20Man%20in%20Black%20Sweater.png" alt="Luis Navas" loading="lazy" />
               </div>
               <div className="nv-approach__text reveal">
                 <Eyebrow>{t.approach.eyebrow}</Eyebrow>
