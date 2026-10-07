@@ -75,7 +75,8 @@ export async function handleBrief(request, { env = process.env, fetcher = fetch,
   const origin = request.headers.get('origin');
   if (origin && origin !== new URL(request.url).origin) return json(403, { error: 'origin' });
   if (!request.headers.get('content-type')?.startsWith('multipart/form-data')) return json(415, { error: 'format' });
-  const requiredEnv = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'RESEND_API_KEY', 'BRIEF_EMAIL_FROM', 'BRIEF_EMAIL_TO'];
+  const requiredEnv = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID'];
+  const emailConfigured = ['RESEND_API_KEY', 'BRIEF_EMAIL_FROM', 'BRIEF_EMAIL_TO'].every(key => Boolean(env[key]?.trim()));
   if (requiredEnv.some(key => !env[key]?.trim())) return json(503, { error: 'unavailable' });
   if (Number(request.headers.get('content-length')) > MAX_BODY) return json(413, { error: 'size' });
   for (const [key, value] of attempts) if (value.until <= now) attempts.delete(key);
@@ -126,15 +127,16 @@ export async function handleBrief(request, { env = process.env, fetcher = fetch,
   const caption = `Nuevo brief ${id.slice(0, 12)}\n${title} · $${price}\n${values.name} · ${values.brand}\n${values.email}`;
   const results = await Promise.allSettled([
     prior?.telegram ? Promise.resolve() : deliverTelegram(env, summary, files, caption, fetcher),
-    prior?.email ? Promise.resolve() : deliverEmail(env, summary, files, `Nuevo brief: ${title} — ${values.brand}`, values.email, id, fetcher)
+    !emailConfigured || prior?.email ? Promise.resolve() : deliverEmail(env, summary, files, `Nuevo brief: ${title} — ${values.brand}`, values.email, id, fetcher)
   ]);
-  const telegram = results[0].status === 'fulfilled', email = results[1].status === 'fulfilled';
+  const telegram = results[0].status === 'fulfilled', email = emailConfigured && results[1].status === 'fulfilled';
+  const complete = telegram && (!emailConfigured || email);
   if (!telegram) console.error('Brief notification: Telegram delivery failed');
-  if (!email) console.error('Brief notification: email delivery failed');
+  if (emailConfigured && !email) console.error('Brief notification: email delivery failed');
   if (telegram || email) {
     if (completed.size > 1000) completed.clear();
     completed.set(id, { telegram, email, until: now + 3600000 });
-    return json(200, { accepted: true, complete: telegram && email, requestId: id.slice(0, 12), paymentUrl: telegram && email ? paymentUrl(env) : null });
+    return json(200, { accepted: true, complete, deliveredTo: { telegram, email }, requestId: id.slice(0, 12), paymentUrl: complete ? paymentUrl(env) : null });
   }
   return json(502, { error: 'delivery' });
 }

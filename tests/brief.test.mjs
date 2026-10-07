@@ -112,3 +112,10 @@ test('Vercel fetch adapter serves the production route with server-only environm
     for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
   }
 });
+
+test('Telegram alone can receive a real form submission while email setup is pending', async () => {
+  const { response, body, calls } = await run(input(), [{ name: 'reference.png', bytes: png, type: 'image/png' }], { env: { TELEGRAM_BOT_TOKEN: env.TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID: env.TELEGRAM_CHAT_ID } });
+  assert.equal(response.status, 200); assert.equal(body.complete, true);
+  assert.deepEqual(body.deliveredTo, { telegram: true, email: false });
+  assert.equal(calls.length, 1); assert.match(calls[0].url, /telegram/);
+});

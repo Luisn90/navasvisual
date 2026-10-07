@@ -16,7 +16,7 @@ En el proyecto de Vercel: **Settings → Environment Variables**. Añade las sig
 | `BRIEF_EMAIL_FROM` | Remitente autorizado por Resend, por ejemplo `Navas Visual <proyectos@navasvisual.com>` después de verificar el dominio |
 | `BRIEF_EMAIL_TO` | `luisgabrielnavast90@gmail.com`, destinatario indicado por el propietario |
 
-La función requiere las cinco primeras variables. Si falta alguna, devuelve un error y mantiene el brief en pantalla; no afirma haberlo enviado.
+La función requiere las dos variables de Telegram. El correo se activa cuando están configuradas sus tres variables: `RESEND_API_KEY`, `BRIEF_EMAIL_FROM` y `BRIEF_EMAIL_TO`. Mientras tanto, las solicitudes se entregan solo a Telegram y pueden probarse sin configurar Resend. Si faltan los datos de Telegram, devuelve un error y mantiene el brief en pantalla; no afirma haberlo enviado.
 
 ### Telegram
 
