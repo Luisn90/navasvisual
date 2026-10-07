@@ -3,7 +3,8 @@ function WorkApp() {
   const { lang, setLang, t } = useI18n();
   const [ready, setReady] = React.useState(false);
   const [transPhase, setTransPhase] = React.useState('in');
-  const [filter, setFilter] = React.useState('all');
+  const requestedCategory = new URLSearchParams(window.location.search).get('cat');
+  const [filter, setFilter] = React.useState(requestedCategory || 'all');
   const [selectedProject, setSelectedProject] = React.useState(null);
   const { projects } = useProjects(t.work.items);
 
@@ -19,7 +20,7 @@ function WorkApp() {
 
   // Categorías con su número de proyectos; los destacados primero dentro de cada filtro
   const tagCounts = projects.reduce((acc, p) => { if (p.tag) acc[p.tag] = (acc[p.tag] || 0) + 1; return acc; }, {});
-  const allTags = ['all', ...Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a])];
+  const allTags = ['all', ...[...new Set([...Object.keys(tagCounts), ...(requestedCategory ? [requestedCategory] : [])])].sort((a, b) => (tagCounts[b] || 0) - (tagCounts[a] || 0))];
   const sorted = [...projects].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
   const items = filter === 'all' ? sorted : sorted.filter(i => i.tag === filter);
 
@@ -65,11 +66,12 @@ function WorkApp() {
                   }}
                 >
                   {tag === 'all' ? (lang === 'es' ? 'Todos' : 'All') : tag}
-                  <span style={{ opacity: 0.5, marginLeft: 2 }}>{tag === 'all' ? projects.length : tagCounts[tag]}</span>
+                  <span style={{ opacity: 0.5, marginLeft: 2 }}>{tag === 'all' ? projects.length : (tagCounts[tag] || 0)}</span>
                 </button>
               ))}
             </div>
 
+            {items.length === 0 && <p className="nv-order__text" style={{ marginTop: 32 }}>{lang === 'es' ? 'Todavía no hay trabajos publicados en esta categoría.' : 'No published projects in this category yet.'}</p>}
             <div className="nv-work-page-grid reveal-stagger" style={{ marginTop: 56 }}>
               {items.map((w, i) => (
                 <div className="nv-work-card" key={i} onClick={() => setSelectedProject(w)} style={{ cursor: 'pointer' }}>
@@ -103,7 +105,7 @@ function WorkApp() {
       <RevealMount />
       <WhatsAppModal lang={lang} />
       {selectedProject && (
-        <ProjectModal project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
+        <ProjectModal requestHref={`index.html?service=${encodeURIComponent(new URLSearchParams(window.location.search).get('service') || t.shop.tabs.find(tab => tab.cats.includes(selectedProject.tag))?.id || 'logo')}&reference=${encodeURIComponent(selectedProject.project)}#planes`} project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
       )}
     </React.Fragment>
   );

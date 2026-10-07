@@ -1661,6 +1661,7 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 /* ============================================================
    HERO 2: texto + vitrina animada de una marca de ejemplo
    ============================================================ */
+.nv-home { padding-top: var(--hero-top, 44px); }
 .nv-hero { padding-top: 0; }
 .nv-hero2 {
   background: var(--bg-soft);
@@ -1673,7 +1674,7 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 @media (min-width: 1024px) {
   .nv-hero2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); min-height: min(720px, calc(100vh - 150px)); }
 }
-.nv-hero2__title { margin-top: 36px; }
+.nv-hero2__title { margin-top: 0; }
 .nv-hero2__title .nv-h1 { font-size: clamp(44px, 6.2vw, 104px); line-height: 0.92; letter-spacing: -0.045em; }
 .nv-hero2__lede { margin-top: 28px; max-width: 440px; }
 .nv-hero2__ctas { margin-top: 32px; }
@@ -1818,7 +1819,7 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 .olea-ux__arrow::after { content: ""; position: absolute; right: -0.1em; top: 50%; width: 0.7em; height: 0.7em; border-right: 0.14em solid rgba(31,36,24,0.35); border-top: 0.14em solid rgba(31,36,24,0.35); transform: translateY(-50%) rotate(45deg); }
 
 @media (max-width: 1023px) {
-  .nv-hero2__title { margin-top: 24px; }
+  .nv-hero2__title { margin-top: 0; }
 }
 @media (max-width: 600px) {
   .nv-show__caption { display: none; }
@@ -1831,3 +1832,27 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
   .nv-show__tabs::-webkit-scrollbar { display: none; }
   .nv-show__tab { flex-shrink: 0; }
 }
+
+/* Project intake: no payment before the brief is reviewed. */
+.nv-plan__examples { display: block; margin-top: 14px; text-align: center; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+.nv-brief { max-width: 720px; max-height: 90dvh; overflow-y: auto; }
+.nv-brief__heading { font-size: 30px; margin: 12px 0 20px; outline: none; }
+.nv-brief__progress { display: flex; gap: 8px; list-style: none; flex-wrap: wrap; padding: 0; font-size: 12px; color: var(--fg-muted); }
+.nv-brief__progress li { padding: 8px 10px; border: 1px solid var(--bg-line); border-radius: 20px; }
+.nv-brief__progress .is-active { color: var(--bg); background: var(--fg); }
+.nv-brief__fields { display: grid; gap: 18px; margin-top: 24px; }
+.nv-brief__fields label { display: grid; gap: 8px; font-size: 14px; }
+.nv-brief input:not([type=file]), .nv-brief textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--bg-line); border-radius: 10px; color: var(--fg); background: var(--bg-soft); font: inherit; }
+.nv-brief textarea { resize: vertical; }
+.nv-brief input:focus-visible, .nv-brief textarea:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.nv-brief__upload { margin-top: 24px; padding: 18px; border: 1px dashed var(--fg-muted); border-radius: 12px; }
+.nv-brief__upload label { display: block; margin-bottom: 12px; }
+.nv-brief__upload input { max-width: 100%; }
+.nv-brief__upload ul { list-style: none; padding: 0; margin-top: 12px; }
+.nv-brief__upload li { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 8px 0; font-size: 13px; overflow-wrap: anywhere; }
+.nv-brief__upload button { background: transparent; color: var(--fg); border: 0; text-decoration: underline; cursor: pointer; }
+.nv-brief__summary { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 14px; line-height: 1.6; padding: 18px; background: var(--bg-soft); border-radius: 12px; margin: 24px 0; }
+.nv-brief__error { color: #b42318; margin-top: 16px; }
+.nv-brief .nv-order__actions { margin-top: 24px; }
+.nv-brief button:disabled { opacity: .5; cursor: wait; }
+@media (max-width: 600px) { .nv-brief { padding: 24px 18px; } .nv-brief .nv-order__actions { flex-direction: column; } }

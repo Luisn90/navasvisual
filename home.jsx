@@ -267,7 +267,7 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
     tabRefs.current[next] && tabRefs.current[next].focus();
   };
 
-  const examplesHref = `work.html?cat=${encodeURIComponent(current.cats[0])}`;
+  const examplesHref = `work.html?cat=${encodeURIComponent(current.cats[0])}&service=${encodeURIComponent(current.id)}`;
 
   return (
     <div className="nv-plans">
@@ -318,10 +318,11 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
               <button
                 type="button"
                 className={`nv-btn nv-plan__cta ${pl.featured ? 'nv-plan__cta--light' : 'nv-btn--primary'}`}
-                onClick={() => onOrder({ name, price: pl.price, days: pl.days, revisions: pl.revisions })}
+                onClick={() => onOrder({ name, service: current.id, price: pl.price, days: pl.days, revisions: pl.revisions, reference: new URLSearchParams(window.location.search).get("reference") || "" })}
               >
                 {sh.order}
               </button>
+              <a className="nv-plan__examples" href={examplesHref} onClick={e => { e.preventDefault(); onNavigate(examplesHref); }}>{lang === 'es' ? `Ver trabajos de ${current.name}` : `See ${current.name} work`}</a>
             </article>
           );
         })}
@@ -348,7 +349,7 @@ function HomeApp() {
   const [selectedProject, setSelectedProject] = useStateHome(null);
   const [orderPkg, setOrderPkg] = useStateHome(null);
   const [openFaq, setOpenFaq] = useStateHome(-1);
-  const [planTab, setPlanTab] = useStateHome(t.shop.tabs[0].id);
+  const [planTab, setPlanTab] = useStateHome(new URLSearchParams(window.location.search).get("service") || t.shop.tabs[0].id);
   const goPlans = (tabId) => { setPlanTab(tabId); scrollToId('planes'); };
 
   const featured = projects.some(p => p.featured) ? projects.filter(p => p.featured) : projects;
@@ -374,6 +375,20 @@ function HomeApp() {
     }
   }, [ready]);
 
+  useEffectHome(() => {
+    const nav = document.querySelector('.nv-nav');
+    const inner = nav.querySelector('.nv-nav__inner');
+    const main = document.querySelector('.nv-home');
+    const alignHero = () => {
+      const top = parseFloat(getComputedStyle(nav).paddingTop) + inner.offsetHeight / 2;
+      main.style.setProperty('--hero-top', `${top}px`);
+    };
+    const observer = new ResizeObserver(alignHero);
+    observer.observe(inner);
+    alignHero();
+    return () => observer.disconnect();
+  }, []);
+
   const navigate = (href) => {
     // Enlaces internos del home (index.html#seccion o #seccion): solo desplazar
     const m = href.match(/^(?:index\.html)?#(.+)$/);
@@ -389,19 +404,16 @@ function HomeApp() {
       <PageTransition phase={transPhase} />
       <Nav active="home" lang={lang} setLang={setLang} t={t} ready={ready} onNavigate={navigate} />
 
-      <main>
+      <main className="nv-home">
         {/* HERO */}
         <section className="nv-hero" style={{ position: 'relative', overflow: 'hidden' }}>
           <div className="nv-hero2">
             <div className="nv-hero2__text">
-              <div style={layer(6)}>
-                <Eyebrow>{t.hero.eyebrow}</Eyebrow>
-              </div>
               <div className="nv-hero__title nv-hero2__title">
                 <h1 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
                   <span><em>{t.hero.title_2}</em></span>
-                  <span><em>{t.hero.title_3}</em></span>
+                  {t.hero.title_3 && <span><em>{t.hero.title_3}</em></span>}
                 </h1>
               </div>
               <p className="nv-hero__lede nv-hero2__lede">{t.hero.lede}</p>

@@ -4,10 +4,10 @@ window.NV_I18N = {
     nav: { work: "Trabajo", services: "Planes", about: "Sobre mí", contact: "Contacto" },
     loader: { based: "Disponible en remoto", role: "Diseñador visual", since: "Desde 2019" },
     hero: {
-      eyebrow: "Diseño y desarrollo",
-      title_1: "Diseño que",
-      title_2: "impulsa",
-      title_3: "tu marca.",
+      eyebrow: "",
+      title_1: "Diseño",
+      title_2: "con criterio.",
+      title_3: "",
       lede: "Marca, web, apps o redes. Diseño y desarrollo las piezas que hacen que tus clientes te elijan, con planes de precio cerrado o proyectos a medida.",
       show_caption: "Una marca de ejemplo, todas sus piezas.",
       show_tabs: ["Marca", "Gráfico", "Web", "App a medida", "UI/UX"],
@@ -137,12 +137,12 @@ window.NV_I18N = {
     shop: {
       eyebrow: "Planes",
       title: "Precios claros, sin sorpresas",
-      lede: "Elige el servicio y el plan que encaje contigo. Pagas, me envías tu brief y empiezo a trabajar.",
+      lede: "Mira trabajos relacionados, elige un plan y cuéntame qué necesitas. Revisamos el proyecto antes de cualquier pago.",
       currency_note: "Precios en dólares.",
       delivery: "Entrega",
       revisions: "Revisiones",
       days: "días",
-      order: "Elegir plan",
+      order: "Empezar mi proyecto",
       popular: "Más elegido",
       examples: "Ver ejemplos",
       more: "¿Necesitas algo más grande?",
@@ -199,13 +199,13 @@ window.NV_I18N = {
       signature: "Luis Navas"
     },
     how: {
-      eyebrow: "Cómo comprar",
+      eyebrow: "Cómo empezar",
       title: "Cuatro pasos y listo",
       lede: "Sin reuniones largas ni presupuestos que tardan una semana en llegar.",
       steps: [
-        { n: "01", t: "Elige tu plan", d: "Revisa qué incluye cada uno y pulsa Elegir plan en el que encaje contigo." },
-        { n: "02", t: "Haz el pago", d: "Paga por Binance (USDT) con los datos que te muestro." },
-        { n: "03", t: "Envía tu brief", d: "Mándame el comprobante y cuéntame sobre tu marca por WhatsApp o correo." },
+        { n: "01", t: "Elige tu plan", d: "Revisa los trabajos relacionados y qué incluye cada plan." },
+        { n: "02", t: "Cuéntame tu proyecto", d: "Completa el formulario por pasos y añade tus referencias." },
+        { n: "03", t: "Confirmamos el alcance", d: "Reviso tu brief y acordamos alcance, disponibilidad y pago antes de empezar." },
         { n: "04", t: "Recibe tu diseño", d: "Te entrego las propuestas en el plazo del plan y ajustamos con las revisiones incluidas." }
       ]
     },
@@ -220,36 +220,13 @@ window.NV_I18N = {
       eyebrow: "Preguntas",
       title: "Antes de pedir",
       items: [
-        { q: "¿Cómo pago?", a: "Por Binance (USDT). Los datos aparecen al pulsar Elegir plan." },
+        { q: "¿Cómo pago?", a: "Primero revisamos tu proyecto. Después de confirmar el alcance te envío los datos de pago en USDT." },
         { q: "¿Cuándo empieza a contar el plazo?", a: "Desde que confirmo tu pago y recibo el brief con la información de tu marca." },
         { q: "¿Y si necesito más cambios de los incluidos?", a: "Las revisiones del paquete sirven para ajustar el diseño hasta que encaje con tu marca. Si necesitas rondas extra, te las cotizo antes de hacerlas." },
         { q: "¿Los archivos son míos?", a: "Sí. Al terminar recibes los archivos finales y los derechos de uso de tu diseño." },
         { q: "¿Puedo pedir algo que no está en los planes?", a: "Claro. Escríbeme y lo cotizamos como proyecto a medida." },
-        { q: "¿Emites factura?", a: "Sí. Si la necesitas, indícalo cuando me envíes el comprobante." }
+        { q: "¿Emites factura?", a: "Sí. Si la necesitas, indícalo al enviar tu brief." }
       ]
-    },
-    order: {
-      title: "Pedir",
-      step_pay: "Haz el pago",
-      step_send: "Envía el comprobante y tu brief",
-      send_lede: "Cuéntame el nombre de tu marca, a qué se dedica y colores o referencias que te gusten.",
-      binance: "Binance (USDT)",
-      bank: "Transferencia bancaria",
-      pay_id: "Binance Pay ID",
-      pay_email: "Correo Binance",
-      bank_name: "Banco",
-      holder: "Titular",
-      id_doc: "Cédula",
-      account: "Cuenta",
-      phone: "Teléfono",
-      copy: "Copiar",
-      copied: "Copiado",
-      no_pay: "Escríbeme y te paso los datos de pago en el momento.",
-      send_wa: "Enviar por WhatsApp",
-      send_email: "Enviar por correo",
-      note: "Empiezo a trabajar cuando confirmo el pago. El plazo de entrega cuenta desde ese momento.",
-      close: "Cerrar",
-      wa_msg: (pkg, price) => `Hola Luis, quiero el plan ${pkg} (${price}). Te envío el comprobante de pago.\n\nMi marca: \nA qué se dedica: \nColores o referencias que me gustan: `
     },
     footer: {
       cta: "¿Tienes un proyecto en mente?",
@@ -264,10 +241,10 @@ window.NV_I18N = {
     nav: { work: "Work", services: "Plans", about: "About", contact: "Contact" },
     loader: { based: "Available remotely", role: "Visual designer", since: "Since 2019" },
     hero: {
-      eyebrow: "Design and development",
-      title_1: "Design that",
-      title_2: "moves your",
-      title_3: "brand forward.",
+      eyebrow: "",
+      title_1: "Design",
+      title_2: "with purpose.",
+      title_3: "",
       lede: "Brand, web, apps or social. I design and build the pieces that make customers choose you, with fixed-price plans or custom projects.",
       show_caption: "One example brand, every piece.",
       show_tabs: ["Brand", "Graphic", "Web", "Custom app", "UI/UX"],
@@ -397,12 +374,12 @@ window.NV_I18N = {
     shop: {
       eyebrow: "Plans",
       title: "Clear prices, no surprises",
-      lede: "Pick the service and plan that fit you. You pay, send me your brief and I get to work.",
+      lede: "Browse related work, choose a plan and tell me what you need. We review the project before any payment.",
       currency_note: "Prices in US dollars.",
       delivery: "Delivery",
       revisions: "Revisions",
       days: "days",
-      order: "Choose plan",
+      order: "Start my project",
       popular: "Most chosen",
       examples: "See examples",
       more: "Need something bigger?",
@@ -459,13 +436,13 @@ window.NV_I18N = {
       signature: "Luis Navas"
     },
     how: {
-      eyebrow: "How to buy",
+      eyebrow: "Getting started",
       title: "Four steps, done",
       lede: "No long meetings, no quotes that take a week to arrive.",
       steps: [
-        { n: "01", t: "Pick a plan", d: "Check what each one includes and press Choose plan on the one that fits." },
-        { n: "02", t: "Make the payment", d: "Pay via Binance (USDT) using the details I show you." },
-        { n: "03", t: "Send your brief", d: "Send me the receipt and tell me about your brand via WhatsApp or email." },
+        { n: "01", t: "Pick a plan", d: "Browse related projects and check what each plan includes." },
+        { n: "02", t: "Tell me about your project", d: "Complete the guided brief and add your references." },
+        { n: "03", t: "Confirm the scope", d: "I review your brief, then we agree on scope, availability and payment before starting." },
         { n: "04", t: "Get your design", d: "I deliver within the plan timeline and we refine it with the included revisions." }
       ]
     },
@@ -480,36 +457,13 @@ window.NV_I18N = {
       eyebrow: "FAQ",
       title: "Before you order",
       items: [
-        { q: "How do I pay?", a: "Via Binance (USDT). Details appear when you press Choose plan." },
+        { q: "How do I pay?", a: "We review your project first. After confirming the scope, I send you the USDT payment details." },
         { q: "When does the timeline start?", a: "Once I confirm your payment and receive your brief with your brand details." },
         { q: "What if I need more changes than included?", a: "Package revisions are for refining the design until it fits your brand. If you need extra rounds, I'll quote them before doing them." },
         { q: "Do I own the files?", a: "Yes. When we finish you get the final files and the usage rights to your design." },
         { q: "Can I ask for something not listed?", a: "Of course. Message me and we'll quote it as a custom project." },
-        { q: "Do you issue invoices?", a: "Yes. If you need one, mention it when you send the receipt." }
+        { q: "Do you issue invoices?", a: "Yes. If you need one, mention it in your brief." }
       ]
-    },
-    order: {
-      title: "Order",
-      step_pay: "Make the payment",
-      step_send: "Send the receipt and your brief",
-      send_lede: "Tell me your brand name, what it does, and any colors or references you like.",
-      binance: "Binance (USDT)",
-      bank: "Bank transfer",
-      pay_id: "Binance Pay ID",
-      pay_email: "Binance email",
-      bank_name: "Bank",
-      holder: "Account holder",
-      id_doc: "ID",
-      account: "Account",
-      phone: "Phone",
-      copy: "Copy",
-      copied: "Copied",
-      no_pay: "Message me and I'll send you the payment details right away.",
-      send_wa: "Send via WhatsApp",
-      send_email: "Send via email",
-      note: "I start working once I confirm the payment. The delivery timeline counts from then.",
-      close: "Close",
-      wa_msg: (pkg, price) => `Hi Luis, I'd like the ${pkg} plan (${price}). Here's my payment receipt.\n\nMy brand: \nWhat it does: \nColors or references I like: `
     },
     footer: {
       cta: "Have a project in mind?",
