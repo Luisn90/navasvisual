@@ -2,12 +2,12 @@
 window.NV_I18N = {
   es: {
     nav: { work: "Trabajo", services: "Planes", about: "Sobre mí", contact: "Contacto" },
-    loader: { based: "Basado en Venezuela", role: "Diseñador visual", since: "Desde 2019" },
+    loader: { based: "Disponible en remoto", role: "Diseñador visual", since: "Desde 2019" },
     hero: {
-      eyebrow: "Diseño y desarrollo · Venezuela",
-      title_1: "Todo lo visual",
-      title_2: "que tu negocio",
-      title_3: "necesita.",
+      eyebrow: "Diseño y desarrollo",
+      title_1: "Diseño que",
+      title_2: "impulsa",
+      title_3: "tu marca.",
       lede: "Marca, web, apps o redes. Diseño y desarrollo las piezas que hacen que tus clientes te elijan, con planes de precio cerrado o proyectos a medida.",
       show_caption: "Una marca de ejemplo, todas sus piezas.",
       show_tabs: ["Marca", "Gráfico", "Web", "App a medida", "UI/UX"],
@@ -15,9 +15,9 @@ window.NV_I18N = {
       cta_custom: "Cuéntame tu proyecto",
       cta_work: "Ver trabajo",
       cta_contact: "Iniciar proyecto",
-      strip: ["Disponible para nuevos proyectos", "Pagos en USDT y bolívares", "Caracas, VEN"],
+      strip: ["Disponible para nuevos proyectos", "Pagos en USDT", "Trabajo remoto"],
       meta_role: "Diseñador independiente",
-      meta_loc: "Venezuela / Remoto",
+      meta_loc: "Remoto",
       meta_year: "Est. 2019"
     },
     marquee: ["Branding", "WordPress", "Framer", "Vibecode", "UI/UX", "Diseño gráfico"],
@@ -64,7 +64,7 @@ window.NV_I18N = {
       eyebrow: "Sobre mí",
       title: "Luis Navas",
       role: "Diseñador visual independiente",
-      bio_1: "Soy diseñador visual con base en Venezuela. Llevo más de seis años ayudando a marcas, startups y agencias a construir productos y sistemas visuales que comunican con precisión.",
+      bio_1: "Soy diseñador visual. Llevo más de seis años ayudando a marcas, startups y agencias a construir productos y sistemas visuales que comunican con precisión.",
       bio_2: "Mi trabajo se mueve entre lo digital y lo editorial, entre el rigor del sistema y la sensibilidad del detalle. Creo en procesos transparentes, comunicación honesta y soluciones que envejecen bien.",
       bio_3: "Trabajo de manera independiente con clientes en toda Latinoamérica, Europa y Estados Unidos.",
       stats: [
@@ -106,7 +106,7 @@ window.NV_I18N = {
       items: [
         { q: "¿Cuánto cuesta un proyecto?", a: "Cada proyecto se cotiza de forma personalizada según alcance, complejidad y tiempos. Tras una primera conversación envío una propuesta detallada con fases, entregables y costos." },
         { q: "¿Cuánto tarda un proyecto?", a: "Una identidad básica toma entre 3 y 5 semanas. Un sitio web entre 4 y 8 semanas. Una aplicación móvil completa entre 8 y 16 semanas. Los plazos exactos se definen en el brief." },
-        { q: "¿Trabajas con clientes fuera de Venezuela?", a: "Sí. Trabajo de manera 100% remota con clientes en Latinoamérica, Estados Unidos y Europa. Uso herramientas colaborativas para mantener todo claro y documentado." },
+        { q: "¿Trabajas con clientes internacionales?", a: "Sí. Trabajo de manera 100% remota con clientes en Latinoamérica, Estados Unidos y Europa. Uso herramientas colaborativas para mantener todo claro y documentado." },
         { q: "¿Qué incluye una propuesta?", a: "Cada propuesta incluye alcance detallado, entregables, cronograma con hitos, condiciones comerciales y términos de revisión. Sin sorpresas." },
         { q: "¿Trabajas con equipos o agencias?", a: "Sí. Colaboro como diseñador externo con agencias y equipos internos. Puedo integrarme a tu flujo o liderar áreas específicas según la necesidad." },
         { q: "¿Tienes contrato y NDAs?", a: "Siempre. Todo proyecto se firma con contrato. Para clientes que lo requieran, firmo acuerdos de confidencialidad antes de cualquier conversación." }
@@ -138,7 +138,7 @@ window.NV_I18N = {
       eyebrow: "Planes",
       title: "Precios claros, sin sorpresas",
       lede: "Elige el servicio y el plan que encaje contigo. Pagas, me envías tu brief y empiezo a trabajar.",
-      currency_note: "Precios en dólares. Si pagas en bolívares, se calcula a la tasa BCV del día.",
+      currency_note: "Precios en dólares.",
       delivery: "Entrega",
       revisions: "Revisiones",
       days: "días",
@@ -204,7 +204,7 @@ window.NV_I18N = {
       lede: "Sin reuniones largas ni presupuestos que tardan una semana en llegar.",
       steps: [
         { n: "01", t: "Elige tu plan", d: "Revisa qué incluye cada uno y pulsa Elegir plan en el que encaje contigo." },
-        { n: "02", t: "Haz el pago", d: "Paga por Binance (USDT) o por transferencia en bolívares con los datos que te muestro." },
+        { n: "02", t: "Haz el pago", d: "Paga por Binance (USDT) con los datos que te muestro." },
         { n: "03", t: "Envía tu brief", d: "Mándame el comprobante y cuéntame sobre tu marca por WhatsApp o correo." },
         { n: "04", t: "Recibe tu diseño", d: "Te entrego las propuestas en el plazo del plan y ajustamos con las revisiones incluidas." }
       ]
@@ -220,7 +220,7 @@ window.NV_I18N = {
       eyebrow: "Preguntas",
       title: "Antes de pedir",
       items: [
-        { q: "¿Cómo pago?", a: "Por Binance (USDT) o por transferencia y Pago Móvil en bolívares. Los datos aparecen al pulsar Elegir plan." },
+        { q: "¿Cómo pago?", a: "Por Binance (USDT). Los datos aparecen al pulsar Elegir plan." },
         { q: "¿Cuándo empieza a contar el plazo?", a: "Desde que confirmo tu pago y recibo el brief con la información de tu marca." },
         { q: "¿Y si necesito más cambios de los incluidos?", a: "Las revisiones del paquete sirven para ajustar el diseño hasta que encaje con tu marca. Si necesitas rondas extra, te las cotizo antes de hacerlas." },
         { q: "¿Los archivos son míos?", a: "Sí. Al terminar recibes los archivos finales y los derechos de uso de tu diseño." },
@@ -234,14 +234,14 @@ window.NV_I18N = {
       step_send: "Envía el comprobante y tu brief",
       send_lede: "Cuéntame el nombre de tu marca, a qué se dedica y colores o referencias que te gusten.",
       binance: "Binance (USDT)",
-      bank: "Transferencia o Pago Móvil (Bs.)",
+      bank: "Transferencia bancaria",
       pay_id: "Binance Pay ID",
       pay_email: "Correo Binance",
       bank_name: "Banco",
       holder: "Titular",
       id_doc: "Cédula",
       account: "Cuenta",
-      phone: "Teléfono Pago Móvil",
+      phone: "Teléfono",
       copy: "Copiar",
       copied: "Copiado",
       no_pay: "Escríbeme y te paso los datos de pago en el momento.",
@@ -255,19 +255,19 @@ window.NV_I18N = {
       cta: "¿Tienes un proyecto en mente?",
       cta_action: "Escríbeme",
       copy: "© 2026 Navas Visual. Todos los derechos reservados.",
-      build: "Diseñado y construido en Venezuela",
+      build: "Diseñado y construido por Luis Navas",
       legal: "Luis Navas, RIF V-18783269-8",
       services: "Planes"
     }
   },
   en: {
     nav: { work: "Work", services: "Plans", about: "About", contact: "Contact" },
-    loader: { based: "Based in Venezuela", role: "Visual designer", since: "Since 2019" },
+    loader: { based: "Available remotely", role: "Visual designer", since: "Since 2019" },
     hero: {
-      eyebrow: "Design and development · Venezuela",
-      title_1: "Everything visual",
-      title_2: "your business",
-      title_3: "needs.",
+      eyebrow: "Design and development",
+      title_1: "Design that",
+      title_2: "moves your",
+      title_3: "brand forward.",
       lede: "Brand, web, apps or social. I design and build the pieces that make customers choose you, with fixed-price plans or custom projects.",
       show_caption: "One example brand, every piece.",
       show_tabs: ["Brand", "Graphic", "Web", "Custom app", "UI/UX"],
@@ -275,9 +275,9 @@ window.NV_I18N = {
       cta_custom: "Tell me about your project",
       cta_work: "View work",
       cta_contact: "Start a project",
-      strip: ["Available for new projects", "Payments in USDT and bolívares", "Caracas, VEN"],
+      strip: ["Available for new projects", "Payments in USDT", "Remote work"],
       meta_role: "Independent designer",
-      meta_loc: "Venezuela / Remote",
+      meta_loc: "Remote",
       meta_year: "Est. 2019"
     },
     marquee: ["Branding", "WordPress", "Framer", "Vibecode", "UI/UX", "Graphic design"],
@@ -324,7 +324,7 @@ window.NV_I18N = {
       eyebrow: "About",
       title: "Luis Navas",
       role: "Independent visual designer",
-      bio_1: "I'm a visual designer based in Venezuela. For over six years I've helped brands, startups and agencies build products and visual systems that communicate with precision.",
+      bio_1: "I'm a visual designer. For over six years I've helped brands, startups and agencies build products and visual systems that communicate with precision.",
       bio_2: "My work moves between digital and editorial, between the rigor of systems and the sensitivity of detail. I believe in transparent processes, honest communication and solutions that age well.",
       bio_3: "I work independently with clients across Latin America, Europe and the United States.",
       stats: [
@@ -366,7 +366,7 @@ window.NV_I18N = {
       items: [
         { q: "How much does a project cost?", a: "Every project is quoted individually based on scope, complexity and timeline. After an initial conversation I send a detailed proposal with phases, deliverables and costs." },
         { q: "How long does a project take?", a: "A basic identity takes 3 to 5 weeks. A website 4 to 8 weeks. A full mobile app 8 to 16 weeks. Exact timelines are defined in the brief." },
-        { q: "Do you work with clients outside Venezuela?", a: "Yes. I work 100% remotely with clients across Latin America, the US and Europe. I use collaborative tools to keep everything clear and documented." },
+        { q: "Do you work with international clients?", a: "Yes. I work 100% remotely with clients across Latin America, the US and Europe. I use collaborative tools to keep everything clear and documented." },
         { q: "What's included in a proposal?", a: "Every proposal includes detailed scope, deliverables, timeline with milestones, commercial terms and revision conditions. No surprises." },
         { q: "Do you work with teams or agencies?", a: "Yes. I collaborate as an external designer with agencies and in-house teams. I can plug into your flow or lead specific areas as needed." },
         { q: "Do you work with contracts and NDAs?", a: "Always. Every project is signed with a contract. For clients who require it, I sign NDAs before any conversation." }
@@ -398,7 +398,7 @@ window.NV_I18N = {
       eyebrow: "Plans",
       title: "Clear prices, no surprises",
       lede: "Pick the service and plan that fit you. You pay, send me your brief and I get to work.",
-      currency_note: "Prices in US dollars. Bolívar payments use the official BCV rate of the day.",
+      currency_note: "Prices in US dollars.",
       delivery: "Delivery",
       revisions: "Revisions",
       days: "days",
@@ -464,7 +464,7 @@ window.NV_I18N = {
       lede: "No long meetings, no quotes that take a week to arrive.",
       steps: [
         { n: "01", t: "Pick a plan", d: "Check what each one includes and press Choose plan on the one that fits." },
-        { n: "02", t: "Make the payment", d: "Pay via Binance (USDT) or bank transfer in bolívares with the details I show you." },
+        { n: "02", t: "Make the payment", d: "Pay via Binance (USDT) using the details I show you." },
         { n: "03", t: "Send your brief", d: "Send me the receipt and tell me about your brand via WhatsApp or email." },
         { n: "04", t: "Get your design", d: "I deliver within the plan timeline and we refine it with the included revisions." }
       ]
@@ -480,7 +480,7 @@ window.NV_I18N = {
       eyebrow: "FAQ",
       title: "Before you order",
       items: [
-        { q: "How do I pay?", a: "Via Binance (USDT), or bank transfer and Pago Móvil in bolívares. Details appear when you press Choose plan." },
+        { q: "How do I pay?", a: "Via Binance (USDT). Details appear when you press Choose plan." },
         { q: "When does the timeline start?", a: "Once I confirm your payment and receive your brief with your brand details." },
         { q: "What if I need more changes than included?", a: "Package revisions are for refining the design until it fits your brand. If you need extra rounds, I'll quote them before doing them." },
         { q: "Do I own the files?", a: "Yes. When we finish you get the final files and the usage rights to your design." },
@@ -494,14 +494,14 @@ window.NV_I18N = {
       step_send: "Send the receipt and your brief",
       send_lede: "Tell me your brand name, what it does, and any colors or references you like.",
       binance: "Binance (USDT)",
-      bank: "Bank transfer or Pago Móvil (Bs.)",
+      bank: "Bank transfer",
       pay_id: "Binance Pay ID",
       pay_email: "Binance email",
       bank_name: "Bank",
       holder: "Account holder",
       id_doc: "ID",
       account: "Account",
-      phone: "Pago Móvil phone",
+      phone: "Phone",
       copy: "Copy",
       copied: "Copied",
       no_pay: "Message me and I'll send you the payment details right away.",
@@ -515,7 +515,7 @@ window.NV_I18N = {
       cta: "Have a project in mind?",
       cta_action: "Write me",
       copy: "© 2026 Navas Visual. All rights reserved.",
-      build: "Designed and built in Venezuela",
+      build: "Designed and built by Luis Navas",
       legal: "Luis Navas, RIF V-18783269-8",
       services: "Plans"
     }

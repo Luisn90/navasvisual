@@ -117,7 +117,7 @@ function Loader({ onDone }) {
       </div>
       <div className="nv-loader__bottom">
         <span>Loading studio</span>
-        <span>VEN · ES/EN</span>
+        <span>ES/EN</span>
       </div>
       <div className="nv-loader__bar" style={{ width: `${count}%` }} />
     </div>
@@ -234,9 +234,7 @@ function Footer({ t, lang, onNavigate }) {
   useEffect(() => {
     const tick = () => {
       const d = new Date();
-      // Venezuela = UTC-4
-      const vt = new Date(d.getTime() + (d.getTimezoneOffset() * 60000) + (-4 * 3600000));
-      setTime(vt.toTimeString().slice(0, 8) + ' VET');
+      setTime(d.toISOString().slice(11, 19) + ' UTC');
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -1028,11 +1026,11 @@ const NV_PAYMENT = {
     email: '',   // correo de la cuenta Binance (opcional)
   },
   bank: {
-    bank: '',          // nombre del banco, p. ej. 'Banesco'
+    bank: '',          // nombre del banco
     holder: 'Luis Navas',
     idDoc: 'V-18783269',
-    account: '',       // número de cuenta (opcional si usas solo Pago Móvil)
-    phone: '',         // teléfono de Pago Móvil, p. ej. '0412-0000000'
+    account: '',       // número de cuenta
+    phone: '',         // teléfono de contacto
   },
 };
 

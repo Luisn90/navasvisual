@@ -97,7 +97,7 @@ function HeroShowcase({ t, lang }) {
         <div className={`${cls(0)} nv-show__scene--brand`} aria-hidden={active !== 0}>
           <img
             className="nv-show__brand-image"
-            src="assets/Candy%20conos%20principal%402x-100.jpg"
+            src="assets/Candy%20conos%20brand.jpg"
             alt={es ? 'Diseño de marca Candy Conos: helado con galletas sobre fondo azul' : 'Candy Conos brand design: ice cream with cookies on a blue background'}
             fetchPriority="high"
           />
