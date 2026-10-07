@@ -49,6 +49,7 @@ function useProjects(fallbackItems) {
               description: p.description || '',
               url: p.project_url || '',
               gallery: Array.isArray(p.gallery) ? p.gallery : [],
+              featured: !!p.featured,
             })));
           } else {
             setProjects(fallbackItems);
@@ -137,6 +138,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
   const links = [
     { k: 'home', href: 'index.html' },
     { k: 'work', href: 'work.html' },
+    { k: 'services', href: 'index.html#planes' },
     { k: 'about', href: 'about.html' },
     { k: 'contact', href: 'contact.html' },
   ];
@@ -255,6 +257,7 @@ function Footer({ t, lang, onNavigate }) {
             <ul>
               <li><a href="about.html" onClick={(e) => { e.preventDefault(); onNavigate('about.html'); }}>{t.nav.about}</a></li>
               <li><a href="work.html" onClick={(e) => { e.preventDefault(); onNavigate('work.html'); }}>{t.nav.work}</a></li>
+              <li><a href="index.html#planes" onClick={(e) => { e.preventDefault(); onNavigate('index.html#planes'); }}>{t.footer.services}</a></li>
               <li><a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{t.nav.contact}</a></li>
             </ul>
           </div>
@@ -276,6 +279,7 @@ function Footer({ t, lang, onNavigate }) {
         </div>
         <div className="nv-footer__bottom">
           <span>{t.footer.copy}</span>
+          <span>{t.footer.legal}</span>
           <span>{t.footer.build}</span>
         </div>
       </div>
@@ -304,7 +308,7 @@ function Cursor() {
       tx = e.clientX; ty = e.clientY;
       el.classList.add('visible');
       const target = e.target;
-      const isHover = target.closest('a, button, .nv-svc-row, .nv-faq-item, .nv-work-card, .nv-process-step');
+      const isHover = target.closest('a, button, .nv-svc-row, .nv-faq-item, .nv-work-card, .nv-process-step, .nv-sidx__row');
       el.classList.toggle('hover', !!isHover);
     };
     const tick = () => {
@@ -1014,6 +1018,122 @@ function ProjectModal({ project, lang, onClose }) {
 }
 
 // === REVEAL HOOK COMPONENT ===
+
+// === DATOS DE PAGO (rellenar antes de publicar) ===
+// Los campos vacíos no se muestran. Si no hay ningún método completo,
+// el modal de pedido pide al cliente que escriba para recibir los datos.
+const NV_PAYMENT = {
+  binance: {
+    payId: '',   // Binance Pay ID, p. ej. '123456789'
+    email: '',   // correo de la cuenta Binance (opcional)
+  },
+  bank: {
+    bank: '',          // nombre del banco, p. ej. 'Banesco'
+    holder: 'Luis Navas',
+    idDoc: 'V-18783269',
+    account: '',       // número de cuenta (opcional si usas solo Pago Móvil)
+    phone: '',         // teléfono de Pago Móvil, p. ej. '0412-0000000'
+  },
+};
+
+function formatUSD(n) { return `$${n}`; }
+
+function CopyRow({ label, value, o }) {
+  const [copied, setCopied] = useState(false);
+  if (!value) return null;
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch (e) {}
+  };
+  return (
+    <div className="nv-order__row">
+      <span className="nv-order__row-label">{label}</span>
+      <span className="nv-order__row-value">{value}</span>
+      <button type="button" className="nv-order__copy" onClick={copy}>{copied ? o.copied : o.copy}</button>
+    </div>
+  );
+}
+
+// === MODAL DE PEDIDO (paquetes) ===
+function OrderModal({ pkg, t, lang, onClose }) {
+  const [closing, setClosing] = useState(false);
+  const o = t.order;
+  const requestClose = () => {
+    if (closing) return;
+    setClosing(true);
+    setTimeout(onClose, 280);
+  };
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') requestClose(); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, []);
+
+  const b = NV_PAYMENT.binance;
+  const k = NV_PAYMENT.bank;
+  const hasBinance = !!(b.payId || b.email);
+  const hasBank = !!(k.bank && (k.account || k.phone));
+  const price = formatUSD(pkg.price);
+  const msg = o.wa_msg(pkg.name, price);
+  const waUrl = `https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  const mailUrl = `mailto:${NV_CONTACT_EMAIL}?subject=${encodeURIComponent(`${o.title}: ${pkg.name}`)}&body=${encodeURIComponent(msg)}`;
+
+  return (
+    <div onClick={requestClose} className={`nv-modal-overlay ${closing ? 'nv-modal-overlay--out' : 'nv-modal-overlay--in'}`}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`nv-modal-box nv-order ${closing ? 'nv-modal-box--out' : 'nv-modal-box--in'}`}
+        role="dialog" aria-modal="true" aria-labelledby="nv-order-title"
+      >
+        <button className="nv-order__close" onClick={requestClose} aria-label={o.close}>✕</button>
+
+        <div className="nv-order__head">
+          <h3 id="nv-order-title" className="nv-order__title">{pkg.name}</h3>
+          <div className="nv-order__price">{price}</div>
+          <p className="nv-order__meta">
+            {t.shop.delivery}: {pkg.days} {t.shop.days}. {t.shop.revisions}: {pkg.revisions}.
+          </p>
+        </div>
+
+        <ol className="nv-order__steps">
+          <li className="nv-order__step">
+            <h4 className="nv-order__step-title">{o.step_pay}</h4>
+            {!hasBinance && !hasBank && <p className="nv-order__text">{o.no_pay}</p>}
+            {hasBinance && (
+              <div className="nv-order__method">
+                <div className="nv-order__method-name">{o.binance}</div>
+                <CopyRow label={o.pay_id} value={b.payId} o={o} />
+                <CopyRow label={o.pay_email} value={b.email} o={o} />
+              </div>
+            )}
+            {hasBank && (
+              <div className="nv-order__method">
+                <div className="nv-order__method-name">{o.bank}</div>
+                <CopyRow label={o.bank_name} value={k.bank} o={o} />
+                <CopyRow label={o.holder} value={k.holder} o={o} />
+                <CopyRow label={o.id_doc} value={k.idDoc} o={o} />
+                <CopyRow label={o.account} value={k.account} o={o} />
+                <CopyRow label={o.phone} value={k.phone} o={o} />
+              </div>
+            )}
+            {(hasBinance || hasBank) && <p className="nv-order__fine">{t.shop.currency_note}</p>}
+          </li>
+          <li className="nv-order__step">
+            <h4 className="nv-order__step-title">{o.step_send}</h4>
+            <p className="nv-order__text">{o.send_lede}</p>
+            <div className="nv-order__actions">
+              <a href={waUrl} target="_blank" rel="noopener noreferrer" className="nv-btn nv-btn--primary">{o.send_wa}</a>
+              <a href={mailUrl} className="nv-btn nv-btn--ghost">{o.send_email}</a>
+            </div>
+          </li>
+        </ol>
+
+        <p className="nv-order__note">{o.note}</p>
+      </div>
+    </div>
+  );
+}
+
 function RevealMount() { useReveal(); return null; }
 
 // Export to window
