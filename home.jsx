@@ -405,16 +405,19 @@ function HomeApp() {
       <Nav active="home" lang={lang} setLang={setLang} t={t} ready={ready} onNavigate={navigate} />
 
       <main className="nv-home">
-        {/* HERO */}
-        <section className="nv-hero" style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* PRESENTACIÓN */}
+        <IntroHero t={t} onNavigate={navigate} />
+
+        {/* VITRINA: segunda sección */}
+        <section id="visual" className="nv-hero" style={{ position: 'relative', overflow: 'hidden' }}>
           <div className="nv-hero2">
             <div className="nv-hero2__text">
               <div className="nv-hero__title nv-hero2__title">
-                <h1 className="nv-h1">
+                <h2 className="nv-h1">
                   <span><em>{t.hero.title_1}</em></span>
                   <span><em>{t.hero.title_2}</em></span>
                   {t.hero.title_3 && <span><em>{t.hero.title_3}</em></span>}
-                </h1>
+                </h2>
               </div>
               <p className="nv-hero__lede nv-hero2__lede">{t.hero.lede}</p>
               <div className="nv-hero__ctas nv-hero2__ctas">

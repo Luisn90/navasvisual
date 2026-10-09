@@ -3,6 +3,13 @@ window.NV_I18N = {
   es: {
     nav: { work: "Trabajo", services: "Planes", about: "Sobre mí", contact: "Contacto" },
     loader: { based: "Disponible en remoto", role: "Diseñador visual", since: "Desde 2019" },
+    intro: {
+      lines: ["DISEÑO", "VISUAL", "DIGITAL"],
+      description: "Luis Navas · Marcas, webs y productos digitales.",
+      work: "Ver trabajos",
+      contact: "Hablemos",
+      explore: "Explora lo que hago"
+    },
     hero: {
       eyebrow: "",
       title_1: "Diseño",
@@ -240,6 +247,13 @@ window.NV_I18N = {
   en: {
     nav: { work: "Work", services: "Plans", about: "About", contact: "Contact" },
     loader: { based: "Available remotely", role: "Visual designer", since: "Since 2019" },
+    intro: {
+      lines: ["DESIGN", "VISUAL", "DIGITAL"],
+      description: "Luis Navas · Brands, websites and digital products.",
+      work: "View work",
+      contact: "Let's talk",
+      explore: "Explore what I do"
+    },
     hero: {
       eyebrow: "",
       title_1: "Design",
