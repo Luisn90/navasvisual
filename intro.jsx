@@ -6,7 +6,7 @@ function IntroSculpture() {
     const el = mount.current;
     if (!el || !window.THREE) return;
     const T = window.THREE;
-    let renderer, material, geometry, environment, pmrem;
+    let renderer, material, geometry, environment, pmrem, backdrop, backdropTexture;
     const studio = new T.Scene();
     const panels = [];
     try {
@@ -18,7 +18,7 @@ function IntroSculpture() {
       renderer.setClearColor(0x000000, 0);
       el.appendChild(renderer.domElement);
       // A procedural studio creates broad white highlights and dark reflections.
-      studio.background = new T.Color(0x17191c);
+      studio.background = new T.Color(0xa4a7ad);
       const panel = (width, height, x, y, z, color, intensity) => {
         const mesh = new T.Mesh(new T.PlaneGeometry(width, height), new T.MeshBasicMaterial({ color, side: T.DoubleSide }));
         mesh.material.color.multiplyScalar(intensity);
@@ -36,10 +36,62 @@ function IntroSculpture() {
       const camera = new T.PerspectiveCamera(34, 1, 0.1, 30);
       camera.position.z = 7.4;
       geometry = new T.TorusKnotGeometry(1.12, 0.26, 180, 32, 2, 3);
-      material = new T.MeshStandardMaterial({ color: 0xe9edf2, metalness: 1, roughness: 0.085, envMapIntensity: 1.15 });
+      material = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.035, transmission: 1, thickness: 0.85, ior: 1.48, clearcoat: 1, clearcoatRoughness: 0.025, envMapIntensity: 0.65 });
+      // Slight wavelength separation makes the bent letter edges catch colored light.
+      material.onBeforeCompile = shader => {
+        const split = `
+          vec4 redTransmission = getIBLVolumeRefraction(n, v, material.roughness, material.diffuseColor, material.specularColor, material.specularF90, pos, modelMatrix, viewMatrix, projectionMatrix, material.ior + 0.018, material.thickness, material.attenuationColor, material.attenuationDistance);
+          vec4 blueTransmission = getIBLVolumeRefraction(n, v, material.roughness, material.diffuseColor, material.specularColor, material.specularF90, pos, modelMatrix, viewMatrix, projectionMatrix, material.ior - 0.018, material.thickness, material.attenuationColor, material.attenuationDistance);
+          transmitted.r = redTransmission.r;
+          transmitted.b = blueTransmission.b;
+        `;
+        shader.fragmentShader = shader.fragmentShader.replace('#include <transmission_fragment>', T.ShaderChunk.transmission_fragment.replace('material.transmissionAlpha = mix(', split + '\nmaterial.transmissionAlpha = mix('));
+      };
+      material.customProgramCacheKey = () => 'navas-glass-dispersion-v1';
       const sculpture = new T.Mesh(geometry, material);
       sculpture.rotation.set(0.55, -0.4, -0.35);
       scene.add(sculpture);
+      // WebGL cannot refract DOM text. Render the same letters onto a plane behind
+      // the glass, aligned to their actual positions and using the loaded page font.
+      const textCanvas = document.createElement('canvas');
+      const textContext = textCanvas.getContext('2d');
+      backdropTexture = new T.CanvasTexture(textCanvas);
+      backdropTexture.colorSpace = T.SRGBColorSpace;
+      backdrop = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: backdropTexture, toneMapped: false, depthWrite: false }));
+      backdrop.position.z = -2;
+      // Only include the cloned text in Three's offscreen transmission pass.
+      // The visible page keeps its real DOM letters, so no rectangular copy can cover them.
+      backdrop.onBeforeRender = currentRenderer => { backdrop.material.colorWrite = currentRenderer.getRenderTarget() !== null; };
+      scene.add(backdrop);
+      let alive = true;
+      const syncLetters = () => {
+        if (!alive) return;
+        const rect = el.getBoundingClientRect();
+        const stage = el.closest('.nv-intro__stage');
+        const dpr = Math.min(window.devicePixelRatio, 1.5);
+        textCanvas.width = Math.max(1, Math.round(rect.width * dpr));
+        textCanvas.height = Math.max(1, Math.round(rect.height * dpr));
+        textContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+        textContext.fillStyle = getComputedStyle(el.closest('.nv-intro')).backgroundColor;
+        textContext.fillRect(0, 0, rect.width, rect.height);
+        stage.querySelectorAll('.nv-intro__title > span').forEach(line => {
+          const style = getComputedStyle(line), bounds = line.getBoundingClientRect();
+          textContext.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+          textContext.fillStyle = style.color;
+          textContext.textBaseline = 'alphabetic';
+          const text = line.textContent, metrics = textContext.measureText(text);
+          const spacing = parseFloat(style.letterSpacing) || 0;
+          const width = metrics.width + spacing * text.length;
+          const ascent = metrics.fontBoundingBoxAscent || parseFloat(style.fontSize) * 0.8;
+          const descent = metrics.fontBoundingBoxDescent || parseFloat(style.fontSize) * 0.2;
+          const baseline = bounds.top - rect.top + (bounds.height - ascent - descent) / 2 + ascent;
+          let x = bounds.left - rect.left + (bounds.width - width) / 2;
+          Array.from(text).forEach(char => { textContext.fillText(char, x, baseline); x += textContext.measureText(char).width + spacing; });
+        });
+        backdropTexture.needsUpdate = true;
+        const height = 2 * (camera.position.z - backdrop.position.z) * Math.tan(T.MathUtils.degToRad(camera.fov / 2));
+        backdrop.scale.set(height * camera.aspect, height, 1);
+      };
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
       const pointer = { x: 0, y: 0 };
       let visible = true, frame = 0, last = 0, started = performance.now();
@@ -56,24 +108,31 @@ function IntroSculpture() {
         if (!reduced.matches) frame = requestAnimationFrame(draw);
       };
       const restart = () => { if (frame) cancelAnimationFrame(frame); frame = 0; if (visible && !document.hidden) frame = requestAnimationFrame(draw); };
-      const resize = () => { renderer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / Math.max(1, el.clientHeight); camera.updateProjectionMatrix(); renderer.render(scene, camera); };
+      const resize = () => { renderer.setSize(el.clientWidth, el.clientHeight); camera.aspect = el.clientWidth / Math.max(1, el.clientHeight); camera.updateProjectionMatrix(); syncLetters(); renderer.render(scene, camera); };
       const move = e => { const rect = el.getBoundingClientRect(); pointer.x = Math.max(-1, Math.min(1, (e.clientX - rect.left) / rect.width * 2 - 1)); pointer.y = Math.max(-1, Math.min(1, (e.clientY - rect.top) / rect.height * 2 - 1)); };
       const resizeObserver = new ResizeObserver(resize);
       const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; restart(); });
-      resizeObserver.observe(el); observer.observe(el);
+      resizeObserver.observe(el); resizeObserver.observe(el.closest('.nv-intro__stage')); observer.observe(el);
+      const lettersObserver = new MutationObserver(() => { syncLetters(); renderer.render(scene, camera); });
+      lettersObserver.observe(el.closest('.nv-intro__stage').querySelector('h1'), { subtree: true, childList: true, characterData: true });
+      const fontReady = () => { if (alive) { syncLetters(); renderer.render(scene, camera); } };
+      document.fonts.ready.then(fontReady);
+      document.fonts.addEventListener('loadingdone', fontReady);
+      window.addEventListener('resize', fontReady);
       window.addEventListener('pointermove', move, { passive: true });
       document.addEventListener('visibilitychange', restart);
       reduced.addEventListener('change', restart);
       resize(); restart(); setRendered(true);
       return () => {
-        cancelAnimationFrame(frame); observer.disconnect(); resizeObserver.disconnect();
+        alive = false; cancelAnimationFrame(frame); observer.disconnect(); resizeObserver.disconnect(); lettersObserver.disconnect();
+        document.fonts.removeEventListener('loadingdone', fontReady); window.removeEventListener('resize', fontReady);
         window.removeEventListener('pointermove', move); document.removeEventListener('visibilitychange', restart); reduced.removeEventListener('change', restart);
-        geometry.dispose(); material.dispose(); environment.dispose(); pmrem.dispose();
+        geometry.dispose(); material.dispose(); environment.dispose(); pmrem.dispose(); backdrop.geometry.dispose(); backdrop.material.dispose(); backdropTexture.dispose();
         panels.forEach(mesh => { mesh.geometry.dispose(); mesh.material.dispose(); });
         renderer.dispose(); renderer.domElement.remove();
       };
     } catch {
-      geometry?.dispose(); material?.dispose(); environment?.dispose(); pmrem?.dispose();
+      geometry?.dispose(); material?.dispose(); environment?.dispose(); pmrem?.dispose(); backdrop?.geometry.dispose(); backdrop?.material.dispose(); backdropTexture?.dispose();
       panels.forEach(mesh => { mesh.geometry.dispose(); mesh.material.dispose(); });
       renderer?.dispose(); renderer?.domElement.remove();
     }

@@ -1871,7 +1871,7 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 /* Intro: oversized typography and a locally rendered chrome sculpture. */
 .nv-intro { margin: 0 var(--pad) 32px; padding: 76px clamp(22px, 4vw, 64px) 28px; min-height: calc(100svh - var(--hero-top, 44px) - 24px); background: #ececea; border-radius: var(--radius-lg); display: flex; flex-direction: column; overflow: hidden; }
 .nv-intro__stage { position: relative; display: grid; place-items: center; flex: 1; min-height: 480px; }
-.nv-intro__title { width: 100%; text-align: center; font-size: clamp(68px, min(14vw, 21svh), 236px); line-height: .85; letter-spacing: -.065em; font-weight: 900; margin: 0; }
+.nv-intro__title { width: 100%; text-align: center; font-size: clamp(68px, min(19vw, 28svh), 310px); line-height: .85; letter-spacing: -.065em; font-weight: 900; margin: 0; }
 .nv-intro__title > span { display: block; }
 .nv-intro__title > span + span { margin-top: .10em; }
 .nv-intro__sculpture { position: absolute; width: clamp(240px, 38vw, 530px); aspect-ratio: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
@@ -1891,8 +1891,8 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 @media (max-width: 720px) {
   .nv-intro { padding: 68px 18px 24px; min-height: calc(100svh - var(--hero-top, 44px) - 20px); margin-bottom: 24px; }
   .nv-intro__stage { min-height: 300px; }
-  .nv-intro__title { font-size: clamp(48px, 16.2vw, 110px); }
-  .nv-intro__sculpture { width: clamp(130px, 40vw, 190px); }
+  .nv-intro__title { font-size: clamp(48px, 18.2vw, 125px); }
+  .nv-intro__sculpture { width: clamp(180px, 58vw, 240px); }
   .nv-intro__footer { flex-wrap: wrap; gap: 20px; margin-top: 24px; }
   .nv-intro__identity { width: 100%; }
   .nv-intro__links { gap: 18px; }
