@@ -35,7 +35,22 @@ function IntroSculpture() {
       scene.environment = environment.texture;
       const camera = new T.PerspectiveCamera(34, 1, 0.1, 30);
       camera.position.z = 7.4;
-      geometry = new T.TorusKnotGeometry(1.12, 0.26, 180, 32, 2, 3);
+      // Exact contours from assets/logo.svg; invert SVG Y before extrusion.
+      const shape = () => {
+        const path = new T.Shape();
+        return { path, move: (x, y) => path.moveTo(x, 87 - y), line: (x, y) => path.lineTo(x, 87 - y), curve: (a, b, c, d, x, y) => path.bezierCurveTo(a, 87 - b, c, 87 - d, x, 87 - y) };
+      };
+      const first = shape();
+      first.move(44.23, 0); first.line(24.17, 0); first.line(0, 41.98); first.line(20.06, 41.98); first.path.closePath();
+      const middle = shape();
+      middle.move(58.9708, 0); middle.line(57.0508, 0); middle.line(17.6108, 68.81);
+      middle.curve(13.1708, 76.56, 18.7608, 86.21, 27.6908, 86.21);
+      middle.line(68.0908, 15.74); middle.curve(72.1108, 8.73, 67.0508, 0, 58.9708, 0); middle.path.closePath();
+      const finalPiece = shape();
+      finalPiece.move(86.1206, 44.23); finalPiece.line(66.0606, 44.23); finalPiece.line(41.8906, 86.21);
+      finalPiece.curve(54.3006, 86.21, 65.7706, 79.58, 71.9606, 68.82); finalPiece.line(86.1206, 44.22); finalPiece.path.closePath();
+      geometry = new T.ExtrudeGeometry([first.path, middle.path, finalPiece.path], { depth: 16, steps: 1, bevelEnabled: true, bevelThickness: 2.2, bevelSize: 1.5, bevelSegments: 6, curveSegments: 24 });
+      geometry.center(); geometry.scale(0.034, 0.034, 0.034);
       material = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.035, transmission: 1, thickness: 0.85, ior: 1.48, clearcoat: 1, clearcoatRoughness: 0.025, envMapIntensity: 0.65 });
       // Slight wavelength separation makes the bent letter edges catch colored light.
       material.onBeforeCompile = shader => {
@@ -49,7 +64,7 @@ function IntroSculpture() {
       };
       material.customProgramCacheKey = () => 'navas-glass-dispersion-v1';
       const sculpture = new T.Mesh(geometry, material);
-      sculpture.rotation.set(0.55, -0.4, -0.35);
+      sculpture.rotation.set(0.14, -0.3, -0.08);
       scene.add(sculpture);
       // WebGL cannot refract DOM text. Render the same letters onto a plane behind
       // the glass, aligned to their actual positions and using the loaded page font.
@@ -101,8 +116,8 @@ function IntroSculpture() {
         if (time - last >= 32 || reduced.matches) {
           last = time;
           const elapsed = (time - started) / 1000;
-          sculpture.rotation.x = 0.55 + (reduced.matches ? 0 : Math.sin(elapsed * 0.26) * 0.2 + pointer.y * 0.14);
-          sculpture.rotation.y = -0.4 + (reduced.matches ? 0 : elapsed * 0.11 + pointer.x * 0.2);
+          sculpture.rotation.x = 0.14 + (reduced.matches ? 0 : Math.sin(elapsed * 0.26) * 0.14 + pointer.y * 0.12);
+          sculpture.rotation.y = -0.3 + (reduced.matches ? 0 : Math.sin(elapsed * 0.32) * 0.38 + pointer.x * 0.18);
           renderer.render(scene, camera);
         }
         if (!reduced.matches) frame = requestAnimationFrame(draw);
@@ -139,7 +154,7 @@ function IntroSculpture() {
   }, []);
   return <div className="nv-intro__sculpture" aria-hidden="true">
     <div className="nv-intro__canvas" ref={mount} />
-    {!rendered && <svg className="nv-intro__fallback" viewBox="0 0 400 400"><defs><linearGradient id="nv-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff"/><stop offset=".25" stopColor="#717780"/><stop offset=".45" stopColor="#fff"/><stop offset=".62" stopColor="#151719"/><stop offset=".8" stopColor="#e5e9ed"/><stop offset="1" stopColor="#fff"/></linearGradient></defs><g fill="none" stroke="url(#nv-metal)" strokeWidth="30"><ellipse cx="200" cy="200" rx="125" ry="65" transform="rotate(-35 200 200)"/><ellipse cx="200" cy="200" rx="125" ry="65" transform="rotate(85 200 200)"/></g></svg>}
+    {!rendered && <svg className="nv-intro__fallback" viewBox="-6 -6 99 99"><defs><linearGradient id="nv-glass-logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff"/><stop offset=".4" stopColor="#bec6d0" stopOpacity=".55"/><stop offset=".6" stopColor="#fff" stopOpacity=".8"/><stop offset="1" stopColor="#9da9b9" stopOpacity=".5"/></linearGradient></defs><g fill="url(#nv-glass-logo)" stroke="#fff" strokeWidth=".7"><path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z"/><path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z"/><path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z"/></g></svg>}
   </div>;
 }
 
