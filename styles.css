@@ -1853,6 +1853,10 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 .nv-brief__upload button { background: transparent; color: var(--fg); border: 0; text-decoration: underline; cursor: pointer; }
 .nv-brief__summary { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 14px; line-height: 1.6; padding: 18px; background: var(--bg-soft); border-radius: 12px; margin: 24px 0; }
 .nv-brief__error { color: #b42318; margin-top: 16px; }
+.nv-brief__confirm { margin-top: 16px; padding: 16px 18px; border: 1px solid var(--bg-line); border-radius: 18px; background: var(--bg, #fff); box-shadow: 0 10px 30px rgb(0 0 0 / .08); }
+.nv-brief__confirm .nv-order__actions { margin-top: 12px; }
+.nv-brief__restored { margin-top: 12px; font-size: 13px; color: var(--fg-muted); }
+.nv-brief__restored button { margin-left: 6px; background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; cursor: pointer; }
 .nv-brief .nv-order__actions { margin-top: 24px; }
 .nv-brief button:disabled { opacity: .5; cursor: wait; }
 @media (max-width: 600px) { .nv-brief { padding: 24px 18px; } .nv-brief .nv-order__actions { flex-direction: column; } }

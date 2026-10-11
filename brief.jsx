@@ -1,7 +1,7 @@
 // The brief is sent only after the client confirms it; credentials stay in Vercel.
 const BRIEF_COPY = {
-  es: { steps: ['Tu marca', 'El proyecto', 'Referencias', 'Revisar'], intro: 'Cuéntame qué necesitas. Al enviar el brief podrás elegir entre pagar o consultar conmigo.', name: 'Tu nombre', email: 'Correo electrónico', brand: 'Nombre de la marca', business: '¿A qué se dedica?', audience: '¿A quién va dirigido?', goals: '¿Qué necesitas conseguir?', style: 'Estilo y personalidad', colors: 'Colores que prefieres o quieres evitar', uses: '¿Dónde se usará el logo?', slogan: 'Eslogan (opcional)', existing: '¿Es una marca nueva o un rediseño?', scope: 'Páginas, funciones o piezas que necesitas', platform: 'Web actual, plataforma o redes (opcional)', deadline: 'Fecha deseada (opcional)', links: 'Enlaces de referencia (uno por línea, opcional)', notes: '¿Qué te gusta de estas referencias? (opcional)', files: 'Cargar referencias', fileHelp: 'Hasta 5 archivos JPG, PNG, WebP o PDF. Máximo 3 MB en total.', fileError: 'Revisa el formato y los límites: 5 archivos y 3 MB en total.', remove: 'Quitar', back: 'Atrás', next: 'Continuar', close: 'Cerrar', submit: 'Enviar mi proyecto', sending: 'Enviando…', sent: 'Solicitud enviada', received: 'Recibí tu brief y las referencias. ¿Cómo quieres continuar?', partial: 'Tu solicitud fue recibida, pero una de las notificaciones no se completó. Consúltame para confirmar los detalles antes de pagar.', pay: 'Pagar el plan', coordinatePay: 'Coordinar el pago', consult: 'Consultar personalmente', sendError: 'No se pudo confirmar el envío. Tus respuestas y referencias siguen aquí. Inténtalo de nuevo o consúltame.', unavailable: 'El envío no está disponible en este momento. Tus datos siguen aquí; puedes consultarme directamente.', rate: 'Has realizado varios intentos. Espera unos minutos antes de volver a enviar.', privacy: 'Al enviar, compartes tus respuestas y archivos con Luis Navas para revisar tu proyecto.', receipt: 'Número de solicitud', edit: 'Volver a editar', reference: 'Proyecto que te interesa', referencePrice: 'Precio del plan', noCharge: 'Completar este formulario no realiza ningún cobro.', attachments: 'Archivos de referencia', review: 'Comprueba tus respuestas antes de enviarlas.', newOrOld: 'Indica si partes de cero o qué quieres cambiar.', styles: 'Por ejemplo: simple, cercano, elegante, atrevido…', logoUses: 'Por ejemplo: redes, envases, rótulos, web…', goalHint: 'Cuéntame el problema que quieres resolver.', requiredError: 'Completa los campos obligatorios antes de continuar.', subject: 'Solicitud de proyecto' },
-  en: { steps: ['Your brand', 'The project', 'References', 'Review'], intro: 'Tell me what you need. After sending the brief, you can choose to pay or discuss it with me.', name: 'Your name', email: 'Email', brand: 'Brand name', business: 'What does your business do?', audience: 'Who is it for?', goals: 'What do you need to achieve?', style: 'Style and personality', colors: 'Colors you prefer or want to avoid', uses: 'Where will the logo be used?', slogan: 'Tagline (optional)', existing: 'New brand or redesign?', scope: 'Pages, features or pieces you need', platform: 'Current website, platform or social accounts (optional)', deadline: 'Desired date (optional)', links: 'Reference links (one per line, optional)', notes: 'What do you like about these references? (optional)', files: 'Add reference files', fileHelp: 'Up to 5 JPG, PNG, WebP or PDF files. Maximum 3 MB total.', fileError: 'Check file types and limits: 5 files and 3 MB total.', remove: 'Remove', back: 'Back', next: 'Continue', close: 'Close', submit: 'Send my project', sending: 'Sending…', sent: 'Request sent', received: 'I received your brief and references. How would you like to continue?', partial: 'Your request was received, but one notification could not be completed. Contact me to confirm the details before paying.', pay: 'Pay for the plan', coordinatePay: 'Arrange payment', consult: 'Discuss it with me', sendError: 'Could not confirm delivery. Your answers and references are still here. Try again or contact me.', unavailable: 'Delivery is unavailable right now. Your answers are still here; you can contact me directly.', rate: 'You have tried several times. Wait a few minutes before sending again.', privacy: 'By sending, you share your answers and files with Luis Navas to review your project.', receipt: 'Request number', edit: 'Edit answers', reference: 'Project you like', referencePrice: 'Plan price', noCharge: 'Completing this form does not charge you.', attachments: 'Reference files', review: 'Check your answers before sending.', newOrOld: 'Tell me whether you are starting from scratch or what needs to change.', styles: 'For example: simple, friendly, elegant, bold…', logoUses: 'For example: social media, packaging, signage, website…', goalHint: 'Tell me the problem you want to solve.', requiredError: 'Complete the required fields before continuing.', subject: 'Project request' }
+  es: { steps: ['Tu marca', 'El proyecto', 'Referencias', 'Revisar'], intro: 'Cuéntame qué necesitas. Al enviar el brief podrás elegir entre pagar o consultar conmigo.', name: 'Tu nombre', email: 'Correo electrónico', brand: 'Nombre de la marca', business: '¿A qué se dedica?', audience: '¿A quién va dirigido?', goals: '¿Qué necesitas conseguir?', style: 'Estilo y personalidad', colors: 'Colores que prefieres o quieres evitar', uses: '¿Dónde se usará el logo?', slogan: 'Eslogan (opcional)', existing: '¿Es una marca nueva o un rediseño?', scope: 'Páginas, funciones o piezas que necesitas', platform: 'Web actual, plataforma o redes (opcional)', deadline: 'Fecha deseada (opcional)', links: 'Enlaces de referencia (uno por línea, opcional)', notes: '¿Qué te gusta de estas referencias? (opcional)', files: 'Cargar referencias', fileHelp: 'Hasta 5 archivos JPG, PNG, WebP o PDF. Máximo 3 MB en total.', fileError: 'Revisa el formato y los límites: 5 archivos y 3 MB en total.', remove: 'Quitar', back: 'Atrás', next: 'Continuar', close: 'Cerrar', submit: 'Enviar mi proyecto', sending: 'Enviando…', sent: 'Solicitud enviada', received: 'Recibí tu brief y las referencias. ¿Cómo quieres continuar?', partial: 'Tu solicitud fue recibida, pero una de las notificaciones no se completó. Consúltame para confirmar los detalles antes de pagar.', pay: 'Pagar el plan', coordinatePay: 'Coordinar el pago', consult: 'Consultar personalmente', sendError: 'No se pudo confirmar el envío. Tus respuestas y referencias siguen aquí. Inténtalo de nuevo o consúltame.', unavailable: 'El envío no está disponible en este momento. Tus datos siguen aquí; puedes consultarme directamente.', rate: 'Has realizado varios intentos. Espera unos minutos antes de volver a enviar.', privacy: 'Al enviar, compartes tus respuestas y archivos con Luis Navas para revisar tu proyecto.', receipt: 'Número de solicitud', edit: 'Volver a editar', reference: 'Proyecto que te interesa', referencePrice: 'Precio del plan', noCharge: 'Completar este formulario no realiza ningún cobro.', attachments: 'Archivos de referencia', review: 'Comprueba tus respuestas antes de enviarlas.', newOrOld: 'Indica si partes de cero o qué quieres cambiar.', styles: 'Por ejemplo: simple, cercano, elegante, atrevido…', logoUses: 'Por ejemplo: redes, envases, rótulos, web…', goalHint: 'Cuéntame el problema que quieres resolver.', requiredError: 'Completa los campos obligatorios antes de continuar.', subject: 'Solicitud de proyecto', draftRestored: 'Recuperamos lo que habías escrito en este dispositivo.', draftClear: 'Empezar de cero', closeTitle: '¿Cerrar el formulario?', closeBody: 'Lo que escribiste queda guardado en este dispositivo y lo verás al volver a abrir este plan. Los archivos adjuntos sí tendrás que volver a cargarlos.', keepEditing: 'Seguir completando', closeAnyway: 'Cerrar' },
+  en: { steps: ['Your brand', 'The project', 'References', 'Review'], intro: 'Tell me what you need. After sending the brief, you can choose to pay or discuss it with me.', name: 'Your name', email: 'Email', brand: 'Brand name', business: 'What does your business do?', audience: 'Who is it for?', goals: 'What do you need to achieve?', style: 'Style and personality', colors: 'Colors you prefer or want to avoid', uses: 'Where will the logo be used?', slogan: 'Tagline (optional)', existing: 'New brand or redesign?', scope: 'Pages, features or pieces you need', platform: 'Current website, platform or social accounts (optional)', deadline: 'Desired date (optional)', links: 'Reference links (one per line, optional)', notes: 'What do you like about these references? (optional)', files: 'Add reference files', fileHelp: 'Up to 5 JPG, PNG, WebP or PDF files. Maximum 3 MB total.', fileError: 'Check file types and limits: 5 files and 3 MB total.', remove: 'Remove', back: 'Back', next: 'Continue', close: 'Close', submit: 'Send my project', sending: 'Sending…', sent: 'Request sent', received: 'I received your brief and references. How would you like to continue?', partial: 'Your request was received, but one notification could not be completed. Contact me to confirm the details before paying.', pay: 'Pay for the plan', coordinatePay: 'Arrange payment', consult: 'Discuss it with me', sendError: 'Could not confirm delivery. Your answers and references are still here. Try again or contact me.', unavailable: 'Delivery is unavailable right now. Your answers are still here; you can contact me directly.', rate: 'You have tried several times. Wait a few minutes before sending again.', privacy: 'By sending, you share your answers and files with Luis Navas to review your project.', receipt: 'Request number', edit: 'Edit answers', reference: 'Project you like', referencePrice: 'Plan price', noCharge: 'Completing this form does not charge you.', attachments: 'Reference files', review: 'Check your answers before sending.', newOrOld: 'Tell me whether you are starting from scratch or what needs to change.', styles: 'For example: simple, friendly, elegant, bold…', logoUses: 'For example: social media, packaging, signage, website…', goalHint: 'Tell me the problem you want to solve.', requiredError: 'Complete the required fields before continuing.', subject: 'Project request', draftRestored: 'We restored what you had written on this device.', draftClear: 'Start over', closeTitle: 'Close the form?', closeBody: 'Your answers are saved on this device and will be here when you open this plan again. Attached files will need to be added again.', keepEditing: 'Keep editing', closeAnyway: 'Close' }
 };
 
 // Public payment details supplied by the studio owner; these are not API credentials.
@@ -23,7 +23,18 @@ function BriefPaymentRow({ label, value, es }) {
 function OrderModal({ pkg, t, lang, onClose }) {
   const c = BRIEF_COPY[lang === 'es' ? 'es' : 'en'];
   const [step, setStep] = React.useState(0);
-  const [values, setValues] = React.useState({ reference: pkg.reference || '' });
+  // Borrador por plan: se guarda en este dispositivo mientras escriben y se borra al enviar.
+  const draftKey = `nv-brief-draft:${pkg.service}:${pkg.tier}`;
+  const [restored, setRestored] = React.useState(false);
+  const [values, setValues] = React.useState(() => {
+    const base = { reference: pkg.reference || '' };
+    try {
+      const saved = JSON.parse(localStorage.getItem(draftKey) || 'null');
+      if (saved && saved.values && Date.now() - saved.at < 14 * 864e5) return { ...saved.values, ...base, restored: true };
+    } catch {}
+    return base;
+  });
+  const [confirmClose, setConfirmClose] = React.useState(false);
   const [files, setFiles] = React.useState([]);
   const [error, setError] = React.useState('');
   const [busy, setBusy] = React.useState(false);
@@ -34,7 +45,15 @@ function OrderModal({ pkg, t, lang, onClose }) {
   const [rateState, setRateState] = React.useState('idle');
   const es = lang === 'es';
   const busyRef = React.useRef(false);
-  const requestClose = () => { if (!busyRef.current) onClose(); };
+  const dirtyRef = React.useRef(false), pressedOverlay = React.useRef(false);
+  // Si ya escribieron algo, cerrar pide confirmación en vez de perder el formulario.
+  const requestClose = () => {
+    if (busyRef.current) return;
+    if (dirtyRef.current) { setConfirmClose(true); return; }
+    onClose();
+  };
+  const closeRef = React.useRef(requestClose);
+  closeRef.current = requestClose;
   const box = React.useRef(null), form = React.useRef(null);
   const logo = ['logo', 'identidad'].includes(pkg.service);
   const fields = [
@@ -47,7 +66,7 @@ function OrderModal({ pkg, t, lang, onClose }) {
     const previous = document.activeElement, overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const key = e => {
-      if (e.key === 'Escape' && !busyRef.current) onClose();
+      if (e.key === 'Escape' && !busyRef.current) { e.preventDefault(); closeRef.current(); }
       if (e.key === 'Tab') {
         const elements = [...box.current.querySelectorAll('button:not(:disabled), input, textarea, a[href]')].filter(el => el.tabIndex >= 0 && el.getClientRects().length);
         const first = elements[0], last = elements[elements.length - 1];
@@ -60,6 +79,21 @@ function OrderModal({ pkg, t, lang, onClose }) {
   }, []);
   React.useEffect(() => { box.current.scrollTop = 0; box.current.querySelector('.nv-brief__heading').focus(); }, [step, result]);
   const change = (key, value) => { setValues(v => ({ ...v, [key]: value })); };
+  React.useEffect(() => {
+    if (values.restored) { setRestored(true); setValues(({ restored: _, ...v }) => v); }
+  }, []);
+  const filled = Object.entries(values).some(([k, v]) => !['reference', 'restored'].includes(k) && String(v || '').trim());
+  dirtyRef.current = !result && (filled || files.length > 0);
+  React.useEffect(() => {
+    try {
+      if (result) localStorage.removeItem(draftKey);
+      else if (filled) { const { restored: _, ...v } = values; localStorage.setItem(draftKey, JSON.stringify({ values: v, at: Date.now() })); }
+    } catch {}
+  }, [values, result]);
+  const clearDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch {}
+    setValues({ reference: pkg.reference || '' }); setFiles([]); setStep(0); setRestored(false); setError('');
+  };
   const addFiles = e => {
     const added = [...e.target.files]; e.target.value = '';
     const next = [...files, ...added];
@@ -107,12 +141,28 @@ function OrderModal({ pkg, t, lang, onClose }) {
     } catch { setError(c.sendError); } finally { setBusy(false); busyRef.current = false; }
   };
   return (
-    <div className="nv-modal-overlay nv-modal-overlay--in" onClick={e => { if (e.target === e.currentTarget) requestClose(); }}>
+    <div className="nv-modal-overlay nv-modal-overlay--in"
+      onPointerDown={e => { pressedOverlay.current = e.target === e.currentTarget; }}
+      onClick={e => {
+        // Solo un clic que empieza y termina fuera del formulario cuenta; y con datos escritos, no cierra.
+        const outside = e.target === e.currentTarget && pressedOverlay.current;
+        pressedOverlay.current = false;
+        if (outside && !dirtyRef.current) requestClose();
+      }}>
       <div className="nv-modal-box nv-order nv-brief" ref={box} role="dialog" aria-modal="true" aria-labelledby="brief-title">
         <button type="button" className="nv-order__close" onClick={requestClose} disabled={busy} aria-label={c.close}>✕</button>
         <p className="nv-order__meta">{pkg.name} · ${pkg.price}</p>
         <h2 id="brief-title" className="nv-brief__heading" tabIndex="-1">{result ? c.sent : c.steps[step]}</h2>
         {!result && <ol className="nv-brief__progress">{c.steps.map((label, i) => <li key={label} aria-current={i === step ? 'step' : undefined} className={i === step ? 'is-active' : ''}>{i + 1}. {label}</li>)}</ol>}
+        {confirmClose && <div className="nv-brief__confirm" role="alertdialog" aria-labelledby="brief-close-title" aria-describedby="brief-close-body">
+          <p id="brief-close-title"><strong>{c.closeTitle}</strong></p>
+          <p id="brief-close-body" className="nv-order__text">{c.closeBody}</p>
+          <div className="nv-order__actions">
+            <button type="button" className="nv-btn nv-btn--primary" autoFocus onClick={() => setConfirmClose(false)}>{c.keepEditing}</button>
+            <button type="button" className="nv-btn nv-btn--ghost" onClick={onClose}>{c.closeAnyway}</button>
+          </div>
+        </div>}
+        {restored && !result && <p className="nv-brief__restored" role="status">{c.draftRestored} <button type="button" onClick={clearDraft}>{c.draftClear}</button></p>}
         <p className="nv-order__text">{result ? (result.complete ? c.received : c.partial) : step === 3 ? c.review : c.intro}</p>
         {values.reference && <p className="nv-order__text">{c.reference}: {values.reference}</p>}
         {!result && <form ref={form} onSubmit={e => { e.preventDefault(); if (step === 3) { submitBrief(); return; } if (fields[step].some(([key, , , required = true]) => required && !values[key]?.trim())) { setError(c.requiredError); return; } setError(''); setStep(s => Math.min(3, s + 1)); }}>
