@@ -418,6 +418,11 @@ function showApp(email) {
   document.getElementById('app').classList.add('visible');
   document.getElementById('userEmail').textContent = email;
   loadProjects();
+  // Enlace desde Telegram: abre la solicitud directamente en la oficina
+  if (/^#solicitud-[0-9a-f-]{36}$/i.test(location.hash)) {
+    document.getElementById('teamFrame').src = 'admin-equipo.html' + location.hash;
+    showPage('team');
+  }
 }
 
 async function handleLogout() {
