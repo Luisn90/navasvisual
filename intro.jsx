@@ -52,7 +52,7 @@ function IntroSculpture() {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.outputColorSpace = T.SRGBColorSpace;
       renderer.toneMapping = T.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.15;
+      renderer.toneMappingExposure = 1.05;
       renderer.setClearColor(0x000000, 0);
       el.appendChild(renderer.domElement);
       // A procedural studio creates broad white highlights and dark reflections.
@@ -64,9 +64,9 @@ function IntroSculpture() {
       };
       panel(8, 4, 0, 5, 2, 0xffffff, 4);
       panel(3, 8, -5, 0, 3, 0xffffff, 3);
-      panel(2, 8, 5, 1, 0, 0xe5eaff, 3);
+      panel(2, 8, 5, 1, 0, 0xf3f3f3, 3);
       panel(8, 1.5, 0, -4, 4, 0xffffff, 2);
-      panel(2, 5, 3, -1, -4, 0xaec7ff, 0.5);
+      panel(2, 5, 3, -1, -4, 0xd9d9d9, 0.5);
       pmrem = new T.PMREMGenerator(renderer);
       environment = pmrem.fromScene(studio, 0.03);
       const scene = new T.Scene();
@@ -91,7 +91,7 @@ function IntroSculpture() {
       // refracts a continuous surface instead of visible facets; sharp corners stay crisp.
       geometry = creasedNormals(T, new T.ExtrudeGeometry([first.path, middle.path, finalPiece.path], { depth: 16, steps: 1, bevelEnabled: true, bevelThickness: 2.2, bevelSize: 1.5, bevelSegments: 10, curveSegments: 96 }), 35);
       geometry.center(); geometry.scale(0.034, 0.034, 0.034);
-      material = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.035, transmission: 1, thickness: 0.85, ior: 1.48, clearcoat: 1, clearcoatRoughness: 0.025, envMapIntensity: 0.65 });
+      material = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.035, transmission: 1, thickness: 0.85, ior: 1.48, clearcoat: 0.6, clearcoatRoughness: 0.025, envMapIntensity: 0.38 });
       // Slight wavelength separation makes the bent letter edges catch colored light.
       material.onBeforeCompile = shader => {
         const split = `
@@ -108,8 +108,8 @@ function IntroSculpture() {
       scene.add(sculpture);
       // WebGL cannot refract DOM text. Render the same letters onto a plane behind
       // the glass, aligned to their actual positions and using the loaded page font.
-      const textCanvas = document.createElement('canvas');
-      const textContext = textCanvas.getContext('2d');
+      let textCanvas = document.createElement('canvas');
+      let textContext = textCanvas.getContext('2d');
       backdropTexture = new T.CanvasTexture(textCanvas);
       backdropTexture.colorSpace = T.SRGBColorSpace;
       backdrop = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: backdropTexture, toneMapped: false, depthWrite: false }));
@@ -119,6 +119,24 @@ function IntroSculpture() {
       backdrop.onBeforeRender = currentRenderer => { backdrop.material.colorWrite = currentRenderer.getRenderTarget() !== null; };
       scene.add(backdrop);
       let alive = true;
+      // Paint the hero's silk SVG into the backdrop too, so the glass refracts the
+      // same folds that surround it. If the browser refuses (tainted canvas), use the flat color.
+      const silk = { image: null, key: '', broken: false };
+      const loadSilk = () => {
+        const host = el.closest('.nv-intro')?.querySelector('.nv-intro__silk svg');
+        if (!host || silk.broken) return null;
+        const box = host.getBoundingClientRect();
+        const key = `${Math.round(box.width)}x${Math.round(box.height)}`;
+        if (key !== silk.key && box.width > 0) {
+          silk.key = key;
+          const clone = host.cloneNode(true);
+          clone.setAttribute('width', Math.round(box.width)); clone.setAttribute('height', Math.round(box.height));
+          const image = new Image();
+          image.onload = () => { if (alive && silk.key === key) { silk.image = image; syncLetters(); renderer.render(scene, camera); } };
+          image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+        }
+        return box;
+      };
       const syncLetters = () => {
         if (!alive) return;
         const rect = el.getBoundingClientRect();
@@ -129,6 +147,11 @@ function IntroSculpture() {
         textContext.setTransform(dpr, 0, 0, dpr, 0, 0);
         textContext.fillStyle = getComputedStyle(el.closest('.nv-intro')).backgroundColor;
         textContext.fillRect(0, 0, rect.width, rect.height);
+        const silkBox = loadSilk();
+        if (silkBox && silk.image) {
+          textContext.drawImage(silk.image, silkBox.left - rect.left, silkBox.top - rect.top, silkBox.width, silkBox.height);
+          try { textContext.getImageData(0, 0, 1, 1); } catch { silk.broken = true; silk.image = null; textCanvas = document.createElement('canvas'); textContext = textCanvas.getContext('2d'); backdropTexture.image = textCanvas; return syncLetters(); }
+        }
         stage.querySelectorAll('.nv-intro__title > span').forEach(line => {
           const style = getComputedStyle(line), bounds = line.getBoundingClientRect();
           textContext.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
@@ -198,18 +221,63 @@ function IntroSculpture() {
   </div>;
 }
 
+// Soft pearl silk behind the hero. Inline SVG (no external assets); the sculpture
+// also paints it into its refraction backdrop so the glass bends the same folds.
+function IntroSilk() {
+  return <div className="nv-intro__silk" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="nv-silk-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#fdfcfa"/><stop offset=".55" stopColor="#efece8"/><stop offset="1" stopColor="#e3dfd9"/></linearGradient>
+        <linearGradient id="nv-silk-b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ffffff"/><stop offset=".6" stopColor="#efedea"/><stop offset="1" stopColor="#dedad4"/></linearGradient>
+        <linearGradient id="nv-silk-c" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e6e2dc"/><stop offset=".5" stopColor="#f7f6f3"/><stop offset="1" stopColor="#ebe8e3"/></linearGradient>
+        <filter id="nv-silk-soft" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="26"/></filter>
+        <filter id="nv-silk-edge" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>
+      </defs>
+      <rect width="1600" height="900" fill="#efede9"/>
+      <path d="M760 0C1020 30 1250 170 1600 430V0Z" fill="url(#nv-silk-c)"/>
+      <path d="M740 -10C1010 30 1250 175 1610 440" fill="none" stroke="#cfcac3" strokeWidth="46" opacity=".5" filter="url(#nv-silk-soft)"/>
+      <path d="M760 0C1020 30 1250 170 1600 430" fill="none" stroke="#fff" strokeWidth="4" filter="url(#nv-silk-edge)"/>
+      <path d="M1180 0C1330 90 1450 190 1600 250V0Z" fill="url(#nv-silk-b)" opacity=".8"/>
+      <path d="M-20 620C250 500 520 455 800 525C1090 600 1310 505 1620 280" fill="none" stroke="#c9c4bc" strokeWidth="70" opacity=".45" filter="url(#nv-silk-soft)"/>
+      <path d="M0 640C260 520 520 470 800 540C1080 610 1300 520 1600 300V900H0Z" fill="url(#nv-silk-a)"/>
+      <path d="M0 640C260 520 520 470 800 540C1080 610 1300 520 1600 300" fill="none" stroke="#fff" strokeWidth="5" filter="url(#nv-silk-edge)"/>
+      <path d="M-30 735C140 650 330 640 470 720C560 770 600 840 610 930" fill="none" stroke="#c6c1b9" strokeWidth="60" opacity=".5" filter="url(#nv-silk-soft)"/>
+      <path d="M0 740C150 640 330 630 470 720C550 772 590 840 600 900H0Z" fill="url(#nv-silk-b)"/>
+      <path d="M0 740C150 640 330 630 470 720C550 772 590 840 600 900" fill="none" stroke="#fff" strokeWidth="4" filter="url(#nv-silk-edge)"/>
+      <path d="M1630 650C1500 700 1380 790 1330 920" fill="none" stroke="#c6c1b9" strokeWidth="60" opacity=".45" filter="url(#nv-silk-soft)"/>
+      <path d="M1600 660C1480 710 1370 790 1330 900H1600Z" fill="url(#nv-silk-c)"/>
+      <path d="M1600 660C1480 710 1370 790 1330 900" fill="none" stroke="#fff" strokeWidth="4" filter="url(#nv-silk-edge)"/>
+    </svg>
+  </div>;
+}
+
 function IntroHero({ t, onNavigate }) {
   const c = t.intro;
   const navigate = (e, href) => { e.preventDefault(); onNavigate(href); };
   return <section className="nv-intro" aria-labelledby="nv-intro-title">
+    <IntroSilk />
     <div className="nv-intro__stage">
-      <h1 id="nv-intro-title" className="nv-intro__title">{c.lines.map(line => <span key={line}>{line}</span>)}</h1>
-      <IntroSculpture />
+      <aside className="nv-intro__side nv-intro__side--left">
+        <strong>NAVAS VISUAL</strong>
+        <i aria-hidden="true" />
+        <ul>{c.left.map(word => <li key={word}>{word}</li>)}</ul>
+      </aside>
+      <div className="nv-intro__center">
+        <h1 id="nv-intro-title" className="nv-intro__title">{c.lines.map(line => <span key={line}>{line}</span>)}</h1>
+        <IntroSculpture />
+      </div>
+      <aside className="nv-intro__side nv-intro__side--right">
+        <strong>01</strong>
+        <i aria-hidden="true" />
+        <ul>{c.right.map(word => <li key={word}>{word}</li>)}</ul>
+      </aside>
     </div>
-    <div className="nv-intro__footer">
-      <div className="nv-intro__identity"><span>NAVAS VISUAL</span><p>{c.description}</p></div>
-      <div className="nv-intro__links"><a href="work.html" onClick={e => navigate(e, 'work.html')}>{c.work} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 13 13 3M3 3h10v10"/></svg></a><a href="contact.html" onClick={e => navigate(e, 'contact.html')}>{c.contact} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 13 13 3M3 3h10v10"/></svg></a></div>
-      <a className="nv-intro__explore" href="#visual" onClick={e => navigate(e, '#visual')}>{c.explore} <span aria-hidden="true">↓</span></a>
+    <div className="nv-intro__bottom">
+      <p className="nv-intro__lede">{c.lede}</p>
+      <div className="nv-intro__actions">
+        <a className="nv-intro__btn nv-intro__btn--dark" href="work.html" onClick={e => navigate(e, 'work.html')}>{c.work} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a>
+        <a className="nv-intro__btn nv-intro__btn--light" href="contact.html" onClick={e => navigate(e, 'contact.html')}>{c.contact} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></a>
+      </div>
     </div>
   </section>;
 }

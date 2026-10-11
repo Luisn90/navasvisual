@@ -5,10 +5,11 @@ window.NV_I18N = {
     loader: { based: "Disponible en remoto", role: "Diseñador visual", since: "Desde 2019" },
     intro: {
       lines: ["DISEÑO", "VISUAL", "DIGITAL"],
-      description: "Luis Navas · Marcas, webs y productos digitales.",
-      work: "Ver trabajos",
-      contact: "Hablemos",
-      explore: "Explora lo que hago"
+      lede: "Branding, diseño web y contenido visual con enfoque estratégico.",
+      left: ["IDEAS", "MARCAS", "EXPERIENCIAS", "REALES"],
+      right: ["DISEÑO", "ESTRATEGIA", "CREATIVIDAD", "RESULTADOS"],
+      work: "Ver proyectos",
+      contact: "Hablemos"
     },
     hero: {
       eyebrow: "",
@@ -249,10 +250,11 @@ window.NV_I18N = {
     loader: { based: "Available remotely", role: "Visual designer", since: "Since 2019" },
     intro: {
       lines: ["DESIGN", "VISUAL", "DIGITAL"],
-      description: "Luis Navas · Brands, websites and digital products.",
-      work: "View work",
-      contact: "Let's talk",
-      explore: "Explore what I do"
+      lede: "Branding, web design and visual content with a strategic focus.",
+      left: ["IDEAS", "BRANDS", "REAL", "EXPERIENCES"],
+      right: ["DESIGN", "STRATEGY", "CREATIVITY", "RESULTS"],
+      work: "View projects",
+      contact: "Let's talk"
     },
     hero: {
       eyebrow: "",

@@ -160,6 +160,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
         <div className="nv-nav__inner">
           <a href="index.html" onClick={(e) => { e.preventDefault(); handleNav('index.html'); }} className="nv-nav__logo">
             <LogoSVG size={28} />
+            <span className="nv-nav__wordmark">NAVAS VISUAL</span>
           </a>
           <div className="nv-nav__links">
             {links.slice(1).map(l => (
