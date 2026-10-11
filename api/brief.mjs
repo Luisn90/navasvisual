@@ -111,7 +111,7 @@ export async function handleBrief(request, { env = process.env, fetcher = fetch,
     ...Object.entries(values).filter(([, value]) => value).map(([key, value]) => `${labels[key]}: ${value}`),
     `Referencias adjuntas: ${files.map(f => f.name).join(', ') || 'Ninguna'}`].join('\n\n');
   const prior = completed.get(id);
-  if (prior?.telegram && prior?.email) return json(200, { accepted: true, complete: true, requestId: id.slice(0, 12), paymentUrl: paymentUrl(env) });
+  if (prior?.telegram && prior?.email) return json(200, { accepted: true, complete: true, requestId: id.slice(0, 12), paymentKey: id, paymentUrl: paymentUrl(env) });
   const caption = `Nuevo brief ${id.slice(0, 12)}\n${title} · $${price}\n${values.name} · ${values.brand}\n${values.email}`;
   const results = await Promise.allSettled([
     prior?.telegram ? Promise.resolve() : deliverTelegram(env, summary, files, caption, fetcher),
@@ -127,7 +127,7 @@ export async function handleBrief(request, { env = process.env, fetcher = fetch,
     // Guarda la solicitud para Marta y le pide el análisis, sin retrasar la respuesta al cliente.
     const record = buildRecord({ id, serviceKey: input.service, tierIndex: input.tier, values, files });
     await afterResponse(() => processNewSolicitud(env, record, new URL(request.url).origin, fetcher));
-    return json(200, { accepted: true, complete, deliveredTo: { telegram, email }, requestId: id.slice(0, 12), paymentUrl: complete ? paymentUrl(env) : null });
+    return json(200, { accepted: true, complete, deliveredTo: { telegram, email }, requestId: id.slice(0, 12), paymentKey: id, paymentUrl: complete ? paymentUrl(env) : null });
   }
   return json(502, { error: 'delivery' });
 }

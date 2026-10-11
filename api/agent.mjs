@@ -1,6 +1,7 @@
 import { runDesign, signedImageUrls, DESIGN_SERVICES, CAMILO } from './_diseno.mjs';
 import { runContent, CONTENT_SERVICES, TEO } from './_contenido.mjs';
 import { runMonitor, latestReports, writeSummary, chatWithVega } from './_monitor.mjs';
+import { decidePayment, signedProofUrl } from './_pagos.mjs';
 import { afterResponse, sendTelegram, verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
@@ -16,7 +17,7 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
 
   const auth = await verifyAdmin(env, request, fetcher).catch(() => ({ ok: false, status: 503 }));
   if (!auth.ok) return json(auth.status, { error: auth.status === 503 ? 'config' : 'auth' });
-  if (!aiReady(env) || !supabaseReady(env)) return json(503, { error: 'config' });
+  if (!supabaseReady(env)) return json(503, { error: 'config' });
 
   let body;
   try {
@@ -26,6 +27,22 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
   } catch { return json(400, { error: 'invalid' }); }
 
   try {
+    // Pagos: no necesitan IA. Luis ve el comprobante y confirma o rechaza; el cliente recibe el correo.
+    if (body?.action === 'comprobante') {
+      const row = await getSolicitud(env, body.id, fetcher);
+      if (!row?.pago?.archivo?.path) return json(404, { error: 'not_found' });
+      return json(200, { url: await signedProofUrl(env, row.pago.archivo.path, fetcher), type: row.pago.archivo.type });
+    }
+    if (body?.action === 'pago') {
+      if (!['confirmar', 'rechazar'].includes(body.decision)) return json(400, { error: 'invalid' });
+      const motivo = typeof body.motivo === 'string' ? body.motivo.trim() : '';
+      if (body.decision === 'rechazar' && !motivo) return json(400, { error: 'motivo' });
+      const row = await getSolicitud(env, body.id, fetcher);
+      if (!row) return json(404, { error: 'not_found' });
+      const link = `${new URL(request.url).origin}/admin.html#solicitud-${row.id}`;
+      return json(200, await decidePayment(env, row, { decision: body.decision, motivo }, { link }, fetcher));
+    }
+    if (!aiReady(env)) return json(503, { error: 'config' });
     if (body?.action === 'analizar') {
       const row = await getSolicitud(env, body.id, fetcher);
       if (!row) return json(404, { error: 'not_found' });

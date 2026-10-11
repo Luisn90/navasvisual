@@ -144,3 +144,9 @@ alter table public.cambios_web add constraint cambios_web_origen_check check (or
 create policy "admin aprueba cambios" on public.cambios_web for update to authenticated
   using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN') and estado = 'en_revision')
   with check (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN') and estado in ('aprobado', 'rechazado'));
+
+-- Pagos de los clientes: comprobante subido desde la web y confirmación de Luis.
+alter table public.solicitudes add column if not exists pago jsonb;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('pagos', 'pagos', false, 5242880, array['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+on conflict (id) do nothing;
