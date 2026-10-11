@@ -9,5 +9,11 @@
     "api/monitor.mjs": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/compartir.jpg",
+      "destination": "/api/og-image"
+    }
+  ]
 }

@@ -1440,7 +1440,7 @@ function webChanges(){
   const sec=el('section',{class:'design','aria-label':'Cambios para la web'},el('p',{class:'eyebrow',text:'Cambios para la web'}));
   // Imagen para compartir: se aplica al momento, sin tocar el código.
   const ogFile=el('input',{type:'file',id:'ogFile',accept:'image/jpeg,image/png,image/webp',hidden:true,onchange:e=>{const f=e.target.files[0];e.target.value='';if(f)uploadOg(f);}});
-  const src=m.ogPreview||`/api/og-image?v=${Math.floor(Date.now()/300000)}`;
+  const src=m.ogPreview||`/compartir.jpg?v=${Math.floor(Date.now()/300000)}`;
   sec.append(el('div',{class:'block'},el('h5',{text:'Imagen al compartir la web'}),
     el('p',{class:'small',text:'Es la que aparece al enviar navasvisual.com por WhatsApp o redes. Se recorta sola a 1200 × 630 px; deja lo importante en el centro.'}),
     el('div',{class:'share-card'},el('img',{src,alt:'Vista previa al compartir la web'}),
