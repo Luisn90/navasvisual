@@ -41,3 +41,9 @@ create policy "admin actualiza solicitudes" on public.solicitudes
 
 -- Avisos en tiempo real en la oficina (si falla porque ya está añadida, puedes ignorarlo).
 alter publication supabase_realtime add table public.solicitudes;
+
+-- Camilo, el agente de diseño: propuestas visuales e imágenes privadas.
+alter table public.solicitudes add column if not exists diseno jsonb;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('disenos', 'disenos', false, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do nothing;

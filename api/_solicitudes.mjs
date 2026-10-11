@@ -15,6 +15,8 @@ export const labels = {
   uses: 'Usos del logo', slogan: 'Eslogan', scope: 'Alcance', platform: 'Web o redes actuales',
   deadline: 'Fecha deseada', links: 'Enlaces de referencia', notes: 'Notas de referencias', reference: 'Proyecto de referencia'
 };
+import { DESIGN_SERVICES, runDesign } from './_diseno.mjs';
+
 export const STATUSES = ['nueva', 'revision', 'propuesta', 'aceptada', 'descartada'];
 const DEFAULT_CLAUDE_MODEL = 'claude-sonnet-5-5';
 const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-120b';
@@ -55,7 +57,7 @@ export async function getSolicitud(env, id, fetcher = fetch) {
   return rows?.[0] || null;
 }
 export async function listSolicitudes(env, limit = 25, fetcher = fetch) {
-  return await supabase(env, `solicitudes?select=id,request_id,created_at,status,service_name,tier,price,name,brand,ai&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
+  return await supabase(env, `solicitudes?select=id,request_id,created_at,status,service,service_name,tier,price,name,brand,ai,diseno&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
 }
 export async function updateSolicitud(env, id, patch, fetcher = fetch) {
   const rows = await supabase(env, `solicitudes?id=eq.${id}`, {
@@ -77,7 +79,7 @@ export function buildRecord({ id, serviceKey, tierIndex, values, files }) {
 function catalogText() {
   return Object.values(services).map(s => `- ${s.name}: ${tiers.map((t, i) => `${t} $${s.prices[i]}`).join(' · ')}`).join('\n');
 }
-function briefText(row) {
+export function briefText(row) {
   const fields = Object.entries(row.data || {}).filter(([, v]) => v).map(([k, v]) => `${labels[k] || k}: ${v}`).join('\n');
   const files = (row.files || []).map(f => f.name).join(', ') || 'Ninguna';
   return `Plan elegido: ${row.service_name} ${row.tier} ($${row.price} USD)\n${fields}\nReferencias adjuntas: ${files}`;
@@ -115,7 +117,7 @@ async function groq(env, body, fetcher = fetch) {
   if (!response.ok) throw new Error(`groq_${response.status}`);
   return response.json();
 }
-function parseJsonLoose(text) {
+export function parseJsonLoose(text) {
   if (!text) return null;
   const start = text.indexOf('{'), end = text.lastIndexOf('}');
   if (start < 0 || end <= start) return null;
@@ -140,26 +142,35 @@ const ANALYSIS_TOOL = {
   }
 };
 
-export async function analyzeSolicitud(env, row, fetcher = fetch) {
-  const prompt = `Analiza esta solicitud nueva y prepara el borrador de respuesta.\n\n<brief>\n${briefText(row)}\n</brief>`;
-  let a;
-  if (aiProvider(env) === 'claude') {
+// Pide a la IA que rellene una herramienta con datos estructurados (Claude o Groq).
+export async function callTool(env, { system, prompt, tool, maxTokens = 2000 }, fetcher = fetch) {
+  const provider = aiProvider(env);
+  if (provider === 'claude') {
     const result = await claude(env, {
-      max_tokens: 2000, system: MARTA, tools: [ANALYSIS_TOOL], tool_choice: { type: 'tool', name: ANALYSIS_TOOL.name },
+      max_tokens: maxTokens, system, tools: [tool], tool_choice: { type: 'tool', name: tool.name },
       messages: [{ role: 'user', content: prompt }]
     }, fetcher);
-    a = result.content?.find(b => b.type === 'tool_use' && b.name === ANALYSIS_TOOL.name)?.input;
-  } else if (aiProvider(env) === 'groq') {
+    return result.content?.find(b => b.type === 'tool_use' && b.name === tool.name)?.input || null;
+  }
+  if (provider === 'groq') {
     const result = await groq(env, {
-      max_tokens: 3000, temperature: 0.4,
-      messages: [{ role: 'system', content: MARTA }, { role: 'user', content: prompt }],
-      tools: [{ type: 'function', function: { name: ANALYSIS_TOOL.name, description: ANALYSIS_TOOL.description, parameters: ANALYSIS_TOOL.input_schema } }],
-      tool_choice: { type: 'function', function: { name: ANALYSIS_TOOL.name } }
+      max_tokens: Math.max(maxTokens, 3000), temperature: 0.5,
+      messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
+      tools: [{ type: 'function', function: { name: tool.name, description: tool.description, parameters: tool.input_schema } }],
+      tool_choice: { type: 'function', function: { name: tool.name } }
     }, fetcher);
     const message = result.choices?.[0]?.message;
-    const call = message?.tool_calls?.find(c => c.function?.name === ANALYSIS_TOOL.name);
-    a = parseJsonLoose(call?.function?.arguments) || parseJsonLoose(message?.content);
-  } else throw new Error('ai_config');
+    const call = message?.tool_calls?.find(c => c.function?.name === tool.name);
+    return parseJsonLoose(call?.function?.arguments) || parseJsonLoose(message?.content);
+  }
+  throw new Error('ai_config');
+}
+
+export async function analyzeSolicitud(env, row, fetcher = fetch) {
+  const a = await callTool(env, {
+    system: MARTA, tool: ANALYSIS_TOOL,
+    prompt: `Analiza esta solicitud nueva y prepara el borrador de respuesta.\n\n<brief>\n${briefText(row)}\n</brief>`
+  }, fetcher);
   if (!a?.resumen) throw new Error('ai_format');
   return {
     resumen: String(a.resumen), encaje: String(a.encaje || ''),
@@ -169,10 +180,10 @@ export async function analyzeSolicitud(env, row, fetcher = fetch) {
   };
 }
 
-export async function chatWithMarta(env, { message, history = [], solicitudes = [] }, fetcher = fetch) {
+export async function chatWithMarta(env, { message, history = [], solicitudes = [], persona = null }, fetcher = fetch) {
   const context = solicitudes.length ? solicitudes.map(r => {
     const when = new Date(r.created_at).toISOString().slice(0, 16).replace('T', ' ');
-    return `- [${r.status}] ${when} · ${r.name} (${r.brand}) · ${r.service_name} ${r.tier} $${r.price}${r.ai?.resumen ? ` · ${r.ai.resumen}` : ''}${r.ai?.prioridad ? ` · prioridad ${r.ai.prioridad}` : ''}`;
+    return `- [${r.status}] ${when} · ${r.name} (${r.brand}) · ${r.service_name} ${r.tier} $${r.price}${r.ai?.resumen ? ` · ${r.ai.resumen}` : ''}${r.ai?.prioridad ? ` · prioridad ${r.ai.prioridad}` : ''}${r.diseno?.conceptos?.length ? ` · conceptos de Camilo (ronda ${r.diseno.ronda}): ${r.diseno.conceptos.map(c => c.titulo).join(', ')}` : ''}`;
   }).join('\n') : 'No hay solicitudes guardadas todavía.';
   const turns = history.filter(m => m && (m.from === 'me' || m.from === 'agent') && typeof m.text === 'string')
     .slice(-12).map(m => ({ role: m.from === 'me' ? 'user' : 'assistant', content: m.text.slice(0, 2000) }));
@@ -182,7 +193,7 @@ export async function chatWithMarta(env, { message, history = [], solicitudes = 
     if (messages.length && messages.at(-1).role === t.role) messages.at(-1).content += `\n\n${t.content}`;
     else messages.push({ ...t });
   }
-  const system = `${MARTA}\n\nEstás hablando con Luis en su panel. Responde breve y útil. Solicitudes recientes (estado, fecha UTC, cliente, plan, resumen):\n${context}`;
+  const system = `${persona || MARTA}\n\nEstás hablando con Luis en su panel. Responde breve y útil. Solicitudes recientes (estado, fecha UTC, cliente, plan, resumen):\n${context}`;
   let text;
   if (aiProvider(env) === 'claude') {
     const result = await claude(env, { max_tokens: 1200, system, messages }, fetcher);
@@ -205,7 +216,7 @@ export async function sendTelegram(env, text, fetcher = fetch) {
   if (!response.ok) throw new Error('telegram_followup');
 }
 
-export function telegramAnalysis(row, ai, link) {
+export function telegramAnalysis(row, ai, link, toDesign = false) {
   const lines = [`🤖 Marta analizó la solicitud ${row.request_id.slice(0, 12)}`, `${row.brand} · ${row.service_name} ${row.tier} · $${row.price}`, ''];
   if (ai) {
     lines.push(`Resumen: ${ai.resumen}`, `Prioridad: ${ai.prioridad}`, `Encaje: ${ai.encaje}`);
@@ -214,6 +225,7 @@ export function telegramAnalysis(row, ai, link) {
   } else {
     lines.push('Guardada en el admin. El análisis automático no está disponible ahora.');
   }
+  if (toDesign) lines.push('', '🎨 Se la pasé a Camilo para que prepare conceptos visuales.');
   lines.push(link);
   return lines.join('\n');
 }
@@ -232,9 +244,14 @@ export async function processNewSolicitud(env, record, origin, fetcher = fetch) 
       await updateSolicitud(env, row.id, { ai, ai_at: new Date().toISOString() }, fetcher);
     } catch (error) { console.error('Solicitud: análisis no disponible', error.message); ai = null; }
   }
-  try { await sendTelegram(env, telegramAnalysis(row, ai, `${origin}/admin.html#solicitud-${row.id}`), fetcher); }
+  const link = `${origin}/admin.html#solicitud-${row.id}`;
+  const toDesign = DESIGN_SERVICES.includes(row.service) && aiReady(env);
+  try { await sendTelegram(env, telegramAnalysis(row, ai, link, toDesign), fetcher); }
   catch (error) { console.error('Solicitud: aviso de seguimiento falló', error.message); }
-  return { stored: true, id: row.id, analyzed: Boolean(ai) };
+  // Marta le pasa a Camilo los briefs de diseño, con su análisis incluido.
+  let design = null;
+  if (toDesign) design = await runDesign(env, { ...row, ai }, { link }, fetcher).catch(error => { console.error('Diseño:', error.message); return null; });
+  return { stored: true, id: row.id, analyzed: Boolean(ai), design: design ? design.estado : null };
 }
 
 // Ejecuta trabajo después de responder al cliente cuando Vercel lo permite; si no, lo espera.

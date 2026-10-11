@@ -1,3 +1,4 @@
+import { runDesign, signedImageUrls, DESIGN_SERVICES, CAMILO } from './_diseno.mjs';
 import { verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
@@ -30,10 +31,26 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
       const updated = await updateSolicitud(env, row.id, { ai, ai_at: new Date().toISOString() }, fetcher);
       return json(200, { solicitud: updated || { ...row, ai } });
     }
+    if (body?.action === 'disenar') {
+      const row = await getSolicitud(env, body.id, fetcher);
+      if (!row) return json(404, { error: 'not_found' });
+      if (!DESIGN_SERVICES.includes(row.service)) return json(400, { error: 'not_design' });
+      const feedback = typeof body.feedback === 'string' ? body.feedback.trim().slice(0, 1000) : '';
+      const diseno = await runDesign(env, row, { feedback, notify: false }, fetcher);
+      if (!diseno || diseno.estado !== 'listo') return json(502, { error: 'upstream' });
+      return json(200, { solicitud: { ...row, diseno } });
+    }
+    if (body?.action === 'imagenes') {
+      const row = await getSolicitud(env, body.id, fetcher);
+      if (!row) return json(404, { error: 'not_found' });
+      const paths = (row.diseno?.conceptos || []).map(c => c.imagen).filter(Boolean);
+      return json(200, { urls: await signedImageUrls(env, paths, fetcher) });
+    }
     if (body?.action === 'chat') {
       if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });
       const solicitudes = await listSolicitudes(env, 25, fetcher);
-      const reply = await chatWithMarta(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], solicitudes }, fetcher);
+      const persona = body.agent === 'diseno' ? CAMILO : null;
+      const reply = await chatWithMarta(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], solicitudes, persona }, fetcher);
       return json(200, { reply });
     }
     return json(400, { error: 'action' });

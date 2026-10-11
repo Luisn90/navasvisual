@@ -10,6 +10,11 @@ const env = {
 };
 const ROW_ID = '11111111-2222-3333-4444-555555555555';
 const analysis = { resumen: 'Quiere un logo para su heladería.', encaje: 'Cabe en Estándar.', faltantes: ['¿Tiene colores definidos?'], prioridad: 'alta', siguiente_paso: 'Responder hoy.', borrador_asunto: 'Tu logo', borrador: 'Hola, soy Luis…' };
+const concepts = { enfoque: 'Frescura artesanal.', conceptos: [
+  { titulo: 'Cono geométrico', idea: 'Un cono simple.', simbolo: 'Triángulo y círculo', estilo: 'Minimal', colores: ['#FF5A4E', 'rojo', '#1FB5C9'], tipografia: 'Sans redonda', prompt_imagen: 'minimal ice cream cone mark' },
+  { titulo: 'Gota', idea: 'Helado que se derrite.', simbolo: 'Gota', estilo: 'Orgánico', colores: ['#FFB020'], tipografia: 'Serif suave', prompt_imagen: 'melting drop mark' },
+  { titulo: 'Monograma', idea: 'Inicial A.', simbolo: 'A redondeada', estilo: 'Tipográfico', colores: ['#111111'], tipografia: 'Geométrica', prompt_imagen: 'rounded letter A monogram shape' }
+] };
 const record = buildRecord({ id: 'a'.repeat(64), serviceKey: 'logo', tierIndex: 1, values: { name: 'Ana', email: 'ana@example.com', brand: 'Helados Ana', business: 'Heladería' }, files: [{ name: '1-ref.png', type: 'image/png', bytes: Buffer.alloc(10) }] });
 
 function network({ duplicate = false, claudeFails = false, user = 'luis@example.com' } = {}) {
@@ -24,6 +29,7 @@ function network({ duplicate = false, claudeFails = false, user = 'luis@example.
     if (url.includes('api.anthropic.com')) {
       if (claudeFails) return Response.json({ error: 'down' }, { status: 529 });
       const body = JSON.parse(options.body);
+      if (body.tools?.[0]?.name === 'registrar_conceptos') return Response.json({ content: [{ type: 'tool_use', name: 'registrar_conceptos', input: concepts }] });
       if (body.tools) return Response.json({ content: [{ type: 'tool_use', name: 'registrar_analisis', input: analysis }] });
       return Response.json({ content: [{ type: 'text', text: 'Tienes 1 solicitud pendiente: Helados Ana.' }] });
     }
@@ -36,7 +42,7 @@ function network({ duplicate = false, claudeFails = false, user = 'luis@example.
 test('stores a new request, analyzes it and sends the summary with a link to Telegram', async () => {
   const { calls, fetcher } = network();
   const result = await processNewSolicitud(env, record, 'https://site.example', fetcher);
-  assert.deepEqual(result, { stored: true, id: ROW_ID, analyzed: true });
+  assert.deepEqual(result, { stored: true, id: ROW_ID, analyzed: true, design: 'listo' });
   const claude = calls.find(c => c.url.includes('anthropic'));
   assert.equal(claude.options.headers['x-api-key'], 'claude-key');
   assert.match(JSON.parse(claude.options.body).messages[0].content, /<brief>[\s\S]*Helados Ana[\s\S]*<\/brief>/);
@@ -45,6 +51,14 @@ test('stores a new request, analyzes it and sends the summary with a link to Tel
   const telegram = JSON.parse(calls.find(c => c.url.includes('sendMessage')).options.body);
   assert.match(telegram.text, /Quiere un logo/);
   assert.match(telegram.text, new RegExp(`https://site.example/admin.html#solicitud-${ROW_ID}`));
+  assert.match(telegram.text, /Camilo/);
+  // Camilo recibe el brief y el análisis de Marta
+  const design = calls.filter(c => c.url.includes('anthropic')).map(c => JSON.parse(c.options.body)).find(b => b.tools?.[0]?.name === 'registrar_conceptos');
+  assert.match(design.messages[0].content, /<analisis_de_marta>[\s\S]*Quiere un logo/);
+  const saved = calls.filter(c => c.options.method === 'PATCH').map(c => JSON.parse(c.options.body)).find(b => b.diseno?.estado === 'listo');
+  assert.equal(saved.diseno.conceptos.length, 3);
+  assert.deepEqual(saved.diseno.conceptos[0].colores, ['#FF5A4E', '#1FB5C9']);
+  assert.equal(saved.diseno.con_imagenes, false);
 });
 
 test('does not analyze a request that was already stored', async () => {
@@ -156,4 +170,63 @@ test('Groq chat replies come from the message content', async () => {
   const response = await handleAgent(agentRequest({ action: 'chat', message: 'hola' }), { env: { ...env, ANTHROPIC_API_KEY: '', GROQ_API_KEY: 'gsk_test' }, fetcher });
   assert.equal(response.status, 200);
   assert.equal((await response.json()).reply, 'No tienes solicitudes pendientes.');
+});
+
+test('Camilo generates one image per concept with Cloudflare and sends them to Telegram', async () => {
+  const { calls, fetcher: base } = network();
+  const jpeg = Buffer.from([255, 216, 255, 0, 1]);
+  const fetcher = async (url, options = {}) => {
+    if (url.includes('api.cloudflare.com')) { calls.push({ url, options }); return Response.json({ success: true, result: { image: jpeg.toString('base64') } }); }
+    if (url.includes('/storage/v1/object/disenos/')) { calls.push({ url, options }); return Response.json({ Key: 'ok' }); }
+    if (url.includes('sendMediaGroup')) { calls.push({ url, options }); return Response.json({ ok: true }); }
+    return base(url, options);
+  };
+  const result = await processNewSolicitud({ ...env, CLOUDFLARE_ACCOUNT_ID: 'acc', CLOUDFLARE_API_TOKEN: 'cf-token' }, record, 'https://site.example', fetcher);
+  assert.equal(result.design, 'listo');
+  const images = calls.filter(c => c.url.includes('cloudflare'));
+  assert.equal(images.length, 3);
+  assert.match(images[0].url, /accounts\/acc\/ai\/run\/@cf\/black-forest-labs\/flux-1-schnell$/);
+  assert.equal(images[0].options.headers.Authorization, 'Bearer cf-token');
+  assert.ok(calls.some(c => c.url.endsWith(`/storage/v1/object/disenos/${ROW_ID}/r1-1.jpg`)));
+  const media = calls.find(c => c.url.includes('sendMediaGroup')).options.body;
+  assert.equal(JSON.parse(media.get('media')).length, 3);
+  const saved = calls.filter(c => c.options.method === 'PATCH').map(c => JSON.parse(c.options.body)).find(b => b.diseno?.estado === 'listo');
+  assert.equal(saved.diseno.con_imagenes, true);
+  assert.equal(saved.diseno.conceptos[0].imagen, `${ROW_ID}/r1-1.jpg`);
+});
+
+test('non-design services are not passed to Camilo', async () => {
+  const { calls, fetcher } = network();
+  const web = buildRecord({ id: 'b'.repeat(64), serviceKey: 'wordpress', tierIndex: 0, values: { name: 'Ana', email: 'ana@example.com', brand: 'Web Ana', scope: 'Landing' }, files: [] });
+  const result = await processNewSolicitud(env, web, 'https://site.example', fetcher);
+  assert.equal(result.design, null);
+  assert.equal(calls.filter(c => c.url.includes('anthropic')).length, 1);
+});
+
+test('agent API regenerates design concepts with feedback and signs image URLs', async () => {
+  const { calls, fetcher: base } = network();
+  const fetcher = async (url, options = {}) => {
+    if (url.includes('/storage/v1/object/sign/disenos')) { calls.push({ url, options }); return Response.json([{ path: `${ROW_ID}/r1-1.jpg`, signedURL: `/object/sign/disenos/${ROW_ID}/r1-1.jpg?token=t` }]); }
+    if (url.includes('/rest/v1/solicitudes?id=eq.') && options.method !== 'PATCH') return Response.json([{ ...record, id: ROW_ID, diseno: { estado: 'listo', ronda: 1, conceptos: [{ titulo: 'A', imagen: `${ROW_ID}/r1-1.jpg` }, { titulo: 'B', imagen: '../otro/secreto.jpg' }] } }]);
+    return base(url, options);
+  };
+  const regen = await handleAgent(agentRequest({ action: 'disenar', id: ROW_ID, feedback: 'Más minimalista' }), { env, fetcher });
+  assert.equal(regen.status, 200);
+  const body = (await regen.json()).solicitud;
+  assert.equal(body.diseno.ronda, 2);
+  const prompt = calls.map(c => c.url.includes('anthropic') && JSON.parse(c.options.body)).find(b => b && b.tools?.[0]?.name === 'registrar_conceptos');
+  assert.match(prompt.messages[0].content, /Más minimalista/);
+  const signed = await handleAgent(agentRequest({ action: 'imagenes', id: ROW_ID }), { env, fetcher });
+  const { urls } = await signed.json();
+  assert.equal(urls[`${ROW_ID}/r1-1.jpg`], `https://db.example.co/storage/v1/object/sign/disenos/${ROW_ID}/r1-1.jpg?token=t`);
+  const signCall = calls.find(c => c.url.includes('/object/sign/'));
+  assert.deepEqual(JSON.parse(signCall.options.body).paths, [`${ROW_ID}/r1-1.jpg`]);
+});
+
+test('chat with Camilo uses his persona', async () => {
+  const { calls, fetcher } = network();
+  const response = await handleAgent(agentRequest({ action: 'chat', agent: 'diseno', message: '¿Qué dirección recomiendas?' }), { env, fetcher });
+  assert.equal(response.status, 200);
+  const body = JSON.parse(calls.find(c => c.url.includes('anthropic')).options.body);
+  assert.match(body.system, /^Eres Camilo/);
 });
