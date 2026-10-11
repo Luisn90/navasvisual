@@ -15,6 +15,8 @@ Cuando alguien envía un brief desde la web, además del aviso que ya llega a Te
 
 8. **Claude arregla lo que encuentra Vega**: una tarea programada de Claude (8:15 y 17:15, hora de Venezuela) lee los hallazgos, publica sola los arreglos seguros (SEO, enlaces e imágenes), deja en un PR los que necesitan tu revisión y explica lo que no se puede arreglar con código. Vega te envía ese informe por Telegram y lo muestra en su pestaña **Revisión**. Las reglas están en [`arreglos-vega.md`](./arreglos-vega.md).
 
+9. **Cambios para la web** (ficha de Vega): la **imagen al compartir** se sube desde la oficina y se aplica al momento (la sirve `/api/og-image` desde el almacenamiento público `web` de Supabase, con la imagen de Candy Conos como respaldo). Con **Pedir un cambio** escribes qué quieres cambiar, con imagen opcional; queda en `cambios_web` y Claude lo aplica en su próxima ejecución y te avisa por Telegram.
+
 Marta **nunca envía nada al cliente**. Tú revisas el borrador y lo envías desde tu correo («Abrir en mi correo» o «Copiar»).
 
 Si falta configuración, el brief se sigue entregando por Telegram y correo como antes: guardar y analizar son pasos extra que, si fallan, no bloquean la solicitud del cliente.
