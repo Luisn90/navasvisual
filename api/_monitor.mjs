@@ -1,6 +1,6 @@
 // Vega, el monitor técnico: revisa navasvisual.com de forma periódica, guarda lo que
 // encuentra, avisa por Telegram cuando algo se rompe y resume qué arreglar o mejorar.
-import { sbRest, supabaseReady, aiReady, aiChat, sendTelegram, afterResponse } from './_solicitudes.mjs';
+import { sbRest, supabaseReady, aiReady, aiChat, callTool, sendTelegram, afterResponse } from './_solicitudes.mjs';
 
 export const PAGES = ['/', '/work.html', '/about.html', '/contact.html', '/admin.html'];
 const SOURCES = ['/components.jsx', '/home.jsx', '/brief.jsx', '/intro.jsx', '/about.jsx', '/work.jsx', '/contact.jsx'];
@@ -13,6 +13,30 @@ Reglas:
 - Prioriza: primero lo que está roto o afecta a clientes (páginas caídas, enlaces o imágenes rotas, formularios o APIs que fallan, agentes que no procesan solicitudes), después lo que mejora rendimiento, SEO, accesibilidad y seguridad.
 - Para cada punto di en una frase qué pasa, por qué importa y qué hacer, de forma concreta (qué archivo, qué página o qué ajuste).
 - Escribe en español, claro y breve. Sin tecnicismos innecesarios.`;
+
+const VEGA_ACTS = `Además de informar, puedes hacer que los cambios se hagan: se los encargas a Claude, que trabaja en el código de la web cada hora (de 7:00 a 23:00, hora de Venezuela), los publica y te avisa por Telegram. Los cambios delicados (seguridad, pagos, el admin, la lógica) los deja preparados y esperan la aprobación de Luis.
+
+Cómo actuar en esta conversación:
+- Si Luis pide un cambio concreto en la web (aunque sea arreglar algo de tus revisiones), rellena «pedido» con una descripción completa y clara para Claude: qué cambiar, dónde y cómo debe quedar. Usa los datos de tus revisiones para concretarlo. En «respuesta» confirma en una frase qué vas a encargar.
+- Si el pedido es ambiguo, no lo encargues: pregunta lo que falte en «respuesta» y deja «pedido» vacío.
+- Si Luis aprueba o rechaza algo de la lista «Esperando aprobación», pon su código en «aprobar» o «rechazar». Si dice «sí» o «apruébalo» y solo hay una cosa esperando, apruébala.
+- Nunca digas que no puedes hacer cambios: los haces a través de Claude.
+- Si solo pregunta, responde y deja «pedido», «aprobar» y «rechazar» vacíos.`;
+
+const VEGA_TOOL = {
+  name: 'responder_a_luis',
+  description: 'Responde a Luis y, si hace falta, encarga un cambio a Claude o registra una aprobación.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      respuesta: { type: 'string', description: 'Lo que le dices a Luis, breve y en español.' },
+      pedido: { type: 'string', description: 'Descripción completa del cambio para Claude. Vacío si no hay que encargar nada.' },
+      aprobar: { type: 'array', items: { type: 'string' }, description: 'Códigos de cambios que Luis aprueba.' },
+      rechazar: { type: 'array', items: { type: 'string' }, description: 'Códigos de cambios que Luis rechaza.' }
+    },
+    required: ['respuesta']
+  }
+};
 
 const now = () => Date.now();
 async function timed(fetcher, url, init = {}, ms = 10000) {
@@ -216,17 +240,51 @@ export async function writeSummary(env, report, fetcher = fetch) {
   }, fetcher);
 }
 
-export async function chatWithVega(env, { message, history = [], report }, fetcher = fetch) {
+function transcript(history, message) {
   const turns = history.filter(m => m && (m.from === 'me' || m.from === 'agent') && typeof m.text === 'string').slice(-10)
-    .map(m => ({ role: m.from === 'me' ? 'user' : 'assistant', content: m.text.slice(0, 2000) }));
-  while (turns.length && turns[0].role !== 'user') turns.shift();
-  const messages = [];
-  for (const t of [...turns, { role: 'user', content: message.slice(0, 2000) }]) {
-    if (messages.length && messages.at(-1).role === t.role) messages.at(-1).content += `\n\n${t.content}`;
-    else messages.push({ ...t });
+    .map(m => `${m.from === 'me' ? 'Luis' : 'Vega'}: ${m.text.slice(0, 1500)}`);
+  return [...turns, `Luis (ahora): ${message.slice(0, 2000)}`].join('\n');
+}
+const code = id => String(id).slice(0, 8);
+
+// Chat con Vega: responde y, si Luis lo pide, encarga cambios a Claude o registra aprobaciones.
+export async function chatWithVega(env, { message, history = [], report }, fetcher = fetch) {
+  const cambios = await sbRest(env, 'cambios_web?select=id,texto,estado,pr_url,created_at&order=created_at.desc&limit=15', {}, fetcher).catch(() => []) || [];
+  const waiting = cambios.filter(c => c.estado === 'en_revision');
+  const queued = cambios.filter(c => ['pendiente', 'aprobado'].includes(c.estado));
+  const context = [
+    report ? reportForAi(report) : 'Todavía no hay revisiones guardadas.',
+    '', 'Esperando aprobación de Luis:', ...(waiting.length ? waiting.map(c => `- [${code(c.id)}] ${c.texto}`) : ['- Nada.']),
+    '', 'En cola para Claude:', ...(queued.length ? queued.map(c => `- ${c.texto} (${c.estado})`) : ['- Nada.'])
+  ].join('\n');
+  let out;
+  try {
+    out = await callTool(env, {
+      system: `${VEGA}\n\n${VEGA_ACTS}\n\nDatos actuales:\n${context}`, tool: VEGA_TOOL, maxTokens: 1500,
+      prompt: `Conversación con Luis en su panel:\n${transcript(history, message)}`
+    }, fetcher);
+  } catch (error) { console.error('Vega: herramienta', error.message); }
+  if (!out?.respuesta) {
+    const reply = await aiChat(env, { system: `${VEGA}\n\nDatos actuales:\n${context}`, messages: [{ role: 'user', content: message.slice(0, 2000) }], maxTokens: 1200 }, fetcher);
+    return { reply, acciones: [] };
   }
-  const context = report ? reportForAi(report) : 'Todavía no hay revisiones guardadas.';
-  return aiChat(env, { system: `${VEGA}\n\nEstás hablando con Luis en su panel. Datos de la última revisión:\n${context}`, messages, maxTokens: 1200 }, fetcher);
+  const acciones = [], notes = [];
+  const pedido = String(out.pedido || '').trim().slice(0, 2000);
+  if (pedido.length >= 8 && !queued.some(c => c.texto === pedido)) {
+    const saved = await sbRest(env, 'cambios_web', { method: 'POST', body: JSON.stringify({ texto: pedido, origen: 'chat', estado: 'pendiente' }), headers: { Prefer: 'return=representation' } }, fetcher).catch(() => null);
+    if (saved?.[0]) { acciones.push({ tipo: 'pedido', id: saved[0].id }); notes.push(`🛠️ Encargado a Claude: «${pedido.length > 160 ? pedido.slice(0, 160) + '…' : pedido}». Lo aplica en su próxima ronda (cada hora, de 7:00 a 23:00) y te aviso por Telegram.`); }
+    else notes.push('No pude guardar el encargo. Inténtalo de nuevo en un momento.');
+  }
+  for (const [list, estado, label] of [[out.aprobar, 'aprobado', 'Aprobado'], [out.rechazar, 'rechazado', 'Rechazado']]) {
+    for (const ref of Array.isArray(list) ? list : []) {
+      const row = waiting.find(c => code(c.id) === String(ref).trim().slice(0, 8));
+      if (!row || acciones.some(a => a.id === row.id)) continue;
+      const patch = estado === 'aprobado' ? { estado, aprobado_at: new Date().toISOString() } : { estado };
+      const ok = await sbRest(env, `cambios_web?id=eq.${row.id}&estado=eq.en_revision`, { method: 'PATCH', body: JSON.stringify(patch) }, fetcher).then(() => true, () => false);
+      if (ok) { acciones.push({ tipo: estado, id: row.id }); notes.push(`${estado === 'aprobado' ? '✅' : '✖️'} ${label}: «${row.texto.slice(0, 120)}».${estado === 'aprobado' ? ' Claude lo publica en su próxima ronda.' : ' Claude lo descartará.'}`); }
+    }
+  }
+  return { reply: [String(out.respuesta).trim(), ...notes].filter(Boolean).join('\n\n'), acciones };
 }
 
 export async function latestReports(env, limit = 2, fetcher = fetch) {

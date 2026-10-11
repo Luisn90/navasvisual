@@ -129,3 +129,32 @@ test('Vega relays Claude fix reports to Telegram once', async () => {
   assert.equal(calls.filter(c => c.url.includes('sendMessage')).length, 1);
   assert.deepEqual(JSON.parse(calls.find(c => c.options.method === 'PATCH').options.body), { notificado: true });
 });
+
+test('Vega turns a change request in the chat into an order for Claude and records approvals', async () => {
+  const { chatWithVega } = await import('../api/_monitor.mjs');
+  const calls = [];
+  const waitingId = '578675e8-9910-4fd5-ad3a-bf0eba1d3a61';
+  const fetcher = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.includes('cambios_web?select')) return Response.json([{ id: waitingId, texto: 'Cabeceras de seguridad', estado: 'en_revision', created_at: new Date().toISOString() }]);
+    if (url.endsWith('/rest/v1/cambios_web') && options.method === 'POST') return Response.json([{ id: 'n1', ...JSON.parse(options.body) }]);
+    if (url.includes('cambios_web?id=eq.') && options.method === 'PATCH') return new Response('');
+    if (url.includes('api.groq.com')) {
+      const body = JSON.parse(options.body);
+      assert.match(body.messages[0].content, /\[578675e8\] Cabeceras de seguridad/);
+      assert.match(body.messages[1].content, /Luis \(ahora\): Aprueba las cabeceras y cambia el título de la portada/);
+      return Response.json({ choices: [{ message: { tool_calls: [{ function: { name: 'responder_a_luis', arguments: JSON.stringify({
+        respuesta: 'Hecho, me encargo.', pedido: 'Cambiar el título de la portada en index.html por «Diseño con intención».', aprobar: ['578675e8', 'zzzzzzzz'] }) } }] } }] });
+    }
+    throw new Error(`unexpected ${url}`);
+  };
+  const { reply, acciones } = await chatWithVega({ ...env }, { message: 'Aprueba las cabeceras y cambia el título de la portada', history: [{ from: 'agent', text: 'Hola' }], report: null }, fetcher);
+  assert.deepEqual(acciones.map(a => a.tipo), ['pedido', 'aprobado']);
+  const insert = JSON.parse(calls.find(c => c.url.endsWith('/rest/v1/cambios_web') && c.options.method === 'POST').options.body);
+  assert.deepEqual(insert, { texto: 'Cambiar el título de la portada en index.html por «Diseño con intención».', origen: 'chat', estado: 'pendiente' });
+  const patch = calls.find(c => c.options.method === 'PATCH');
+  assert.match(patch.url, new RegExp(`id=eq.${waitingId}&estado=eq.en_revision`));
+  assert.equal(JSON.parse(patch.options.body).estado, 'aprobado');
+  assert.match(reply, /Encargado a Claude/);
+  assert.match(reply, /Aprobado: «Cabeceras de seguridad»/);
+});

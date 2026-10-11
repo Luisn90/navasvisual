@@ -132,3 +132,15 @@ create policy "admin lee cambios" on public.cambios_web for select to authentica
 create policy "admin pide cambios" on public.cambios_web for insert to authenticated
   with check (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN') and estado = 'pendiente');
 alter publication supabase_realtime add table public.cambios_web;
+
+-- Encargos desde el chat de Vega y aprobaciones de Luis.
+alter table public.cambios_web add column if not exists origen text not null default 'luis';
+alter table public.cambios_web add column if not exists aprobado_at timestamptz;
+alter table public.cambios_web drop constraint if exists cambios_web_estado_check;
+alter table public.cambios_web add constraint cambios_web_estado_check
+  check (estado in ('pendiente', 'en_revision', 'aprobado', 'rechazado', 'hecho', 'no_posible', 'descartado'));
+alter table public.cambios_web drop constraint if exists cambios_web_origen_check;
+alter table public.cambios_web add constraint cambios_web_origen_check check (origen in ('luis', 'vega', 'chat'));
+create policy "admin aprueba cambios" on public.cambios_web for update to authenticated
+  using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN') and estado = 'en_revision')
+  with check (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN') and estado in ('aprobado', 'rechazado'));
