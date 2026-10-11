@@ -1,4 +1,42 @@
 // Local Three.js, no external models or environment-map requests.
+// Normales suavizadas con ángulo de corte: suaviza curvas y biseles, mantiene las esquinas rectas.
+function creasedNormals(T, geometry, creaseDeg) {
+  const g = geometry.index ? geometry.toNonIndexed() : geometry;
+  const pos = g.attributes.position, count = pos.count, faces = count / 3;
+  const area = new Float32Array(faces * 3), unit = new Float32Array(faces * 3);
+  for (let f = 0; f < faces; f++) {
+    const i = f * 3;
+    const ax = pos.getX(i), ay = pos.getY(i), az = pos.getZ(i);
+    const ux = pos.getX(i + 1) - ax, uy = pos.getY(i + 1) - ay, uz = pos.getZ(i + 1) - az;
+    const vx = pos.getX(i + 2) - ax, vy = pos.getY(i + 2) - ay, vz = pos.getZ(i + 2) - az;
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const len = Math.hypot(nx, ny, nz) || 1;
+    area[f * 3] = nx; area[f * 3 + 1] = ny; area[f * 3 + 2] = nz;
+    unit[f * 3] = nx / len; unit[f * 3 + 1] = ny / len; unit[f * 3 + 2] = nz / len;
+  }
+  const key = i => `${Math.round(pos.getX(i) * 1000)},${Math.round(pos.getY(i) * 1000)},${Math.round(pos.getZ(i) * 1000)}`;
+  const groups = new Map();
+  for (let i = 0; i < count; i++) { const k = key(i); let list = groups.get(k); if (!list) groups.set(k, list = []); list.push(i); }
+  const limit = Math.cos(creaseDeg * Math.PI / 180), normals = new Float32Array(count * 3);
+  for (const list of groups.values()) {
+    for (const i of list) {
+      const f = (i / 3) | 0;
+      let sx = 0, sy = 0, sz = 0;
+      const seen = new Set();
+      for (const j of list) {
+        const h = (j / 3) | 0;
+        if (seen.has(h)) continue; seen.add(h);
+        if (unit[f * 3] * unit[h * 3] + unit[f * 3 + 1] * unit[h * 3 + 1] + unit[f * 3 + 2] * unit[h * 3 + 2] < limit) continue;
+        sx += area[h * 3]; sy += area[h * 3 + 1]; sz += area[h * 3 + 2];
+      }
+      const len = Math.hypot(sx, sy, sz) || 1;
+      normals[i * 3] = sx / len; normals[i * 3 + 1] = sy / len; normals[i * 3 + 2] = sz / len;
+    }
+  }
+  g.setAttribute('normal', new T.BufferAttribute(normals, 3));
+  return g;
+}
+
 function IntroSculpture() {
   const mount = React.useRef(null);
   const [rendered, setRendered] = React.useState(false);
@@ -49,7 +87,9 @@ function IntroSculpture() {
       const finalPiece = shape();
       finalPiece.move(86.1206, 44.23); finalPiece.line(66.0606, 44.23); finalPiece.line(41.8906, 86.21);
       finalPiece.curve(54.3006, 86.21, 65.7706, 79.58, 71.9606, 68.82); finalPiece.line(86.1206, 44.22); finalPiece.path.closePath();
-      geometry = new T.ExtrudeGeometry([first.path, middle.path, finalPiece.path], { depth: 16, steps: 1, bevelEnabled: true, bevelThickness: 2.2, bevelSize: 1.5, bevelSegments: 6, curveSegments: 24 });
+      // More segments on curves and bevels, then smooth normals so the glass
+      // refracts a continuous surface instead of visible facets; sharp corners stay crisp.
+      geometry = creasedNormals(T, new T.ExtrudeGeometry([first.path, middle.path, finalPiece.path], { depth: 16, steps: 1, bevelEnabled: true, bevelThickness: 2.2, bevelSize: 1.5, bevelSegments: 10, curveSegments: 96 }), 35);
       geometry.center(); geometry.scale(0.034, 0.034, 0.034);
       material = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.035, transmission: 1, thickness: 0.85, ior: 1.48, clearcoat: 1, clearcoatRoughness: 0.025, envMapIntensity: 0.65 });
       // Slight wavelength separation makes the bent letter edges catch colored light.
