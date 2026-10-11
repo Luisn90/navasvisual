@@ -394,12 +394,14 @@ function fresh(){return DEFAULTS.map(a=>({...a,instructions:ROLES[a.role].defIns
 function load(){try{const r=localStorage.getItem(STORE);if(r){const a=JSON.parse(r);if(Array.isArray(a)&&a.every(x=>x&&ROLES[x.role]))return a;}}catch(e){}return fresh();}
 let agents=load();
 // Suma a Camilo a las oficinas guardadas antes de que existiera el puesto de diseño.
+// Se guarda en el momento para que no se pierda al recargar; si lo eliminas, no vuelve.
 try{
-  if(!agents.some(a=>a.role==='diseno')&&!localStorage.getItem('oficina-camilo')){
+  if(!agents.some(a=>a.role==='diseno')&&!localStorage.getItem('oficina-camilo-v2')){
     const d=DEFAULTS.find(x=>x.role==='diseno');
     agents.push({...d,instructions:ROLES.diseno.defInstr,msgs:[{from:'agent',text:ROLES.diseno.greet}]});
+    save();
   }
-  localStorage.setItem('oficina-camilo','1');
+  localStorage.setItem('oficina-camilo-v2','1');
 }catch(e){}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(agents.map(a=>({...a,status:a.status==='thinking'?(a.prev||'idle'):a.status,prev:undefined,msgs:a.msgs.slice(-40)}))));}catch(e){}}
 const feedItems=[
