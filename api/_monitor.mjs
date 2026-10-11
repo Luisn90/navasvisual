@@ -74,6 +74,8 @@ async function checkSite(base, fetcher) {
       if (!info.lang) hallazgos.push(finding('mejora', 'accesibilidad', `lang:${path}`, `${pageName(path)} no declara el idioma`, 'Añade lang="es" a la etiqueta <html> para lectores de pantalla y buscadores.', base + path));
     }
     for (const ref of info.refs) {
+      // Plantillas de código (${...}) no son archivos reales.
+      if (/[{}$]/.test(ref)) continue;
       if (/^https?:\/\//i.test(ref)) { if (!/fonts\.(googleapis|gstatic)\.com\/?$/i.test(ref)) assets.set(ref, path); }
       else if (!/^(data|blob|mailto|tel):/i.test(ref)) assets.set(new URL(ref, base + path).href, path);
     }
@@ -160,7 +162,11 @@ async function checkPageSpeed(env, base, fetcher) {
   ['performance', 'accessibility', 'seo', 'best-practices'].forEach(c => params.append('category', c));
   if (env.PAGESPEED_API_KEY?.trim()) params.set('key', env.PAGESPEED_API_KEY.trim());
   const r = await timed(fetcher, `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${params}`, {}, 40000);
-  if (!r.ok) return { metricas: null, hallazgos: [] };
+  if (!r.ok) {
+    const detail = r.response ? await r.response.json().then(d => d?.error?.message || '', () => '') : r.error;
+    console.error('Vega: PageSpeed', r.status, detail);
+    return { metricas: null, hallazgos: [], error: `${r.status || r.error}${detail ? ` ${String(detail).slice(0, 160)}` : ''}` };
+  }
   const data = await r.response.json().catch(() => null);
   const lh = data?.lighthouseResult;
   if (!lh?.categories) return { metricas: null, hallazgos: [] };
@@ -248,7 +254,7 @@ export async function runMonitor(env, { base, modo = 'rapido', notify = true } =
   hallazgos.sort((a, b) => order[a.tipo] - order[b.tipo]);
   const report = {
     modo, estado: summarizeState(hallazgos), duracion_ms: now() - started, hallazgos,
-    metricas: { paginas: site.paginas.sort((a, b) => PAGES.indexOf(a.path) - PAGES.indexOf(b.path)), ...(psi?.metricas ? { pagespeed: psi.metricas } : {}) },
+    metricas: { paginas: site.paginas.sort((a, b) => PAGES.indexOf(a.path) - PAGES.indexOf(b.path)), ...(psi?.metricas ? { pagespeed: psi.metricas } : {}), ...(psi?.error ? { pagespeed_error: psi.error } : {}) },
     resumen: null, visto: false
   };
   if (!supabaseReady(env)) return report;

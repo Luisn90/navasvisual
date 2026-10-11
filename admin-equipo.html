@@ -1356,6 +1356,7 @@ function renderMonitor(force){
       el('div',{class:'scores'},...[['Rendimiento',ps.rendimiento],['Accesibilidad',ps.accesibilidad],['SEO',ps.seo],['Buenas prácticas',ps.buenas_practicas]].map(([l,v])=>el('div',{class:'score '+scoreClass(v)},el('b',{text:v==null?'—':String(v)}),el('span',{text:l})))),
       (ps.lcp||ps.tbt)&&el('p',{class:'small',text:[ps.lcp&&`Carga principal ${ps.lcp}`,ps.tbt&&`bloqueo ${ps.tbt}`,ps.cls&&`saltos ${ps.cls}`].filter(Boolean).join(' · ')})));
   }
+  if(!ps&&latest.metricas&&latest.metricas.pagespeed_error)view.append(el('p',{class:'note',text:'PageSpeed de Google no respondió en la última revisión completa. Si se repite, añade una clave gratuita de Google en Vercel como PAGESPEED_API_KEY.'}));
   const pages=(latest.metricas&&latest.metricas.paginas)||[];
   if(pages.length)view.append(el('div',{class:'block'},el('h5',{text:'Páginas'}),el('dl',{class:'rd-meta'},
     ...pages.flatMap(pg=>[el('dt',{text:pg.path==='/'?'Inicio':pg.path.slice(1)}),el('dd',{class:'mono',text:pg.status?`${pg.status} · ${(pg.ms/1000).toFixed(1)} s`:'sin respuesta'})]))));

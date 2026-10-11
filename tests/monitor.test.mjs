@@ -27,7 +27,8 @@ function site({ brokenImage = false, previous = null, slow = false } = {}) {
       return new Response(page('Inicio', '<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script><script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script><script type="text/babel" src="home.jsx"></script><link rel="stylesheet" href="styles.css">'), { headers: { 'content-type': 'text/html', 'x-content-type-options': 'nosniff' } });
     }
     if (u.pathname === '/about.html') return new Response(`<html><head><title>Sobre mí</title></head></html>`);
-    if (['/work.html', '/contact.html', '/admin.html'].includes(u.pathname)) return new Response(page('x'));
+    if (u.pathname === '/admin.html') return new Response(page('x', '<img src="${p.image_url}">'));
+    if (['/work.html', '/contact.html'].includes(u.pathname)) return new Response(page('x'));
     if (u.pathname === '/home.jsx') return new Response(`<img src="assets/hero.jpg"/> <a href="work.html">x</a> <a href="https://wa.me/123">wa</a> const big = 'assets/foto grande.png';`);
     if (u.pathname.endsWith('.jsx')) return new Response('');
     if (u.pathname === '/assets/hero.jpg') return brokenImage ? new Response('', { status: 404 }) : new Response('', { headers: { 'content-length': '1000' } });
@@ -41,8 +42,9 @@ function site({ brokenImage = false, previous = null, slow = false } = {}) {
 }
 
 test('parsers find SEO data, resources and links', () => {
-  const info = parseHtml(page('Hola', '<script src="a.js"></script><img src="assets/x.png">'));
-  assert.equal(info.title, 'Hola'); assert.equal(info.lang, 'es'); assert.deepEqual(info.refs, ['a.js', 'assets/x.png']);
+  const info = parseHtml(page('Hola', '<script src="a.js"></script><img src="assets/x.png"><img src="${p.image_url}">'));
+  assert.ok(info.refs.includes('${p.image_url}'), 'el parser lo ve, pero la revisión lo ignora');
+  assert.equal(info.title, 'Hola'); assert.equal(info.lang, 'es'); assert.deepEqual(info.refs.slice(0, 2), ['a.js', 'assets/x.png']);
   const src = parseSource(`<img src="assets/a.png"/> <a href="about.html#x">a</a> <a href={"https://instagram.com/x"}>i</a> url('/uploads/b.webp')`);
   assert.deepEqual(src.local, ['/assets/a.png', '/uploads/b.webp']);
   assert.deepEqual(src.pages, ['/about.html']);
@@ -62,6 +64,7 @@ test('a full review finds broken files, SEO gaps, heavy images, agent issues and
   assert.ok(ids.includes('agents:marta'));
   assert.ok(ids.includes('react-dev') && ids.includes('babel-browser') && ids.includes('headers'));
   assert.ok(ids.includes('psi:unused-javascript'));
+  assert.ok(!ids.some(id => id.includes('${')), 'las plantillas no cuentan como archivos rotos');
   assert.ok(!ids.includes('api:rate'), 'BCV sin tasa del día no es un problema');
   assert.ok(!ids.some(id => id.endsWith('/admin.html') && id.startsWith('desc')), 'el admin no se evalúa para SEO');
   assert.equal(report.hallazgos[0].tipo, 'error');
