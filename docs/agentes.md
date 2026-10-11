@@ -9,6 +9,8 @@ Cuando alguien envía un brief desde la web, además del aviso que ya llega a Te
 
 5. Si el servicio es **Logo** o **Identidad**, Marta se lo pasa a **Camilo**, el agente de diseño, con el brief completo y su análisis. Camilo propone 3 o 4 direcciones creativas (idea, símbolo, colores y tipografía) y, si Cloudflare está configurado, genera una imagen de cada una. Llegan a Telegram y quedan en la ficha de la solicitud, donde puedes pedir otra ronda con comentarios.
 
+6. Si el servicio es **Redes**, Marta se lo pasa a **Teo**, el creador de contenido. Teo prepara estrategia (objetivo, tono y frecuencia), pilares, 6 a 8 publicaciones con texto y hashtags, estilo visual con 3 o 4 imágenes de ejemplo del feed y propuesta de perfil (bio, usuario y destacados). Llega a Telegram y queda en la ficha de la solicitud, donde puedes pedir otra ronda con comentarios.
+
 Marta **nunca envía nada al cliente**. Tú revisas el borrador y lo envías desde tu correo («Abrir en mi correo» o «Copiar»).
 
 Si falta configuración, el brief se sigue entregando por Telegram y correo como antes: guardar y analizar son pasos extra que, si fallan, no bloquean la solicitud del cliente.
@@ -56,7 +58,9 @@ Después de guardarlas, vuelve a desplegar el sitio (**Deployments → … → R
 - `api/agent.mjs`: `POST /api/agent` con `{ action: 'analizar', id }` o `{ action: 'chat', message, history }`. Exige la sesión de Supabase del admin (cabecera `Authorization: Bearer …`) y que su correo esté en `ADMIN_EMAILS`.
 - `admin-equipo.html`: si hay sesión del admin, lee la tabla `solicitudes` (protegida por RLS) y se actualiza en tiempo real. Sin sesión, la oficina sigue en modo ejemplo.
 - El texto del brief lo escribe el cliente; las instrucciones de Marta le indican tratarlo solo como información.
-- `api/_diseno.mjs`: Camilo. Pide las direcciones a la IA, genera las imágenes con Cloudflare Workers AI (FLUX.1 schnell) y las guarda en el bucket privado `disenos` de Supabase. El admin las ve con enlaces temporales que firma `/api/agent` (`action: 'imagenes'`); `action: 'disenar'` pide otra ronda con comentarios.
+- `api/_diseno.mjs`: Camilo. Pide las direcciones a la IA, genera las imágenes con Cloudflare Workers AI (FLUX.2 klein, con FLUX.1 schnell de respaldo) y las guarda en el bucket privado `disenos` de Supabase. El admin las ve con enlaces temporales que firma `/api/agent` (`action: 'imagenes'`); `action: 'disenar'` pide otra ronda con comentarios.
+- `api/_contenido.mjs`: Teo. Propuesta de redes con la IA de textos e imágenes de ejemplo del feed; se guarda en la columna `contenido`. `action: 'contenido'` pide otra ronda con comentarios.
+- Con Groq, las llamadas usan `reasoning_effort: low` y, si se supera el límite por minuto del plan gratuito, esperan y reintentan una vez.
 - Los archivos de referencia no se guardan en Supabase: siguen llegando por Telegram y correo. La tabla guarda solo sus nombres.
 
 ## Costos

@@ -1,4 +1,5 @@
 import { runDesign, signedImageUrls, DESIGN_SERVICES, CAMILO } from './_diseno.mjs';
+import { runContent, CONTENT_SERVICES, TEO } from './_contenido.mjs';
 import { verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
@@ -41,16 +42,26 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
       if (!diseno || diseno.estado !== 'listo') return json(502, { error: 'upstream' });
       return json(200, { solicitud: { ...row, diseno } });
     }
+    if (body?.action === 'contenido') {
+      const row = await getSolicitud(env, body.id, fetcher);
+      if (!row) return json(404, { error: 'not_found' });
+      if (!CONTENT_SERVICES.includes(row.service)) return json(400, { error: 'not_content' });
+      const feedback = typeof body.feedback === 'string' ? body.feedback.trim().slice(0, 1000) : '';
+      const link = `${new URL(request.url).origin}/admin.html#solicitud-${row.id}`;
+      const contenido = await runContent(env, row, { feedback, link, notify: true }, fetcher);
+      if (!contenido || contenido.estado !== 'listo') return json(502, { error: 'upstream' });
+      return json(200, { solicitud: { ...row, contenido } });
+    }
     if (body?.action === 'imagenes') {
       const row = await getSolicitud(env, body.id, fetcher);
       if (!row) return json(404, { error: 'not_found' });
-      const paths = (row.diseno?.conceptos || []).map(c => c.imagen).filter(Boolean);
+      const paths = [...(row.diseno?.conceptos || []), ...(row.contenido?.visuales || [])].map(c => c.imagen).filter(Boolean);
       return json(200, { urls: await signedImageUrls(env, paths, fetcher) });
     }
     if (body?.action === 'chat') {
       if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });
       const solicitudes = await listSolicitudes(env, 25, fetcher);
-      const persona = body.agent === 'diseno' ? CAMILO : null;
+      const persona = body.agent === 'diseno' ? CAMILO : body.agent === 'contenido' ? TEO : null;
       const reply = await chatWithMarta(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], solicitudes, persona }, fetcher);
       return json(200, { reply });
     }
