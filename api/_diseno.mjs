@@ -7,6 +7,11 @@ const BUCKET = 'disenos';
 const DEFAULT_IMAGE_MODEL = '@cf/black-forest-labs/flux-1-schnell';
 
 export const imagesReady = env => Boolean(env.CLOUDFLARE_ACCOUNT_ID?.trim() && env.CLOUDFLARE_API_TOKEN?.trim());
+// Acepta el ID solo o una URL del panel de Cloudflare que lo contenga.
+export function cloudflareAccount(env) {
+  const raw = env.CLOUDFLARE_ACCOUNT_ID?.trim() || '';
+  return raw.match(/[0-9a-f]{32}/i)?.[0] || raw;
+}
 
 export const CAMILO = `Eres Camilo, el agente de diseño de Navas Visual, el estudio de diseño de Luis Navas. Marta, la agente comercial, te pasa los briefs de logo e identidad junto con su análisis. Tu trabajo es proponerle a Luis direcciones creativas para empezar: no entregas el logo final, abres caminos para que él diseñe.
 
@@ -25,7 +30,7 @@ const DESIGN_TOOL = {
     properties: {
       enfoque: { type: 'string', description: 'En 1 o 2 frases, la idea central que conecta las propuestas con el negocio.' },
       conceptos: {
-        type: 'array', minItems: 3, maxItems: 4,
+        type: 'array', description: 'Entre 3 y 4 direcciones.',
         items: {
           type: 'object',
           properties: {
@@ -75,13 +80,16 @@ export async function proposeConcepts(env, row, feedback = '', fetcher = fetch) 
 
 export async function generateImage(env, prompt, fetcher = fetch) {
   const model = env.CLOUDFLARE_IMAGE_MODEL?.trim() || DEFAULT_IMAGE_MODEL;
-  const response = await fetcher(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID.trim()}/ai/run/${model}`, {
+  const response = await fetcher(`https://api.cloudflare.com/client/v4/accounts/${cloudflareAccount(env)}/ai/run/${model}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN.trim()}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: `${prompt}. Flat vector logo design, centered, plain white background, high contrast, no text, no letters, no mockup.`, steps: 6 }),
     signal: AbortSignal.timeout(30000)
   });
-  if (!response.ok) throw new Error(`cloudflare_${response.status}`);
+  if (!response.ok) {
+    const detail = await response.json().then(d => d?.errors?.map(e => `${e.code}: ${e.message}`).join('; '), () => '');
+    throw new Error(`cloudflare_${response.status}${detail ? ` (${detail})` : ''}`);
+  }
   const data = await response.json();
   const b64 = data?.result?.image;
   if (!b64) throw new Error('cloudflare_format');

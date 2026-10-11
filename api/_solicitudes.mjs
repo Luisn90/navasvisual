@@ -114,7 +114,10 @@ async function groq(env, body, fetcher = fetch) {
     body: JSON.stringify({ model: env.GROQ_MODEL?.trim() || DEFAULT_GROQ_MODEL, ...body }),
     signal: AbortSignal.timeout(40000)
   });
-  if (!response.ok) throw new Error(`groq_${response.status}`);
+  if (!response.ok) {
+    const detail = await response.json().then(d => d?.error?.code || d?.error?.message || '', () => '');
+    throw new Error(`groq_${response.status}${detail ? ` (${String(detail).slice(0, 200)})` : ''}`);
+  }
   return response.json();
 }
 export function parseJsonLoose(text) {
@@ -153,15 +156,30 @@ export async function callTool(env, { system, prompt, tool, maxTokens = 2000 }, 
     return result.content?.find(b => b.type === 'tool_use' && b.name === tool.name)?.input || null;
   }
   if (provider === 'groq') {
+    try {
+      const result = await groq(env, {
+        max_tokens: Math.max(maxTokens, 3000), temperature: 0.5,
+        messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
+        tools: [{ type: 'function', function: { name: tool.name, description: tool.description, parameters: tool.input_schema } }],
+        tool_choice: { type: 'function', function: { name: tool.name } }
+      }, fetcher);
+      const message = result.choices?.[0]?.message;
+      const call = message?.tool_calls?.find(c => c.function?.name === tool.name);
+      const parsed = parseJsonLoose(call?.function?.arguments) || parseJsonLoose(message?.content);
+      if (parsed) return parsed;
+    } catch (error) {
+      if (!String(error.message).startsWith('groq_400')) throw error;
+      console.warn('IA: la herramienta falló, reintento en modo JSON', error.message);
+    }
+    // Segundo intento: JSON directo, que falla menos cuando el modelo se sale del esquema.
     const result = await groq(env, {
-      max_tokens: Math.max(maxTokens, 3000), temperature: 0.5,
-      messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
-      tools: [{ type: 'function', function: { name: tool.name, description: tool.description, parameters: tool.input_schema } }],
-      tool_choice: { type: 'function', function: { name: tool.name } }
+      max_tokens: Math.max(maxTokens, 3000), temperature: 0.3, response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: `${system}\n\nResponde solo con un objeto JSON válido que siga este esquema:\n${JSON.stringify(tool.input_schema)}` },
+        { role: 'user', content: prompt }
+      ]
     }, fetcher);
-    const message = result.choices?.[0]?.message;
-    const call = message?.tool_calls?.find(c => c.function?.name === tool.name);
-    return parseJsonLoose(call?.function?.arguments) || parseJsonLoose(message?.content);
+    return parseJsonLoose(result.choices?.[0]?.message?.content);
   }
   throw new Error('ai_config');
 }
