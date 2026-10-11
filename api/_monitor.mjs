@@ -237,6 +237,34 @@ function telegramProblems(base, nuevos, link) {
   return [`🛠️ Vega encontró ${nuevos.length === 1 ? 'un problema nuevo' : `${nuevos.length} problemas nuevos`} en ${base.replace(/^https?:\/\//, '')}`, '',
     ...nuevos.slice(0, 8).map(h => `• ${h.titulo}: ${h.detalle}`), nuevos.length > 8 ? `… y ${nuevos.length - 8} más.` : '', '', link].filter(x => x !== '').join('\n');
 }
+// Informe de la tarea programada de Claude que intenta arreglar lo que encuentra Vega.
+export function telegramFix(fix, link) {
+  const done = (fix.arreglados || []).filter(a => a.publicado);
+  const review = (fix.arreglados || []).filter(a => !a.publicado);
+  const pending = fix.pendientes || [];
+  const lines = ['🤖 Claude revisó lo que encontró Vega'];
+  if (fix.resumen) lines.push('', fix.resumen);
+  if (done.length) lines.push('', '🔧 Arreglado y publicado:', ...done.map(a => `• ${a.titulo}${a.cambio ? ` — ${a.cambio}` : ''}`));
+  if (review.length) {
+    lines.push('', '🔍 Listo para que lo revises:', ...review.map(a => `• ${a.titulo}${a.cambio ? ` — ${a.cambio}` : ''}`));
+    [...new Set(review.map(a => a.pr_url).filter(u => /^https:\/\/github\.com\//.test(u || '')))].forEach(u => lines.push(u));
+  }
+  if (pending.length) lines.push('', '⚠️ No lo pude arreglar:', ...pending.map(p => `• ${p.titulo}: ${p.motivo}${p.accion_usuario ? ` Qué hacer: ${p.accion_usuario}` : ''}`));
+  lines.push('', link);
+  return lines.join('\n');
+}
+
+// Envía los informes de Claude que aún no se notificaron y los marca como enviados.
+export async function notifyFixes(env, link, fetcher = fetch) {
+  const fixes = await sbRest(env, 'monitor_fixes?select=*&notificado=eq.false&order=created_at.asc&limit=5', {}, fetcher).catch(() => []);
+  for (const fix of fixes || []) {
+    try {
+      await sendTelegram(env, telegramFix(fix, link), fetcher);
+      await sbRest(env, `monitor_fixes?id=eq.${fix.id}`, { method: 'PATCH', body: JSON.stringify({ notificado: true }) }, fetcher);
+    } catch (error) { console.error('Vega: aviso de arreglos', error.message); }
+  }
+}
+
 function telegramResolved(resueltos) {
   return [`✅ Vega: ${resueltos.length === 1 ? 'se resolvió un problema' : `se resolvieron ${resueltos.length} problemas`}`, ...resueltos.slice(0, 8).map(h => `• ${h.titulo}`)].join('\n');
 }
@@ -284,6 +312,7 @@ export async function runMonitor(env, { base, modo = 'rapido', notify = true } =
         await sendTelegram(env, `📋 Resumen de Vega sobre la web\n\n${report.resumen}\n\n${link}`, fetcher);
       }
     } catch (error) { console.error('Vega: Telegram', error.message); }
+    await notifyFixes(env, link, fetcher);
   }
   // Conserva 30 días de historial.
   await sbRest(env, `monitor_reports?created_at=lt.${new Date(now() - 30 * 864e5).toISOString()}`, { method: 'DELETE' }, fetcher).catch(() => {});

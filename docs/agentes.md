@@ -13,6 +13,8 @@ Cuando alguien envía un brief desde la web, además del aviso que ya llega a Te
 
 7. **Vega**, el monitor técnico, revisa la web sola cada 30 minutos (páginas, enlaces e imágenes rotas, formularios y APIs, SEO, cabeceras de seguridad y si Marta, Camilo y Teo están procesando las solicitudes) y una vez al día hace una revisión completa con PageSpeed de Google y un resumen con IA. Avisa por Telegram cuando aparece un problema nuevo o cuando se resuelve. En su ficha (pestaña **Revisión**) están el estado, las puntuaciones, los hallazgos, «Revisar ahora» y «Pedir resumen».
 
+8. **Claude arregla lo que encuentra Vega**: una tarea programada de Claude (8:15 y 17:15, hora de Venezuela) lee los hallazgos, publica sola los arreglos seguros (SEO, enlaces e imágenes), deja en un PR los que necesitan tu revisión y explica lo que no se puede arreglar con código. Vega te envía ese informe por Telegram y lo muestra en su pestaña **Revisión**. Las reglas están en [`arreglos-vega.md`](./arreglos-vega.md).
+
 Marta **nunca envía nada al cliente**. Tú revisas el borrador y lo envías desde tu correo («Abrir en mi correo» o «Copiar»).
 
 Si falta configuración, el brief se sigue entregando por Telegram y correo como antes: guardar y analizar son pasos extra que, si fallan, no bloquean la solicitud del cliente.

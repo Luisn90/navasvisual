@@ -88,3 +88,18 @@ select cron.schedule('vega-completo', '0 12 * * *', $$
     headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'vega_monitor_secret')),
     timeout_milliseconds := 10000)
 $$);
+
+-- Informes de la tarea programada de Claude que arregla lo que encuentra Vega.
+create table if not exists public.monitor_fixes (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  resumen text,
+  arreglados jsonb not null default '[]'::jsonb,
+  pendientes jsonb not null default '[]'::jsonb,
+  notificado boolean not null default false
+);
+create index if not exists monitor_fixes_created_at_idx on public.monitor_fixes (created_at desc);
+alter table public.monitor_fixes enable row level security;
+create policy "admin lee arreglos" on public.monitor_fixes for select to authenticated
+  using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+alter publication supabase_realtime add table public.monitor_fixes;

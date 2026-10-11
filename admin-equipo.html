@@ -919,7 +919,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const REQ_STATES={nueva:'Nueva',revision:'En revisión',propuesta:'Propuesta enviada',aceptada:'Aceptada',descartada:'Descartada'};
 const REQ_LABELS={name:'Nombre',email:'Correo',brand:'Marca',business:'Actividad',audience:'Público',existing:'Marca nueva o rediseño',goals:'Objetivo',style:'Estilo',colors:'Colores',uses:'Usos del logo',slogan:'Eslogan',scope:'Alcance',platform:'Web o redes actuales',deadline:'Fecha deseada',links:'Enlaces de referencia',notes:'Notas de referencias',reference:'Proyecto de referencia'};
 const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.',not_design:'Camilo solo trabaja con briefs de logo e identidad.',not_content:'Teo solo trabaja con briefs de Redes.',no_reports:'Vega todavía no ha hecho ninguna revisión. Pulsa «Revisar ahora».'};
-const live={monitor:{reports:[],checking:false,summary:null,summaryBusy:false},on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
+const live={monitor:{reports:[],fixes:[],checking:false,summary:null,summaryBusy:false},on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
 const DESIGN=['logo','identidad'];
 const designAgent=()=>agents.find(a=>a.role==='diseno');
 const contentAgent=()=>agents.find(a=>a.role==='contenido');
@@ -970,7 +970,7 @@ async function initLive(){
     try{live.sb.channel('solicitudes-admin').on('postgres_changes',{event:'*',schema:'public',table:'solicitudes'},()=>loadReqs(false)).subscribe();}catch(e){}
     setInterval(()=>loadReqs(false),60000);
     await loadMonitor();
-    try{live.sb.channel('vega-admin').on('postgres_changes',{event:'*',schema:'public',table:'monitor_reports'},()=>loadMonitor()).subscribe();}catch(e){}
+    try{live.sb.channel('vega-admin').on('postgres_changes',{event:'*',schema:'public',table:'monitor_reports'},()=>loadMonitor()).on('postgres_changes',{event:'*',schema:'public',table:'monitor_fixes'},()=>loadMonitor()).subscribe();}catch(e){}
     setInterval(loadMonitor,120000);
     syncSales();openFromHash();
     addEventListener('hashchange',openFromHash);
@@ -1318,6 +1318,12 @@ async function loadMonitor(){
   if(!live.sb)return;
   const {data,error}=await live.sb.from('monitor_reports').select('*').order('created_at',{ascending:false}).limit(12);
   if(error||!data)return;
+  const fx=await live.sb.from('monitor_fixes').select('*').order('created_at',{ascending:false}).limit(5);
+  if(!fx.error&&fx.data){
+    const known=live.monitor.fixes[0];
+    if(live.monitor.reports.length&&fx.data[0]&&(!known||known.id!==fx.data[0].id)){const v=techAgent();pushFeed(v?v.id:'','Claude revisó sus hallazgos');}
+    live.monitor.fixes=fx.data;
+  }
   const prev=live.monitor.reports[0];
   live.monitor.reports=data;
   if(data[0]&&(!prev||prev.id!==data[0].id)){
@@ -1332,7 +1338,7 @@ const AREA={disponibilidad:'Disponibilidad',enlaces:'Enlaces',rendimiento:'Rendi
 function scoreClass(n){return n==null?'':n>=90?'good':n>=50?'mid':'bad';}
 function renderMonitor(force){
   const box=$('#reqs'),m=live.monitor,latest=m.reports[0];
-  const key=`${latest?latest.id:'none'}|${m.checking}|${m.summaryBusy}|${m.summary?m.summary.length:0}`;
+  const key=`${latest?latest.id:'none'}|${m.fixes[0]?m.fixes[0].id:''}|${m.checking}|${m.summaryBusy}|${m.summary?m.summary.length:0}`;
   if(!force&&box.firstChild&&box.firstChild.dataset&&box.firstChild.dataset.key===key)return;
   const view=el('div',{class:'rd','data-key':key});
   const [cls,label]=latest?MON_STATE[latest.estado]||MON_STATE.ok:['revision','Sin revisiones'];
@@ -1369,6 +1375,17 @@ function renderMonitor(force){
       h.url&&/^https:\/\//.test(h.url)&&el('a',{href:h.url,target:'_blank',rel:'noopener',class:'small',text:'Abrir'})))));
   }
   if(!latest.hallazgos.length)view.append(el('p',{class:'empty',text:'Vega no encontró nada que arreglar en la última revisión.'}));
+  if(m.fixes.length){
+    const f=m.fixes[0];
+    const done=(f.arreglados||[]).filter(a=>a.publicado),review=(f.arreglados||[]).filter(a=>!a.publicado),pend=f.pendientes||[];
+    const safeUrl=u=>/^https:\/\/github\.com\//.test(u||'')?u:null;
+    view.append(el('section',{class:'ai','aria-label':'Arreglos de Claude'},
+      el('div',{class:'row between'},el('p',{class:'eyebrow',text:'Arreglos de Claude'}),el('span',{class:'mono',text:since(f.created_at)})),
+      f.resumen&&el('p',{text:f.resumen}),
+      done.length&&el('div',null,el('b',{text:'Arreglado y publicado'}),el('ul',null,...done.map(a=>el('li',{text:`${a.titulo}${a.cambio?' — '+a.cambio:''}`})))),
+      review.length&&el('div',null,el('b',{text:'Listo para que lo revises'}),el('ul',null,...review.map(a=>el('li',null,`${a.titulo}${a.cambio?' — '+a.cambio:''} `,safeUrl(a.pr_url)&&el('a',{href:a.pr_url,target:'_blank',rel:'noopener',text:'Ver cambio'}))))),
+      pend.length&&el('div',null,el('b',{text:'No lo pudo arreglar'}),el('ul',null,...pend.map(p=>el('li',null,el('span',{text:`${p.titulo}: ${p.motivo}`}),p.accion_usuario&&el('span',{class:'small',text:` Qué hacer: ${p.accion_usuario}`})))))));
+  }
   const hist=m.reports.slice().reverse();
   view.append(el('div',{class:'block'},el('h5',{text:'Últimas revisiones'}),el('div',{class:'history'},
     ...hist.map(r=>el('span',{class:'dot-h '+r.estado,title:`${new Date(r.created_at).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})} · ${(MON_STATE[r.estado]||MON_STATE.ok)[1]}`})))));
