@@ -7,6 +7,8 @@ Cuando alguien envía un brief desde la web, además del aviso que ya llega a Te
 3. Llega un segundo mensaje a Telegram con ese análisis y un enlace que abre la solicitud en el admin.
 4. En **Admin → Equipo**, Marta se pone en amarillo y su ficha muestra la pestaña **Solicitudes**: lista, estados, análisis y borrador editable. La pestaña **Chat** habla con la IA sobre tus solicitudes.
 
+5. Si el servicio es **Logo** o **Identidad**, Marta se lo pasa a **Camilo**, el agente de diseño, con el brief completo y su análisis. Camilo propone 3 o 4 direcciones creativas (idea, símbolo, colores y tipografía) y, si Cloudflare está configurado, genera una imagen de cada una. Llegan a Telegram y quedan en la ficha de la solicitud, donde puedes pedir otra ronda con comentarios.
+
 Marta **nunca envía nada al cliente**. Tú revisas el borrador y lo envías desde tu correo («Abrir en mi correo» o «Copiar»).
 
 Si falta configuración, el brief se sigue entregando por Telegram y correo como antes: guardar y analizar son pasos extra que, si fallan, no bloquean la solicitud del cliente.
@@ -31,7 +33,11 @@ En Vercel: **Settings → Environment Variables**, entorno **Production** (y **P
 | `GROQ_API_KEY` | IA gratuita. Créala en [console.groq.com/keys](https://console.groq.com/keys); empieza por `gsk_`. |
 | `ANTHROPIC_API_KEY` | Opcional, de pago. Si existe, Marta usa Claude en lugar de Groq. Créala en [console.anthropic.com](https://console.anthropic.com) → **API Keys**. |
 | `ADMIN_EMAILS` | El mismo correo del paso 1. Si son varios, sepáralos con comas. |
-| `GROQ_MODEL` / `ANTHROPIC_MODEL` | Opcionales. Por defecto `openai/gpt-oss-120b` y `claude-sonnet-5-5`. |
+| `CLOUDFLARE_ACCOUNT_ID` | Opcional, para las imágenes de Camilo. Lo ves en el panel de Cloudflare (barra lateral de **Workers & Pages** o en la URL). |
+| `CLOUDFLARE_API_TOKEN` | Opcional. Cloudflare → **Manage account → Account API Tokens → Create Token** → plantilla **Workers AI**. |
+| `GROQ_MODEL` / `ANTHROPIC_MODEL` / `CLOUDFLARE_IMAGE_MODEL` | Opcionales. Por defecto `openai/gpt-oss-120b` y `claude-sonnet-5-5`. |
+
+Sin las variables de Cloudflare, Camilo entrega las direcciones por escrito, sin imágenes.
 
 Basta con una de las dos claves de IA. Sin ninguna, las solicitudes se guardan y aparecen en la oficina, pero sin análisis ni borrador.
 
@@ -50,8 +56,9 @@ Después de guardarlas, vuelve a desplegar el sitio (**Deployments → … → R
 - `api/agent.mjs`: `POST /api/agent` con `{ action: 'analizar', id }` o `{ action: 'chat', message, history }`. Exige la sesión de Supabase del admin (cabecera `Authorization: Bearer …`) y que su correo esté en `ADMIN_EMAILS`.
 - `admin-equipo.html`: si hay sesión del admin, lee la tabla `solicitudes` (protegida por RLS) y se actualiza en tiempo real. Sin sesión, la oficina sigue en modo ejemplo.
 - El texto del brief lo escribe el cliente; las instrucciones de Marta le indican tratarlo solo como información.
+- `api/_diseno.mjs`: Camilo. Pide las direcciones a la IA, genera las imágenes con Cloudflare Workers AI (FLUX.1 schnell) y las guarda en el bucket privado `disenos` de Supabase. El admin las ve con enlaces temporales que firma `/api/agent` (`action: 'imagenes'`); `action: 'disenar'` pide otra ronda con comentarios.
 - Los archivos de referencia no se guardan en Supabase: siguen llegando por Telegram y correo. La tabla guarda solo sus nombres.
 
 ## Costos
 
-Cada solicitud usa una llamada a la IA para el análisis, y cada mensaje del chat otra. Con Groq entra en el plan gratuito, que tiene límites diarios de peticiones muy por encima de este uso. Con Claude se paga por uso; puedes poner un límite mensual en la consola de Anthropic (**Settings → Limits**).
+Cada solicitud usa una llamada a la IA para el análisis, y cada mensaje del chat otra. Con Groq entra en el plan gratuito, que tiene límites diarios de peticiones muy por encima de este uso. Las imágenes de Cloudflare entran en su cuota gratuita diaria (10.000 *neurons*), suficiente para muchas rondas al día. Con Claude se paga por uso; puedes poner un límite mensual en la consola de Anthropic (**Settings → Limits**).
