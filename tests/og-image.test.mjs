@@ -13,6 +13,7 @@ test('serves the image uploaded from the office', async () => {
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('content-type'), 'image/jpeg');
   assert.match(res.headers.get('cache-control'), /s-maxage=300/);
+  assert.equal(res.headers.get('content-length'), '3');
   assert.deepEqual([...new Uint8Array(await res.arrayBuffer())], [255, 216, 255]);
   const head = await handleOgImage(req('HEAD'), { env, fetcher });
   assert.equal(head.status, 200);
