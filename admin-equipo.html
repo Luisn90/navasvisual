@@ -178,6 +178,11 @@ details.brief summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bo
 .note{margin:0;font-size:12px;color:var(--muted)}
 .btn:disabled{opacity:.5;cursor:default}
 /* Revisión de Vega */
+.share-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);max-width:100%}
+.share-card img{width:100%;aspect-ratio:1200/630;object-fit:cover;display:block;background:var(--surface-2)}
+.share-card div{display:flex;flex-direction:column;gap:2px;padding:8px 10px;font-size:12.5px}
+.share-card span{color:var(--muted);font-size:11.5px}
+.design input[type=file]{font-size:12.5px;max-width:100%}
 .st.problemas{color:var(--bad);background:#fdeeee;border-color:#f3c9ca}
 .scores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .score{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -919,7 +924,7 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const REQ_STATES={nueva:'Nueva',revision:'En revisión',propuesta:'Propuesta enviada',aceptada:'Aceptada',descartada:'Descartada'};
 const REQ_LABELS={name:'Nombre',email:'Correo',brand:'Marca',business:'Actividad',audience:'Público',existing:'Marca nueva o rediseño',goals:'Objetivo',style:'Estilo',colors:'Colores',uses:'Usos del logo',slogan:'Eslogan',scope:'Alcance',platform:'Web o redes actuales',deadline:'Fecha deseada',links:'Enlaces de referencia',notes:'Notas de referencias',reference:'Proyecto de referencia'};
 const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.',not_design:'Camilo solo trabaja con briefs de logo e identidad.',not_content:'Teo solo trabaja con briefs de Redes.',no_reports:'Vega todavía no ha hecho ninguna revisión. Pulsa «Revisar ahora».'};
-const live={monitor:{reports:[],fixes:[],checking:false,summary:null,summaryBusy:false},on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
+const live={monitor:{reports:[],fixes:[],cambios:[],ogBusy:false,ogPreview:null,cwBusy:false,checking:false,summary:null,summaryBusy:false},on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
 const DESIGN=['logo','identidad'];
 const designAgent=()=>agents.find(a=>a.role==='diseno');
 const contentAgent=()=>agents.find(a=>a.role==='contenido');
@@ -970,7 +975,7 @@ async function initLive(){
     try{live.sb.channel('solicitudes-admin').on('postgres_changes',{event:'*',schema:'public',table:'solicitudes'},()=>loadReqs(false)).subscribe();}catch(e){}
     setInterval(()=>loadReqs(false),60000);
     await loadMonitor();
-    try{live.sb.channel('vega-admin').on('postgres_changes',{event:'*',schema:'public',table:'monitor_reports'},()=>loadMonitor()).on('postgres_changes',{event:'*',schema:'public',table:'monitor_fixes'},()=>loadMonitor()).subscribe();}catch(e){}
+    try{live.sb.channel('vega-admin').on('postgres_changes',{event:'*',schema:'public',table:'monitor_reports'},()=>loadMonitor()).on('postgres_changes',{event:'*',schema:'public',table:'monitor_fixes'},()=>loadMonitor()).on('postgres_changes',{event:'*',schema:'public',table:'cambios_web'},()=>loadMonitor()).subscribe();}catch(e){}
     setInterval(loadMonitor,120000);
     syncSales();openFromHash();
     addEventListener('hashchange',openFromHash);
@@ -1318,6 +1323,12 @@ async function loadMonitor(){
   if(!live.sb)return;
   const {data,error}=await live.sb.from('monitor_reports').select('*').order('created_at',{ascending:false}).limit(12);
   if(error||!data)return;
+  const cw=await live.sb.from('cambios_web').select('*').order('created_at',{ascending:false}).limit(6);
+  if(!cw.error&&cw.data){
+    const before=new Map(live.monitor.cambios.map(c=>[c.id,c.estado]));
+    cw.data.forEach(c=>{const b=before.get(c.id);if(b==='pendiente'&&c.estado!=='pendiente'){const v=techAgent();pushFeed(v?v.id:'',`Claude respondió a tu pedido: ${CW_STATE[c.estado]||c.estado}`);}});
+    live.monitor.cambios=cw.data;
+  }
   const fx=await live.sb.from('monitor_fixes').select('*').order('created_at',{ascending:false}).limit(5);
   if(!fx.error&&fx.data){
     const known=live.monitor.fixes[0];
@@ -1338,7 +1349,7 @@ const AREA={disponibilidad:'Disponibilidad',enlaces:'Enlaces',rendimiento:'Rendi
 function scoreClass(n){return n==null?'':n>=90?'good':n>=50?'mid':'bad';}
 function renderMonitor(force){
   const box=$('#reqs'),m=live.monitor,latest=m.reports[0];
-  const key=`${latest?latest.id:'none'}|${m.fixes[0]?m.fixes[0].id:''}|${m.checking}|${m.summaryBusy}|${m.summary?m.summary.length:0}`;
+  const key=`${latest?latest.id:'none'}|${m.fixes[0]?m.fixes[0].id:''}|${m.cambios.map(c=>c.id+c.estado).join(',')}|${m.ogBusy}|${m.ogPreview||''}|${m.cwBusy}|${m.checking}|${m.summaryBusy}|${m.summary?m.summary.length:0}`;
   if(!force&&box.firstChild&&box.firstChild.dataset&&box.firstChild.dataset.key===key)return;
   const view=el('div',{class:'rd','data-key':key});
   const [cls,label]=latest?MON_STATE[latest.estado]||MON_STATE.ok:['revision','Sin revisiones'];
@@ -1352,6 +1363,7 @@ function renderMonitor(force){
   if(text)view.append(el('section',{class:'ai'},el('div',{class:'row between'},el('p',{class:'eyebrow',text:'Resumen de Vega'}),
       el('button',{type:'button',class:'btn small',onclick:()=>askSummary(true)},'Enviar a Telegram')),
     el('p',{class:'summary',text})));
+  view.append(webChanges());
   if(!latest){
     view.append(el('p',{class:'empty',text:'Vega revisa la web automáticamente cada 30 minutos y hace una revisión completa una vez al día. Pulsa «Revisar ahora» para la primera.'}));
     box.replaceChildren(view);return;
@@ -1394,6 +1406,101 @@ function renderMonitor(force){
     latest.visto=true;syncSales();
     live.sb.from('monitor_reports').update({visto:true}).eq('id',latest.id).then(()=>{},()=>{});
   }
+}
+const CW_STATE={pendiente:'En cola para Claude',hecho:'Hecho y publicado',en_revision:'Listo para que lo revises',no_posible:'No se pudo hacer'};
+const CW_CLASS={pendiente:'revision',hecho:'aceptada',en_revision:'propuesta',no_posible:'descartada'};
+const OK_TYPES=['image/jpeg','image/png','image/webp'];
+// Prepara la imagen en el navegador: recorte a medida (vista previa) o reducción sin recorte.
+async function prepImage(file,{w,h,maxSide}){
+  if(!OK_TYPES.includes(file.type))throw new Error('Usa una imagen JPG, PNG o WebP.');
+  if(file.size>20*1024*1024)throw new Error('La imagen pesa más de 20 MB. Expórtala más ligera.');
+  const url=URL.createObjectURL(file);
+  try{
+    const img=await new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>ko(new Error('No pude leer la imagen.'));i.src=url;});
+    const keepPng=!w&&file.type==='image/png';
+    let cw,ch,sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
+    if(w){
+      cw=w;ch=h;const r=Math.max(w/sw,h/sh);const vw=w/r,vh=h/r;sx=(sw-vw)/2;sy=(sh-vh)/2;sw=vw;sh=vh;
+    }else{
+      const r=Math.min(1,maxSide/Math.max(sw,sh));cw=Math.round(sw*r);ch=Math.round(sh*r);
+    }
+    const c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');
+    if(!keepPng){x.fillStyle='#ffffff';x.fillRect(0,0,cw,ch);}
+    x.imageSmoothingQuality='high';x.drawImage(img,sx,sy,sw,sh,0,0,cw,ch);
+    const type=keepPng?'image/png':'image/jpeg';
+    const blob=q=>new Promise(ok=>c.toBlob(ok,type,q));
+    let out=await blob(0.86);
+    if(!keepPng&&out&&out.size>800*1024)out=await blob(0.72);
+    if(!out)throw new Error('No pude preparar la imagen.');
+    return {blob:out,type,ext:keepPng?'png':'jpg'};
+  }finally{URL.revokeObjectURL(url);}
+}
+function webChanges(){
+  const m=live.monitor;
+  const sec=el('section',{class:'design','aria-label':'Cambios para la web'},el('p',{class:'eyebrow',text:'Cambios para la web'}));
+  // Imagen para compartir: se aplica al momento, sin tocar el código.
+  const ogFile=el('input',{type:'file',id:'ogFile',accept:'image/jpeg,image/png,image/webp',hidden:true,onchange:e=>{const f=e.target.files[0];e.target.value='';if(f)uploadOg(f);}});
+  const src=m.ogPreview||`/compartir.jpg?v=${Math.floor(Date.now()/300000)}`;
+  sec.append(el('div',{class:'block'},el('h5',{text:'Imagen al compartir la web'}),
+    el('p',{class:'small',text:'Es la que aparece al enviar navasvisual.com por WhatsApp o redes. Se recorta sola a 1200 × 630 px; deja lo importante en el centro.'}),
+    el('div',{class:'share-card'},el('img',{src,alt:'Vista previa al compartir la web'}),
+      el('div',null,el('b',{text:'Navas Visual — Diseño visual con intención'}),el('span',{text:'navasvisual.com'}))),
+    ogFile,
+    (()=>{const b=el('button',{type:'button',class:'btn small primary',onclick:()=>ogFile.click()},m.ogBusy?'Subiendo…':'Cambiar imagen');b.disabled=m.ogBusy;return b;})()));
+  // Pedido libre para Claude, con imagen opcional.
+  const txt=el('textarea',{id:'cwText','aria-label':'Qué quieres cambiar',maxlength:'2000',placeholder:'Ejemplo: usa esta foto como portada del proyecto Candy Conos en Trabajo.',oninput:e=>{m.cwDraft=e.target.value;}});
+  txt.value=m.cwDraft||'';
+  const file=el('input',{type:'file',id:'cwFile',accept:'image/jpeg,image/png,image/webp','aria-label':'Imagen para el cambio (opcional)'});
+  const send=el('button',{type:'button',class:'btn small primary',onclick:()=>requestChange(txt,file)},m.cwBusy?'Enviando…':'Enviar a Claude');send.disabled=m.cwBusy;
+  sec.append(el('div',{class:'block'},el('h5',{text:'Pedir un cambio'}),
+    el('p',{class:'small',text:'Escribe qué quieres cambiar en la web y, si hace falta, adjunta la imagen. Claude lo aplica en su próxima ejecución (8:15 o 17:15) y te avisa por Telegram.'}),
+    txt,el('label',{class:'small',for:'cwFile',text:'Imagen (opcional)'}),file,el('div',{class:'row'},send)));
+  if(m.cambios.length)sec.append(el('div',{class:'block'},el('h5',{text:'Tus pedidos'}),...m.cambios.map(c=>el('div',{class:'finding'},
+    el('div',{class:'row between'},el('b',{text:c.texto.length>90?c.texto.slice(0,90)+'…':c.texto}),el('span',{class:'st '+(CW_CLASS[c.estado]||''),text:CW_STATE[c.estado]||c.estado})),
+    c.respuesta&&el('p',{text:c.respuesta}),
+    el('div',{class:'row'},el('span',{class:'small',text:since(c.created_at)}),
+      c.imagen_url&&/^https:\/\//.test(c.imagen_url)&&el('a',{href:c.imagen_url,target:'_blank',rel:'noopener',class:'small',text:'Ver imagen'}),
+      c.pr_url&&/^https:\/\/github\.com\//.test(c.pr_url)&&el('a',{href:c.pr_url,target:'_blank',rel:'noopener',class:'small',text:'Ver cambio'}))))));
+  return sec;
+}
+async function uploadOg(f){
+  const m=live.monitor;if(m.ogBusy)return;
+  m.ogBusy=true;renderReqs(true);
+  try{
+    const {blob}=await prepImage(f,{w:1200,h:630});
+    const {error}=await live.sb.storage.from('web').upload('og/compartir.jpg',blob,{upsert:true,contentType:'image/jpeg',cacheControl:'60'});
+    if(error)throw new Error('No pude subir la imagen. Revisa tu conexión e inténtalo de nuevo.');
+    if(m.ogPreview&&m.ogPreview.startsWith('blob:'))URL.revokeObjectURL(m.ogPreview);
+    m.ogPreview=URL.createObjectURL(blob);
+    toast('Imagen para compartir actualizada. WhatsApp y las redes pueden tardar unos días en refrescar enlaces que ya compartiste.');
+    const v=techAgent();pushFeed(v?v.id:'','Aplicó la nueva imagen para compartir la web');
+  }catch(e){toast(e.message||'No pude subir la imagen.');}
+  finally{m.ogBusy=false;renderReqs(true);}
+}
+async function requestChange(txt,file){
+  const m=live.monitor;if(m.cwBusy)return;
+  const texto=txt.value.trim();
+  if(texto.length<3){toast('Escribe qué quieres cambiar.');txt.focus();return;}
+  m.cwBusy=true;renderReqs(true);
+  try{
+    let imagen_url=null;
+    const f=file.files&&file.files[0];
+    if(f){
+      const {blob,type,ext}=await prepImage(f,{maxSide:2000});
+      const id=(crypto.randomUUID&&crypto.randomUUID())||String(Date.now());
+      const path=`cambios/${id}.${ext}`;
+      const up=await live.sb.storage.from('web').upload(path,blob,{contentType:type,cacheControl:'31536000'});
+      if(up.error)throw new Error('No pude subir la imagen. Revisa tu conexión e inténtalo de nuevo.');
+      imagen_url=live.sb.storage.from('web').getPublicUrl(path).data.publicUrl;
+    }
+    const {error}=await live.sb.from('cambios_web').insert({texto,imagen_url});
+    if(error)throw new Error('No pude guardar el pedido. Inténtalo de nuevo.');
+    m.cwDraft='';
+    toast('Pedido enviado. Claude lo aplicará en su próxima ejecución.');
+    const v=techAgent();pushFeed(v?v.id:'','Recibió tu pedido de cambio para la web');
+    await loadMonitor();
+  }catch(e){toast(e.message||'No pude enviar el pedido.');}
+  finally{m.cwBusy=false;renderReqs(true);}
 }
 async function checkNow(){
   if(live.monitor.checking)return;

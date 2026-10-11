@@ -103,3 +103,32 @@ alter table public.monitor_fixes enable row level security;
 create policy "admin lee arreglos" on public.monitor_fixes for select to authenticated
   using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
 alter publication supabase_realtime add table public.monitor_fixes;
+
+-- Cambios para la web: imagen al compartir y pedidos de Luis para Claude.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('web', 'web', true, 5242880, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do nothing;
+create policy "admin sube imagenes web" on storage.objects for insert to authenticated
+  with check (bucket_id = 'web' and lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+create policy "admin reemplaza imagenes web" on storage.objects for update to authenticated
+  using (bucket_id = 'web' and lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'))
+  with check (bucket_id = 'web' and lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+create policy "admin ve imagenes web" on storage.objects for select to authenticated
+  using (bucket_id = 'web' and lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+create table if not exists public.cambios_web (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  texto text not null check (char_length(texto) between 3 and 2000),
+  imagen_url text,
+  estado text not null default 'pendiente' check (estado in ('pendiente', 'hecho', 'en_revision', 'no_posible')),
+  respuesta text,
+  pr_url text,
+  resuelto_at timestamptz
+);
+create index if not exists cambios_web_created_at_idx on public.cambios_web (created_at desc);
+alter table public.cambios_web enable row level security;
+create policy "admin lee cambios" on public.cambios_web for select to authenticated
+  using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+create policy "admin pide cambios" on public.cambios_web for insert to authenticated
+  with check (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN') and estado = 'pendiente');
+alter publication supabase_realtime add table public.cambios_web;
