@@ -44,6 +44,9 @@ button{cursor:pointer}
 .btn.primary:hover{background:#262626}
 .btn.danger{color:var(--bad)}
 .btn.small{padding:7px 14px;font-size:13px}
+.icon-btn.reload{flex:none;color:var(--fg)}
+.icon-btn.reload.spin svg{animation:nvspin .8s linear infinite}
+@keyframes nvspin{to{transform:rotate(360deg)}}
 .gdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--live);margin-right:8px;vertical-align:middle;box-shadow:0 0 0 3px rgb(51 209 106 / .18)}
 .eyebrow{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;margin:0}
 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--fg)}
@@ -245,6 +248,7 @@ img{max-width:100%}
         <div class="kpi">Leads <b id="kLeads">7</b><em class="warn">3 sin responder</em></div>
         <div class="kpi">Carga <b>1,8 s</b></div>
       </div>
+      <button class="icon-btn reload" id="btnReload" type="button" aria-label="Recargar el equipo" title="Recargar el equipo"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
       <button class="btn primary" id="btnNew" type="button"><span class="gdot"></span>Nuevo agente</button>
     </nav>
   </header>
@@ -879,6 +883,13 @@ $('#newForm').addEventListener('submit',e=>{
 let toastT;
 function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,Math.max(2200,t.length*60));}
 
+/* Recargar solo la oficina (dentro del admin no recarga la página completa) */
+$('#btnReload').addEventListener('click',e=>{
+  e.currentTarget.classList.add('spin');
+  save();
+  setTimeout(()=>location.reload(),150);
+});
+
 /* Visitas en vivo (simuladas) */
 let visits=1284;
 setInterval(()=>{visits+=Math.floor(Math.random()*3);$('#kVisits').textContent=visits.toLocaleString('es-ES');},4000);
@@ -1009,6 +1020,11 @@ function syncSales(){
   }
   renderRoster();
   if([a,c,t].some(x=>x&&selected===x.id))renderPanel();
+  // Avisa al admin para el contador junto a «Equipo» en el menú.
+  try{
+    const attention=live.reqs.filter(r=>r.status==='nueva'||(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)||(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto)).length;
+    if(window.parent!==window)window.parent.postMessage({type:'nv-team-attention',count:attention},location.origin);
+  }catch(e){}
 }
 function liveTabs(a){
   const on=live.on&&['ventas','diseno','contenido'].includes(a.role);
