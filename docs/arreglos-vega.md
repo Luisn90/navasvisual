@@ -1,6 +1,17 @@
 # Arreglos automáticos de lo que encuentra Vega
 
-Una tarea programada de Claude se ejecuta dos veces al día (8:15 y 17:15, hora de Venezuela), después de las revisiones de Vega. Sigue estas instrucciones al pie de la letra.
+Una tarea programada de Claude se ejecuta **cada hora de 7:00 a 23:00** (hora de Venezuela). En cada ronda atiende los encargos y aprobaciones de Luis; en las rondas de las 8 y de las 17 revisa además los hallazgos de Vega. Sigue estas instrucciones al pie de la letra.
+
+## Ronda rápida (antes de nada)
+
+Con el conector de Supabase comprueba si hay trabajo:
+
+```sql
+select estado, count(*) from public.cambios_web
+where estado in ('pendiente', 'aprobado', 'rechazado') group by estado;
+```
+
+Si no hay ninguno y la hora en Venezuela no está entre 8:00–8:59 ni 17:00–17:59, **termina ya**: no clones el repositorio ni escribas nada.
 
 ## Datos
 
@@ -10,19 +21,30 @@ Una tarea programada de Claude se ejecuta dos veces al día (8:15 y 17:15, hora 
   - `public.monitor_fixes`: tus informes. Antes de empezar, lee los de los últimos 3 días para no repetir trabajo ni avisos.
 - Vercel: proyecto `navasvisual` (`prj_BbP3qvfgo2PQJKLXZKhImUISxAZJ`, equipo `team_ACew8hlSxo1dza4eW2UBqLSf`).
 
-## Pedidos de Luis (primero)
+## Encargos de Luis (primero)
 
-Luis puede pedir cambios desde la ficha de Vega. Están en `public.cambios_web` (`id`, `texto`, `imagen_url`, `estado`, `respuesta`, `pr_url`). En cada ejecución, antes que los hallazgos, atiende los que tengan `estado = 'pendiente'`, del más antiguo al más nuevo:
+Luis pide cambios desde la ficha de Vega o hablando con Vega en el chat (ella los apunta por él). Están en `public.cambios_web` (`id`, `texto`, `imagen_url`, `estado`, `origen`, `respuesta`, `pr_url`). Estados: `pendiente` (por hacer), `en_revision` (preparado, espera a Luis), `aprobado` / `rechazado` (Luis ya decidió), `hecho`, `no_posible`, `descartado`.
+
+### 1. Aprobados y rechazados
+
+- `aprobado`: actualiza la rama del PR con `main`, ejecuta las pruebas y espera a que la vista previa de Vercel esté en `READY`. Si todo está bien, **une el PR** (squash) y pon `estado = 'hecho'`, `resuelto_at = now()` y una `respuesta` corta. Si algo falla, no lo unas: déjalo en `en_revision` y explica en `respuesta` qué pasó.
+- `rechazado`: cierra el PR con un comentario breve y pon `estado = 'descartado'`.
+- Un PR que necesita revisión **solo se une si su fila está en `aprobado`**.
+
+### 2. Pendientes
+
+Atiende los que tengan `estado = 'pendiente'`, del más antiguo al más nuevo:
 
 - `imagen_url` es una imagen pública en el almacenamiento de Supabase (`https://kzbhybcyjjqupojuakuw.supabase.co/storage/v1/object/public/web/cambios/…`). Úsala tal cual en el código con esa URL absoluta; no hace falta descargarla ni subirla al repositorio.
 - La imagen al compartir la web ya no se cambia en el código: la sirve `/api/og-image` con lo que Luis sube en la oficina. Si te piden eso, responde que ya se hace desde «Imagen al compartir la web».
-- Si el pedido cambia contenido visible (textos, imágenes, orden de proyectos, enlaces) en las páginas públicas y las pruebas y la vista previa pasan, publícalo como un arreglo seguro. Si toca `api/`, `admin*.html`, precios, pagos o lógica, abre un PR sin unir.
+- Si el pedido cambia contenido visible (textos, imágenes, orden de proyectos, enlaces) en las páginas públicas y las pruebas y la vista previa pasan, publícalo como un arreglo seguro (`estado = 'hecho'`).
+- Si toca `vercel.json`, `api/`, `admin*.html`, precios, pagos, seguridad o lógica, prepara el PR sin unir y pon `estado = 'en_revision'` con el `pr_url` y una `respuesta` que explique en palabras simples qué cambia y qué riesgo tiene. Luis lo aprobará desde la oficina o el chat.
 - Si el pedido es ambiguo, no se puede hacer o sería mala idea para la web, no lo hagas: explica por qué en `respuesta`.
 - Al terminar cada pedido actualiza su fila:
 
   ```sql
   update public.cambios_web
-  set estado = 'hecho' /* o 'en_revision' o 'no_posible' */,
+  set estado = 'hecho' /* o 'en_revision', 'no_posible', 'descartado' */,
       respuesta = 'Qué hiciste o por qué no, en una o dos frases sencillas',
       pr_url = 'https://github.com/Luisn90/navasvisual/pull/…',
       resuelto_at = now()
@@ -41,7 +63,12 @@ Luis puede pedir cambios desde la ficha de Vega. Están en `public.cambios_web` 
      - Rutas de imágenes o enlaces internos rotos cuando el archivo correcto existe en el repositorio.
      - Comprimir imágenes pesadas de `assets/` sin cambiar el nombre ni el formato del archivo (misma ruta, misma extensión), manteniendo buena calidad visual.
      - Textos `alt` que falten.
-   - **Arreglo con revisión (PR sin unir):** cualquier cambio en `vercel.json` (cabeceras de seguridad, CSP), cambiar React a la versión de producción, cambiar el formato o el nombre de una imagen, tocar `api/`, la lógica de los `.jsx` o `admin*.html`.
+   - **Arreglo con revisión (PR sin unir):** cualquier cambio en `vercel.json` (cabeceras de seguridad, CSP), cambiar React a la versión de producción, cambiar el formato o el nombre de una imagen, tocar `api/`, la lógica de los `.jsx` o `admin*.html`. Además del PR, crea una fila para que Luis pueda aprobarlo desde la oficina:
+
+     ```sql
+     insert into public.cambios_web (texto, origen, estado, respuesta, pr_url)
+     values ('Qué cambia, en palabras simples', 'vega', 'en_revision', 'Por qué y qué riesgo tiene', 'https://github.com/Luisn90/navasvisual/pull/…');
+     ```
    - **No se puede arreglar en el código:** servicios externos caídos (BCV, Google), cuotas agotadas, variables o claves que faltan en Vercel, decisiones de negocio o de diseño, y migraciones grandes (por ejemplo, pasar a Vite). Explica el motivo y qué tendría que hacer Luis.
 4. Arreglos seguros: crea una rama `vega/seguro-AAAAMMDD-HHMM` desde `main`, haz los cambios, ejecuta `node --test tests/*.test.mjs` y, si pasan, sube la rama, abre un PR y espera a que el despliegue de vista previa de Vercel de esa rama esté en `READY`. Si todo está bien, une el PR (squash). Si algo falla, no lo unas y trátalo como «con revisión».
 5. Arreglos con revisión: otra rama `vega/revision-AAAAMMDD-HHMM`, mismo proceso de pruebas, abre el PR y **no lo unas**. Explica en el PR qué cambia y cómo probarlo.

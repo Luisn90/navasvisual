@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
 <title>Navas Visual — Equipo</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
@@ -178,6 +182,7 @@ details.brief summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bo
 .note{margin:0;font-size:12px;color:var(--muted)}
 .btn:disabled{opacity:.5;cursor:default}
 /* Revisión de Vega */
+.approvals .finding b{font-weight:500}
 .share-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);max-width:100%}
 .share-card img{width:100%;aspect-ratio:1200/630;object-fit:cover;display:block;background:var(--surface-2)}
 .share-card div{display:flex;flex-direction:column;gap:2px;padding:8px 10px;font-size:12.5px}
@@ -863,6 +868,7 @@ function send(text){
     }
     if(selected===id)renderChat();save();
     if(live.on&&['ventas','diseno','contenido','tecnico'].includes(ag.role))syncSales();
+    if(live.on&&ag.role==='tecnico')loadMonitor();
   });
 }
 $('#chatForm').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatInput');send(i.value);i.value='';});
@@ -1047,6 +1053,7 @@ function syncSales(){
   if(v&&v.status!=='thinking'&&v.status!=='paused'){
     const issues=latest?latest.hallazgos.filter(h=>h.tipo!=='mejora').length:0;
     if(live.monitor.checking){v.status='working';v.task='Revisando la web';}
+    else if(live.monitor.cambios.some(c=>c.estado==='en_revision')){const k=live.monitor.cambios.filter(c=>c.estado==='en_revision').length;v.status='alert';v.task=k===1?'1 cambio espera tu aprobación':`${k} cambios esperan tu aprobación`;}
     else if(latest&&latest.estado!=='ok'&&!latest.visto){v.status='alert';v.task=latest.estado==='problemas'?`${issues===1?'1 problema':issues+' problemas'} en la web`:'Avisos en la web';}
     else{v.status='idle';v.task='';}
     refreshAgent(v);
@@ -1056,7 +1063,8 @@ function syncSales(){
   // Avisa al admin para el contador junto a «Equipo» en el menú.
   try{
     const attention=live.reqs.filter(r=>r.status==='nueva'||(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)||(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto)).length
-      +(latest&&latest.estado!=='ok'&&!latest.visto?1:0);
+      +(latest&&latest.estado!=='ok'&&!latest.visto?1:0)
+      +live.monitor.cambios.filter(c=>c.estado==='en_revision').length;
     if(window.parent!==window)window.parent.postMessage({type:'nv-team-attention',count:attention},location.origin);
   }catch(e){}
 }
@@ -1071,13 +1079,13 @@ function liveTabs(a){
   document.querySelectorAll('#pTabs .tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===live.tab)));
   $('#pTabs .tab[data-tab="reqs"]').firstChild.textContent=designer?'Diseños ':writer?'Propuestas ':tech?'Revisión ':'Solicitudes ';
   const lm=live.monitor.reports[0];
-  const n=tech?(lm&&lm.estado!=='ok'&&!lm.visto?lm.hallazgos.filter(h=>h.tipo!=='mejora').length:0):designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length
+  const n=tech?(lm&&lm.estado!=='ok'&&!lm.visto?lm.hallazgos.filter(h=>h.tipo!=='mejora').length:0)+live.monitor.cambios.filter(c=>c.estado==='en_revision').length:designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length
     :writer?live.reqs.filter(r=>r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto).length
     :live.reqs.filter(r=>r.status==='nueva').length;
   $('#reqCount').textContent=n?String(n):'';
   $('#pSources').innerHTML=tech?'<span class="src">navasvisual.com</span> <span class="src">PageSpeed</span> <span class="src">IA</span>':(designer||writer)?'<span class="src">Briefs de Marta</span> <span class="src">IA de textos e imágenes</span>':'<span class="src">Formulario de la web</span> <span class="src">IA</span>';
   const q=$('#quick');q.innerHTML='';
-  (tech?['¿Qué hay que arreglar?','¿Cómo está la velocidad de la web?','¿Qué mejorarías primero?']
+  (tech?['¿Qué hay que arreglar?','Arregla lo más urgente','¿Qué espera mi aprobación?']
    :designer?['¿En qué estás trabajando?','¿Qué dirección recomiendas para el último brief?','Dame una paleta alternativa']
    :writer?['¿Qué propuestas tienes listas?','Dame 3 ideas de reels para el último brief','Escribe otra bio más corta']:['¿Qué solicitudes tengo pendientes?','¿Cuál atiendo primero?','Resume la última solicitud']).forEach(t=>q.append(el('button',{type:'button',text:t,onclick:()=>send(t)})));
   if(showReqs)renderReqs(false);
@@ -1323,7 +1331,7 @@ async function loadMonitor(){
   if(!live.sb)return;
   const {data,error}=await live.sb.from('monitor_reports').select('*').order('created_at',{ascending:false}).limit(12);
   if(error||!data)return;
-  const cw=await live.sb.from('cambios_web').select('*').order('created_at',{ascending:false}).limit(6);
+  const cw=await live.sb.from('cambios_web').select('*').order('created_at',{ascending:false}).limit(12);
   if(!cw.error&&cw.data){
     const before=new Map(live.monitor.cambios.map(c=>[c.id,c.estado]));
     cw.data.forEach(c=>{const b=before.get(c.id);if(b==='pendiente'&&c.estado!=='pendiente'){const v=techAgent();pushFeed(v?v.id:'',`Claude respondió a tu pedido: ${CW_STATE[c.estado]||c.estado}`);}});
@@ -1407,8 +1415,8 @@ function renderMonitor(force){
     live.sb.from('monitor_reports').update({visto:true}).eq('id',latest.id).then(()=>{},()=>{});
   }
 }
-const CW_STATE={pendiente:'En cola para Claude',hecho:'Hecho y publicado',en_revision:'Listo para que lo revises',no_posible:'No se pudo hacer'};
-const CW_CLASS={pendiente:'revision',hecho:'aceptada',en_revision:'propuesta',no_posible:'descartada'};
+const CW_STATE={pendiente:'En cola para Claude',hecho:'Hecho y publicado',en_revision:'Espera tu aprobación',aprobado:'Aprobado: Claude lo publica en su próxima ronda',rechazado:'Rechazado',no_posible:'No se pudo hacer',descartado:'Descartado'};
+const CW_CLASS={pendiente:'revision',hecho:'aceptada',en_revision:'nueva',aprobado:'revision',rechazado:'descartada',no_posible:'descartada',descartado:'descartada'};
 const OK_TYPES=['image/jpeg','image/png','image/webp'];
 // Prepara la imagen en el navegador: recorte a medida (vista previa) o reducción sin recorte.
 async function prepImage(file,{w,h,maxSide}){
@@ -1453,15 +1461,33 @@ function webChanges(){
   const file=el('input',{type:'file',id:'cwFile',accept:'image/jpeg,image/png,image/webp','aria-label':'Imagen para el cambio (opcional)'});
   const send=el('button',{type:'button',class:'btn small primary',onclick:()=>requestChange(txt,file)},m.cwBusy?'Enviando…':'Enviar a Claude');send.disabled=m.cwBusy;
   sec.append(el('div',{class:'block'},el('h5',{text:'Pedir un cambio'}),
-    el('p',{class:'small',text:'Escribe qué quieres cambiar en la web y, si hace falta, adjunta la imagen. Claude lo aplica en su próxima ejecución (8:15 o 17:15) y te avisa por Telegram.'}),
+    el('p',{class:'small',text:'Escribe qué quieres cambiar en la web y, si hace falta, adjunta la imagen. También puedes pedírselo a Vega en el chat. Claude lo aplica en su próxima ronda (cada hora, de 7:00 a 23:00) y te avisa por Telegram.'}),
     txt,el('label',{class:'small',for:'cwFile',text:'Imagen (opcional)'}),file,el('div',{class:'row'},send)));
-  if(m.cambios.length)sec.append(el('div',{class:'block'},el('h5',{text:'Tus pedidos'}),...m.cambios.map(c=>el('div',{class:'finding'},
+  const waiting=m.cambios.filter(c=>c.estado==='en_revision');
+  if(waiting.length)sec.prepend(el('div',{class:'block approvals'},el('h5',{text:`Esperando tu aprobación (${waiting.length})`}),
+    el('p',{class:'small',text:'Claude ya lo dejó preparado. Si lo apruebas, lo publica en su próxima ronda.'}),
+    ...waiting.map(c=>el('div',{class:'finding aviso'},
+      el('b',{text:c.texto}),c.respuesta&&el('p',{text:c.respuesta}),
+      el('div',{class:'row'},
+        el('button',{type:'button',class:'btn small primary',onclick:()=>decide(c,'aprobado')},'Aprobar'),
+        el('button',{type:'button',class:'btn small',onclick:()=>decide(c,'rechazado')},'Rechazar'),
+        c.pr_url&&/^https:\/\/github\.com\//.test(c.pr_url)&&el('a',{href:c.pr_url,target:'_blank',rel:'noopener',class:'small',text:'Ver el cambio'}))))));
+  const others=m.cambios.filter(c=>c.estado!=='en_revision').slice(0,6);
+  if(others.length)sec.append(el('div',{class:'block'},el('h5',{text:'Tus pedidos'}),...others.map(c=>el('div',{class:'finding'},
     el('div',{class:'row between'},el('b',{text:c.texto.length>90?c.texto.slice(0,90)+'…':c.texto}),el('span',{class:'st '+(CW_CLASS[c.estado]||''),text:CW_STATE[c.estado]||c.estado})),
     c.respuesta&&el('p',{text:c.respuesta}),
     el('div',{class:'row'},el('span',{class:'small',text:since(c.created_at)}),
       c.imagen_url&&/^https:\/\//.test(c.imagen_url)&&el('a',{href:c.imagen_url,target:'_blank',rel:'noopener',class:'small',text:'Ver imagen'}),
       c.pr_url&&/^https:\/\/github\.com\//.test(c.pr_url)&&el('a',{href:c.pr_url,target:'_blank',rel:'noopener',class:'small',text:'Ver cambio'}))))));
   return sec;
+}
+async function decide(c,estado){
+  const patch=estado==='aprobado'?{estado,aprobado_at:new Date().toISOString()}:{estado};
+  const {error}=await live.sb.from('cambios_web').update(patch).eq('id',c.id).eq('estado','en_revision');
+  if(error){toast('No pude guardar tu decisión. Inténtalo de nuevo.');return;}
+  c.estado=estado;syncSales();renderReqs(true);
+  toast(estado==='aprobado'?'Aprobado. Claude lo publica en su próxima ronda.':'Rechazado. Claude lo descartará.');
+  const v=techAgent();pushFeed(v?v.id:'',estado==='aprobado'?'Aprobaste un cambio para la web':'Rechazaste un cambio para la web');
 }
 async function uploadOg(f){
   const m=live.monitor;if(m.ogBusy)return;
