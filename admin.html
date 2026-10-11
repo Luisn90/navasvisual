@@ -428,7 +428,9 @@ async function refreshTeamBadge() {
   if (error || !data) return;
   const { data: mon } = await sb.from('monitor_reports').select('estado, visto').order('created_at', { ascending: false }).limit(1);
   const vega = mon && mon[0] && mon[0].estado !== 'ok' && !mon[0].visto ? 1 : 0;
-  setTeamBadge(data.filter(r => r.status === 'nueva' || (r.de === 'listo' && r.dv !== 'true') || (r.ce === 'listo' && r.cv !== 'true')).length + vega);
+  const { data: rev } = await sb.from('cambios_web').select('id').eq('estado', 'en_revision');
+  const approvals = rev ? rev.length : 0;
+  setTeamBadge(data.filter(r => r.status === 'nueva' || (r.de === 'listo' && r.dv !== 'true') || (r.ce === 'listo' && r.cv !== 'true')).length + vega + approvals);
 }
 function startTeamBadge() {
   refreshTeamBadge();
@@ -438,6 +440,7 @@ function startTeamBadge() {
     sb.channel('admin-equipo-avisos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, () => refreshTeamBadge())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'monitor_reports' }, () => refreshTeamBadge())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cambios_web' }, () => refreshTeamBadge())
       .subscribe();
   } catch (e) {}
   setInterval(refreshTeamBadge, 60000);

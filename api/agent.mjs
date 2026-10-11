@@ -75,8 +75,8 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
     if (body?.action === 'chat' && body.agent === 'tecnico') {
       if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });
       const [report] = await latestReports(env, 1, fetcher);
-      const reply = await chatWithVega(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], report }, fetcher);
-      return json(200, { reply });
+      const { reply, acciones } = await chatWithVega(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], report }, fetcher);
+      return json(200, { reply, acciones });
     }
     if (body?.action === 'chat') {
       if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });
