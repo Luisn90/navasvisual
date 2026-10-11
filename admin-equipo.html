@@ -177,6 +177,22 @@ a.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
 details.brief summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:8px}
 .note{margin:0;font-size:12px;color:var(--muted)}
 .btn:disabled{opacity:.5;cursor:default}
+/* Revisión de Vega */
+.st.problemas{color:var(--bad);background:#fdeeee;border-color:#f3c9ca}
+.scores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.score{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
+.score b{font-family:var(--f-mono);font-size:18px;font-weight:500}
+.score span{font-size:10.5px;color:var(--muted);line-height:1.2}
+.score.good b{color:#1f9a48} .score.mid b{color:#b57800} .score.bad b{color:var(--bad)}
+.finding{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:1.45}
+.finding p{margin:0;color:var(--muted)} .finding b{font-weight:500;min-width:0}
+.finding.error{border-left-color:var(--bad)} .finding.aviso{border-left-color:var(--warn)} .finding.mejora{border-left-color:var(--busy)}
+.summary{white-space:pre-wrap}
+.history{display:flex;gap:5px;flex-wrap:wrap}
+.dot-h{width:12px;height:12px;border-radius:50%;background:var(--ok)}
+.dot-h.avisos{background:var(--warn)} .dot-h.problemas{background:var(--bad)}
+.small{font-size:12px;color:var(--muted)}
+
 /* Propuestas de Camilo y Teo */
 .block{display:flex;flex-direction:column;gap:4px}
 .block h5{margin:0 0 2px;font-size:13px;font-weight:600}
@@ -380,7 +396,7 @@ const ROLES={
        [/hora|cu[aá]ndo|d[ií]a/i,'Tu audiencia está más activa de martes a jueves, entre las 19:00 y las 21:00.']],
     fb:'Puedo proponerte ideas, escribir textos o revisar qué publicaciones funcionaron mejor. ¿Qué necesitas?'},
   tecnico:{label:'Monitor técnico',sources:['Disponibilidad','PageSpeed'],help:'Caídas, velocidad de carga y errores de la web.',
-    defInstr:'Revisa la web cada 5 minutos. Avísame de inmediato si se cae o si la carga supera los 3 segundos.',
+    defInstr:'Revisa la web cada 30 minutos y haz una revisión completa al día. Avísame en cuanto algo se rompa y, cuando te pida un resumen, dime qué arreglar primero y qué mejorar.',
     greet:'Todo en orden: la web está en línea y cargando rápido.',
     quick:['¿Está la web en línea?','¿Qué tan rápido carga?','¿Hay errores?'],
     r:[[/l[ií]nea|ca[ií]d|funciona|uptime|arriba/i,'La web lleva 21 días sin caídas. Disponibilidad del mes: 99,98 %. El último fallo fue un corte de 9 minutos el 20 de septiembre.'],
@@ -823,7 +839,7 @@ function reply(a,text){
 }
 function send(text){
   const a=byId(selected);text=(text||'').trim();if(!a||!text||a.status==='thinking')return;
-  const useLive=live.on&&['ventas','diseno','contenido'].includes(a.role)&&a.status!=='paused';
+  const useLive=live.on&&['ventas','diseno','contenido','tecnico'].includes(a.role)&&a.status!=='paused';
   const history=a.msgs.slice(-12);
   a.msgs.push({from:'me',text});
   if(a.status!=='paused'){a.prev=a.status;setStatus(a,'thinking');}
@@ -841,7 +857,7 @@ function send(text){
       ag.prev=undefined;setStatus(ag,next);
     }
     if(selected===id)renderChat();save();
-    if(live.on&&['ventas','diseno','contenido'].includes(ag.role))syncSales();
+    if(live.on&&['ventas','diseno','contenido','tecnico'].includes(ag.role))syncSales();
   });
 }
 $('#chatForm').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatInput');send(i.value);i.value='';});
@@ -902,11 +918,12 @@ const SB_URL='https://kzbhybcyjjqupojuakuw.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
 const REQ_STATES={nueva:'Nueva',revision:'En revisión',propuesta:'Propuesta enviada',aceptada:'Aceptada',descartada:'Descartada'};
 const REQ_LABELS={name:'Nombre',email:'Correo',brand:'Marca',business:'Actividad',audience:'Público',existing:'Marca nueva o rediseño',goals:'Objetivo',style:'Estilo',colors:'Colores',uses:'Usos del logo',slogan:'Eslogan',scope:'Alcance',platform:'Web o redes actuales',deadline:'Fecha deseada',links:'Enlaces de referencia',notes:'Notas de referencias',reference:'Proyecto de referencia'};
-const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.',not_design:'Camilo solo trabaja con briefs de logo e identidad.',not_content:'Teo solo trabaja con briefs de Redes.'};
-const live={on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
+const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.',not_design:'Camilo solo trabaja con briefs de logo e identidad.',not_content:'Teo solo trabaja con briefs de Redes.',no_reports:'Vega todavía no ha hecho ninguna revisión. Pulsa «Revisar ahora».'};
+const live={monitor:{reports:[],checking:false,summary:null,summaryBusy:false},on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
 const DESIGN=['logo','identidad'];
 const designAgent=()=>agents.find(a=>a.role==='diseno');
 const contentAgent=()=>agents.find(a=>a.role==='contenido');
+const techAgent=()=>agents.find(a=>a.role==='tecnico');
 const CONTENT=['redes'];
 const isContent=r=>CONTENT.includes(r.service);
 const isDesign=r=>DESIGN.includes(r.service);
@@ -952,6 +969,9 @@ async function initLive(){
     $('#kLeads').previousSibling.textContent='Solicitudes abiertas ';
     try{live.sb.channel('solicitudes-admin').on('postgres_changes',{event:'*',schema:'public',table:'solicitudes'},()=>loadReqs(false)).subscribe();}catch(e){}
     setInterval(()=>loadReqs(false),60000);
+    await loadMonitor();
+    try{live.sb.channel('vega-admin').on('postgres_changes',{event:'*',schema:'public',table:'monitor_reports'},()=>loadMonitor()).subscribe();}catch(e){}
+    setInterval(loadMonitor,120000);
     syncSales();openFromHash();
     addEventListener('hashchange',openFromHash);
   }catch(e){console.warn('Solicitudes no disponibles:',e&&e.message||e);}
@@ -1018,36 +1038,48 @@ function syncSales(){
     else{t.status='idle';t.task='';}
     refreshAgent(t);
   }
+  const v=techAgent(),latest=live.monitor.reports[0];
+  if(v&&v.status!=='thinking'&&v.status!=='paused'){
+    const issues=latest?latest.hallazgos.filter(h=>h.tipo!=='mejora').length:0;
+    if(live.monitor.checking){v.status='working';v.task='Revisando la web';}
+    else if(latest&&latest.estado!=='ok'&&!latest.visto){v.status='alert';v.task=latest.estado==='problemas'?`${issues===1?'1 problema':issues+' problemas'} en la web`:'Avisos en la web';}
+    else{v.status='idle';v.task='';}
+    refreshAgent(v);
+  }
   renderRoster();
-  if([a,c,t].some(x=>x&&selected===x.id))renderPanel();
+  if([a,c,t,v].some(x=>x&&selected===x.id))renderPanel();
   // Avisa al admin para el contador junto a «Equipo» en el menú.
   try{
-    const attention=live.reqs.filter(r=>r.status==='nueva'||(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)||(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto)).length;
+    const attention=live.reqs.filter(r=>r.status==='nueva'||(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)||(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto)).length
+      +(latest&&latest.estado!=='ok'&&!latest.visto?1:0);
     if(window.parent!==window)window.parent.postMessage({type:'nv-team-attention',count:attention},location.origin);
   }catch(e){}
 }
 function liveTabs(a){
-  const on=live.on&&['ventas','diseno','contenido'].includes(a.role);
+  const on=live.on&&['ventas','diseno','contenido','tecnico'].includes(a.role);
   if(on&&live.role!==a.role){live.role=a.role;live.open=live.pendingOpen||null;live.pendingOpen=null;}
-  const designer=a.role==='diseno',writer=a.role==='contenido';
+  const designer=a.role==='diseno',writer=a.role==='contenido',tech=a.role==='tecnico';
   $('#pTabs').hidden=!on;
   const showReqs=on&&live.tab==='reqs';
   $('#reqs').hidden=!showReqs;$('#chat').hidden=showReqs;$('#quick').hidden=showReqs;$('#chatForm').hidden=showReqs;
   if(!on)return;
   document.querySelectorAll('#pTabs .tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===live.tab)));
-  $('#pTabs .tab[data-tab="reqs"]').firstChild.textContent=designer?'Diseños ':writer?'Propuestas ':'Solicitudes ';
-  const n=designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length
+  $('#pTabs .tab[data-tab="reqs"]').firstChild.textContent=designer?'Diseños ':writer?'Propuestas ':tech?'Revisión ':'Solicitudes ';
+  const lm=live.monitor.reports[0];
+  const n=tech?(lm&&lm.estado!=='ok'&&!lm.visto?lm.hallazgos.filter(h=>h.tipo!=='mejora').length:0):designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length
     :writer?live.reqs.filter(r=>r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto).length
     :live.reqs.filter(r=>r.status==='nueva').length;
   $('#reqCount').textContent=n?String(n):'';
-  $('#pSources').innerHTML=(designer||writer)?'<span class="src">Briefs de Marta</span> <span class="src">IA de textos e imágenes</span>':'<span class="src">Formulario de la web</span> <span class="src">IA</span>';
+  $('#pSources').innerHTML=tech?'<span class="src">navasvisual.com</span> <span class="src">PageSpeed</span> <span class="src">IA</span>':(designer||writer)?'<span class="src">Briefs de Marta</span> <span class="src">IA de textos e imágenes</span>':'<span class="src">Formulario de la web</span> <span class="src">IA</span>';
   const q=$('#quick');q.innerHTML='';
-  (designer?['¿En qué estás trabajando?','¿Qué dirección recomiendas para el último brief?','Dame una paleta alternativa']
+  (tech?['¿Qué hay que arreglar?','¿Cómo está la velocidad de la web?','¿Qué mejorarías primero?']
+   :designer?['¿En qué estás trabajando?','¿Qué dirección recomiendas para el último brief?','Dame una paleta alternativa']
    :writer?['¿Qué propuestas tienes listas?','Dame 3 ideas de reels para el último brief','Escribe otra bio más corta']:['¿Qué solicitudes tengo pendientes?','¿Cuál atiendo primero?','Resume la última solicitud']).forEach(t=>q.append(el('button',{type:'button',text:t,onclick:()=>send(t)})));
   if(showReqs)renderReqs(false);
 }
 document.querySelectorAll('#pTabs .tab').forEach(t=>t.addEventListener('click',()=>{live.tab=t.dataset.tab;renderPanel();if(live.tab==='chat')renderChat();}));
 function renderReqs(force){
+  if(live.role==='tecnico'){renderMonitor(force);return;}
   const box=$('#reqs');
   if(live.open){
     const r=live.reqs.find(x=>x.id===live.open);
@@ -1281,6 +1313,83 @@ async function rewrite(r,feedback){
     const t=contentAgent();pushFeed(t?t.id:'',`Nueva ronda de redes para ${r.brand}`);
   }catch(e){toast(API_ERR[e.message]||API_ERR.upstream);}
   finally{live.writing=null;syncSales();renderReqs(true);}
+}
+async function loadMonitor(){
+  if(!live.sb)return;
+  const {data,error}=await live.sb.from('monitor_reports').select('*').order('created_at',{ascending:false}).limit(12);
+  if(error||!data)return;
+  const prev=live.monitor.reports[0];
+  live.monitor.reports=data;
+  if(data[0]&&(!prev||prev.id!==data[0].id)){
+    if(live.monitor.checking){live.monitor.checking=false;toast('Vega terminó la revisión');}
+    if(prev){const v=techAgent();pushFeed(v?v.id:'',data[0].estado==='ok'?'Revisó la web: todo en orden':`Revisó la web: ${data[0].hallazgos.filter(h=>h.tipo!=='mejora').length} puntos a revisar`);}
+  }
+  if(live.on)syncSales();
+}
+const MON_STATE={ok:['aceptada','Todo en orden'],avisos:['nueva','Con avisos'],problemas:['problemas','Con problemas']};
+const MON_GROUPS=[['error','Problemas'],['aviso','Avisos'],['mejora','Mejoras sugeridas']];
+const AREA={disponibilidad:'Disponibilidad',enlaces:'Enlaces',rendimiento:'Rendimiento',seo:'SEO',seguridad:'Seguridad',accesibilidad:'Accesibilidad',formularios:'Formularios',agentes:'Agentes'};
+function scoreClass(n){return n==null?'':n>=90?'good':n>=50?'mid':'bad';}
+function renderMonitor(force){
+  const box=$('#reqs'),m=live.monitor,latest=m.reports[0];
+  const key=`${latest?latest.id:'none'}|${m.checking}|${m.summaryBusy}|${m.summary?m.summary.length:0}`;
+  if(!force&&box.firstChild&&box.firstChild.dataset&&box.firstChild.dataset.key===key)return;
+  const view=el('div',{class:'rd','data-key':key});
+  const [cls,label]=latest?MON_STATE[latest.estado]||MON_STATE.ok:['revision','Sin revisiones'];
+  view.append(el('div',{class:'row between'},el('span',{class:'st '+cls,text:label}),
+    el('span',{class:'mono',text:latest?`${latest.modo==='completo'?'Revisión completa':'Revisión rápida'} · ${since(latest.created_at)}`:'Aún no ha revisado'})));
+  const check=el('button',{type:'button',class:'btn small primary',onclick:checkNow},m.checking?'Revisando…':'Revisar ahora');check.disabled=m.checking;
+  const sum=el('button',{type:'button',class:'btn small',onclick:()=>askSummary(false)},m.summaryBusy?'Preparando resumen…':'Pedir resumen');sum.disabled=m.summaryBusy||!latest;
+  view.append(el('div',{class:'row'},check,sum));
+  if(m.checking)view.append(el('p',{class:'note',text:'Vega está revisando páginas, enlaces, imágenes, formularios, velocidad y agentes. Tarda alrededor de un minuto.'}));
+  const text=m.summary||(latest&&latest.resumen);
+  if(text)view.append(el('section',{class:'ai'},el('div',{class:'row between'},el('p',{class:'eyebrow',text:'Resumen de Vega'}),
+      el('button',{type:'button',class:'btn small',onclick:()=>askSummary(true)},'Enviar a Telegram')),
+    el('p',{class:'summary',text})));
+  if(!latest){
+    view.append(el('p',{class:'empty',text:'Vega revisa la web automáticamente cada 30 minutos y hace una revisión completa una vez al día. Pulsa «Revisar ahora» para la primera.'}));
+    box.replaceChildren(view);return;
+  }
+  const ps=latest.metricas&&latest.metricas.pagespeed;
+  if(ps){
+    view.append(el('div',{class:'block'},el('h5',{text:'Velocidad y calidad (móvil, PageSpeed)'}),
+      el('div',{class:'scores'},...[['Rendimiento',ps.rendimiento],['Accesibilidad',ps.accesibilidad],['SEO',ps.seo],['Buenas prácticas',ps.buenas_practicas]].map(([l,v])=>el('div',{class:'score '+scoreClass(v)},el('b',{text:v==null?'—':String(v)}),el('span',{text:l})))),
+      (ps.lcp||ps.tbt)&&el('p',{class:'small',text:[ps.lcp&&`Carga principal ${ps.lcp}`,ps.tbt&&`bloqueo ${ps.tbt}`,ps.cls&&`saltos ${ps.cls}`].filter(Boolean).join(' · ')})));
+  }
+  const pages=(latest.metricas&&latest.metricas.paginas)||[];
+  if(pages.length)view.append(el('div',{class:'block'},el('h5',{text:'Páginas'}),el('dl',{class:'rd-meta'},
+    ...pages.flatMap(pg=>[el('dt',{text:pg.path==='/'?'Inicio':pg.path.slice(1)}),el('dd',{class:'mono',text:pg.status?`${pg.status} · ${(pg.ms/1000).toFixed(1)} s`:'sin respuesta'})]))));
+  for(const [tipo,title] of MON_GROUPS){
+    const items=latest.hallazgos.filter(h=>h.tipo===tipo);
+    if(!items.length)continue;
+    view.append(el('div',{class:'block'},el('h5',{text:`${title} (${items.length})`}),...items.map(h=>el('div',{class:'finding '+tipo},
+      el('div',{class:'row between'},el('b',{text:h.titulo}),el('span',{class:'fmt',text:AREA[h.area]||h.area})),
+      el('p',{text:h.detalle}),
+      h.url&&/^https:\/\//.test(h.url)&&el('a',{href:h.url,target:'_blank',rel:'noopener',class:'small',text:'Abrir'})))));
+  }
+  if(!latest.hallazgos.length)view.append(el('p',{class:'empty',text:'Vega no encontró nada que arreglar en la última revisión.'}));
+  const hist=m.reports.slice().reverse();
+  view.append(el('div',{class:'block'},el('h5',{text:'Últimas revisiones'}),el('div',{class:'history'},
+    ...hist.map(r=>el('span',{class:'dot-h '+r.estado,title:`${new Date(r.created_at).toLocaleString('es-ES',{dateStyle:'short',timeStyle:'short'})} · ${(MON_STATE[r.estado]||MON_STATE.ok)[1]}`})))));
+  box.replaceChildren(view);
+  if(!latest.visto){
+    latest.visto=true;syncSales();
+    live.sb.from('monitor_reports').update({visto:true}).eq('id',latest.id).then(()=>{},()=>{});
+  }
+}
+async function checkNow(){
+  if(live.monitor.checking)return;
+  live.monitor.checking=true;syncSales();renderReqs(true);
+  try{await agentApi({action:'revisar'});toast('Vega está revisando la web');}
+  catch(e){live.monitor.checking=false;syncSales();renderReqs(true);toast(API_ERR[e.message]||API_ERR.upstream);return;}
+  setTimeout(()=>{if(live.monitor.checking){live.monitor.checking=false;loadMonitor();renderReqs(true);}},150000);
+}
+async function askSummary(telegram){
+  if(live.monitor.summaryBusy)return;
+  live.monitor.summaryBusy=true;renderReqs(true);
+  try{const j=await agentApi({action:'resumen',telegram});live.monitor.summary=j.resumen;if(telegram)toast('Resumen enviado a Telegram');}
+  catch(e){toast(API_ERR[e.message]||API_ERR.upstream);}
+  finally{live.monitor.summaryBusy=false;renderReqs(true);}
 }
 function openFromHash(){
   const m=location.hash.match(/^#solicitud-([0-9a-f-]{36})$/i);

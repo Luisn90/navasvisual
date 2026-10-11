@@ -209,6 +209,24 @@ export async function analyzeSolicitud(env, row, fetcher = fetch) {
   };
 }
 
+// Acceso REST a Supabase con la clave de servicio, para otros módulos del servidor.
+export const sbRest = (env, path, init = {}, fetcher = fetch) => supabase(env, path, init, fetcher);
+
+// Conversación de texto libre con la IA disponible (Claude o Groq).
+export async function aiChat(env, { system, messages, maxTokens = 1500 }, fetcher = fetch) {
+  const provider = aiProvider(env);
+  let text;
+  if (provider === 'claude') {
+    const result = await claude(env, { max_tokens: maxTokens, system, messages }, fetcher);
+    text = result.content?.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+  } else if (provider === 'groq') {
+    const result = await groq(env, { max_tokens: Math.max(maxTokens, 1500), temperature: 0.4, messages: [{ role: 'system', content: system }, ...messages] }, fetcher);
+    text = result.choices?.[0]?.message?.content?.trim();
+  } else throw new Error('ai_config');
+  if (!text) throw new Error('ai_format');
+  return text;
+}
+
 export async function chatWithMarta(env, { message, history = [], solicitudes = [], persona = null }, fetcher = fetch) {
   const context = solicitudes.length ? solicitudes.map(r => {
     const when = new Date(r.created_at).toISOString().slice(0, 16).replace('T', ' ');

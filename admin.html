@@ -426,13 +426,20 @@ function setTeamBadge(count) {
 async function refreshTeamBadge() {
   const { data, error } = await sb.from('solicitudes').select('status, de:diseno->>estado, dv:diseno->>visto, ce:contenido->>estado, cv:contenido->>visto');
   if (error || !data) return;
-  setTeamBadge(data.filter(r => r.status === 'nueva' || (r.de === 'listo' && r.dv !== 'true') || (r.ce === 'listo' && r.cv !== 'true')).length);
+  const { data: mon } = await sb.from('monitor_reports').select('estado, visto').order('created_at', { ascending: false }).limit(1);
+  const vega = mon && mon[0] && mon[0].estado !== 'ok' && !mon[0].visto ? 1 : 0;
+  setTeamBadge(data.filter(r => r.status === 'nueva' || (r.de === 'listo' && r.dv !== 'true') || (r.ce === 'listo' && r.cv !== 'true')).length + vega);
 }
 function startTeamBadge() {
   refreshTeamBadge();
   if (teamBadgeStarted) return;
   teamBadgeStarted = true;
-  try { sb.channel('admin-equipo-avisos').on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, () => refreshTeamBadge()).subscribe(); } catch (e) {}
+  try {
+    sb.channel('admin-equipo-avisos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitudes' }, () => refreshTeamBadge())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'monitor_reports' }, () => refreshTeamBadge())
+      .subscribe();
+  } catch (e) {}
   setInterval(refreshTeamBadge, 60000);
   // La oficina avisa al instante cuando marcas algo como visto.
   window.addEventListener('message', e => {
