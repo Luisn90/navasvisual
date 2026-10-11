@@ -1,6 +1,7 @@
 import { runDesign, signedImageUrls, DESIGN_SERVICES, CAMILO } from './_diseno.mjs';
 import { runContent, CONTENT_SERVICES, TEO } from './_contenido.mjs';
-import { verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
+import { runMonitor, latestReports, writeSummary, chatWithVega } from './_monitor.mjs';
+import { afterResponse, sendTelegram, verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
 const json = (status, body) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -57,6 +58,25 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
       if (!row) return json(404, { error: 'not_found' });
       const paths = [...(row.diseno?.conceptos || []), ...(row.contenido?.visuales || [])].map(c => c.imagen).filter(Boolean);
       return json(200, { urls: await signedImageUrls(env, paths, fetcher) });
+    }
+    if (body?.action === 'revisar') {
+      // Vega revisa en segundo plano; la oficina recibe el resultado en tiempo real.
+      const base = new URL(request.url).origin;
+      await afterResponse(() => runMonitor(env, { base, modo: 'completo' }, fetcher));
+      return json(202, { started: true });
+    }
+    if (body?.action === 'resumen') {
+      const [report] = await latestReports(env, 1, fetcher);
+      if (!report) return json(404, { error: 'no_reports' });
+      const resumen = await writeSummary(env, report, fetcher);
+      if (body.telegram) await sendTelegram(env, `📋 Resumen de Vega sobre la web\n\n${resumen}`, fetcher).catch(() => {});
+      return json(200, { resumen, report_at: report.created_at });
+    }
+    if (body?.action === 'chat' && body.agent === 'tecnico') {
+      if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });
+      const [report] = await latestReports(env, 1, fetcher);
+      const reply = await chatWithVega(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], report }, fetcher);
+      return json(200, { reply });
     }
     if (body?.action === 'chat') {
       if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });

@@ -50,3 +50,41 @@ on conflict (id) do nothing;
 
 -- Teo, el creador de contenido: propuesta para los briefs de Redes.
 alter table public.solicitudes add column if not exists contenido jsonb;
+
+-- Vega, el monitor técnico: historial de revisiones de la web.
+create table if not exists public.monitor_reports (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  modo text not null check (modo in ('rapido', 'completo')),
+  estado text not null check (estado in ('ok', 'avisos', 'problemas')),
+  duracion_ms integer,
+  hallazgos jsonb not null default '[]'::jsonb,
+  metricas jsonb not null default '{}'::jsonb,
+  resumen text,
+  visto boolean not null default false
+);
+create index if not exists monitor_reports_created_at_idx on public.monitor_reports (created_at desc);
+alter table public.monitor_reports enable row level security;
+create policy "admin lee revisiones" on public.monitor_reports for select to authenticated
+  using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+create policy "admin marca revisiones" on public.monitor_reports for update to authenticated
+  using (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'))
+  with check (lower((select auth.jwt()) ->> 'email') = lower('TU_CORREO_DEL_ADMIN'));
+alter publication supabase_realtime add table public.monitor_reports;
+
+-- Programación de Vega con pg_cron + pg_net. Usa la misma clave que MONITOR_SECRET en Vercel,
+-- guardada en Vault: select vault.create_secret('LA_CLAVE', 'vega_monitor_secret');
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+select cron.schedule('vega-rapido', '*/30 * * * *', $$
+  select net.http_post(
+    url := 'https://navasvisual.com/api/monitor?modo=rapido',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'vega_monitor_secret')),
+    timeout_milliseconds := 10000)
+$$);
+select cron.schedule('vega-completo', '0 12 * * *', $$
+  select net.http_post(
+    url := 'https://navasvisual.com/api/monitor?modo=completo',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'vega_monitor_secret')),
+    timeout_milliseconds := 10000)
+$$);

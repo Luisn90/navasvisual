@@ -11,6 +11,8 @@ Cuando alguien envía un brief desde la web, además del aviso que ya llega a Te
 
 6. Si el servicio es **Redes**, Marta se lo pasa a **Teo**, el creador de contenido. Teo prepara estrategia (objetivo, tono y frecuencia), pilares, 6 a 8 publicaciones con texto y hashtags, estilo visual con 3 o 4 imágenes de ejemplo del feed y propuesta de perfil (bio, usuario y destacados). Llega a Telegram y queda en la ficha de la solicitud, donde puedes pedir otra ronda con comentarios.
 
+7. **Vega**, el monitor técnico, revisa la web sola cada 30 minutos (páginas, enlaces e imágenes rotas, formularios y APIs, SEO, cabeceras de seguridad y si Marta, Camilo y Teo están procesando las solicitudes) y una vez al día hace una revisión completa con PageSpeed de Google y un resumen con IA. Avisa por Telegram cuando aparece un problema nuevo o cuando se resuelve. En su ficha (pestaña **Revisión**) están el estado, las puntuaciones, los hallazgos, «Revisar ahora» y «Pedir resumen».
+
 Marta **nunca envía nada al cliente**. Tú revisas el borrador y lo envías desde tu correo («Abrir en mi correo» o «Copiar»).
 
 Si falta configuración, el brief se sigue entregando por Telegram y correo como antes: guardar y analizar son pasos extra que, si fallan, no bloquean la solicitud del cliente.
@@ -37,6 +39,9 @@ En Vercel: **Settings → Environment Variables**, entorno **Production** (y **P
 | `ADMIN_EMAILS` | El mismo correo del paso 1. Si son varios, sepáralos con comas. |
 | `CLOUDFLARE_ACCOUNT_ID` | Opcional, para las imágenes de Camilo. Lo ves en el panel de Cloudflare (barra lateral de **Workers & Pages** o en la URL). |
 | `CLOUDFLARE_API_TOKEN` | Opcional. Cloudflare → **Manage account → Account API Tokens → Create Token** → plantilla **Workers AI**. |
+| `MONITOR_SECRET` | Clave aleatoria que comparten Vercel y Supabase (Vault, `vega_monitor_secret`) para que solo la programación pueda lanzar las revisiones de Vega. |
+| `PAGESPEED_API_KEY` | Opcional. Clave de Google para PageSpeed Insights si la cuota sin clave se queda corta. |
+| `SITE_URL` | Opcional. Dirección que revisa Vega; por defecto, la del propio despliegue. |
 | `GROQ_MODEL` / `ANTHROPIC_MODEL` / `CLOUDFLARE_IMAGE_MODEL` | Opcionales. Por defecto `openai/gpt-oss-120b` y `claude-sonnet-5-5`. |
 
 Sin las variables de Cloudflare, Camilo entrega las direcciones por escrito, sin imágenes.
@@ -61,6 +66,7 @@ Después de guardarlas, vuelve a desplegar el sitio (**Deployments → … → R
 - `api/_diseno.mjs`: Camilo. Pide las direcciones a la IA, genera las imágenes con Cloudflare Workers AI (FLUX.2 klein, con FLUX.1 schnell de respaldo) y las guarda en el bucket privado `disenos` de Supabase. El admin las ve con enlaces temporales que firma `/api/agent` (`action: 'imagenes'`); `action: 'disenar'` pide otra ronda con comentarios.
 - `api/_contenido.mjs`: Teo. Propuesta de redes con la IA de textos e imágenes de ejemplo del feed; se guarda en la columna `contenido`. `action: 'contenido'` pide otra ronda con comentarios.
 - Con Groq, las llamadas usan `reasoning_effort: low` y, si se supera el límite por minuto del plan gratuito, esperan y reintentan una vez.
+- `api/_monitor.mjs` y `api/monitor.mjs`: Vega. Supabase `pg_cron` llama a `/api/monitor?modo=rapido` cada 30 minutos y a `?modo=completo` cada día a las 12:00 UTC (08:00 en Venezuela), con `Authorization: Bearer MONITOR_SECRET`. Cada revisión se guarda en `monitor_reports` (30 días de historial).
 - Los archivos de referencia no se guardan en Supabase: siguen llegando por Telegram y correo. La tabla guarda solo sus nombres.
 
 ## Costos

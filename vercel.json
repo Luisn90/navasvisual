@@ -5,6 +5,9 @@
     },
     "api/agent.mjs": {
       "maxDuration": 60
+    },
+    "api/monitor.mjs": {
+      "maxDuration": 60
     }
   }
 }
