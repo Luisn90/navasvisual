@@ -339,6 +339,14 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
   );
 }
 
+// Ilustraciones de los cuatro pasos de «Cómo empezar», en el mismo orden que t.how.steps.
+const PROCESS_IMAGES = [
+  'assets/proceso/01-elige-tu-plan.webp',
+  'assets/proceso/02-cuentame-tu-proyecto.webp',
+  'assets/proceso/03-confirmamos-el-alcance.webp',
+  'assets/proceso/04-recibe-tu-diseno.webp'
+];
+
 function HomeApp() {
   const { lang, setLang, t } = useI18n();
   const [loading, setLoading] = useStateHome(true);
@@ -499,12 +507,13 @@ function HomeApp() {
           <div className="nv-container">
             <SectionHead eyebrow={t.how.eyebrow} title={t.how.title} lede={t.how.lede} />
             <div className="nv-process__steps reveal-stagger">
-              {t.how.steps.map((s) => (
+              {t.how.steps.map((s, i) => (
                 <div className="nv-process-step" key={s.n}>
                   <div>
                     <span className="nv-process-step__num">{s.n}</span>
                     <h3 className="nv-process-step__title">{s.t}</h3>
                   </div>
+                  {PROCESS_IMAGES[i] && <div className="nv-process-step__art"><img src={PROCESS_IMAGES[i]} alt="" width="720" height="720" loading="lazy" decoding="async" /></div>}
                   <p className="nv-process-step__desc">{s.d}</p>
                 </div>
               ))}
