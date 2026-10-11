@@ -57,8 +57,14 @@ export async function getSolicitud(env, id, fetcher = fetch) {
   const rows = await supabase(env, `solicitudes?id=eq.${id}&select=*`, {}, fetcher);
   return rows?.[0] || null;
 }
+// Busca por el código completo del brief (64 caracteres), el que recibe el cliente para subir su pago.
+export async function getSolicitudByRequest(env, requestId, fetcher = fetch) {
+  if (!/^[0-9a-f]{64}$/.test(requestId || '')) return null;
+  const rows = await supabase(env, `solicitudes?request_id=eq.${requestId}&select=*`, {}, fetcher);
+  return rows?.[0] || null;
+}
 export async function listSolicitudes(env, limit = 25, fetcher = fetch) {
-  return await supabase(env, `solicitudes?select=id,request_id,created_at,status,service,service_name,tier,price,name,brand,ai,diseno,contenido&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
+  return await supabase(env, `solicitudes?select=id,request_id,created_at,status,service,service_name,tier,price,name,brand,ai,diseno,contenido,pago&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
 }
 export async function updateSolicitud(env, id, patch, fetcher = fetch) {
   const rows = await supabase(env, `solicitudes?id=eq.${id}`, {

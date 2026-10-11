@@ -20,6 +20,62 @@ function BriefPaymentRow({ label, value, es }) {
   return <div className="nv-brief__payment-row"><span>{label}</span><strong>{value}</strong><button type="button" onClick={copy}>{copied ? (es ? 'Copiado' : 'Copied') : (es ? 'Copiar' : 'Copy')}</button>{failed && <small role="status">{es ? 'Selecciona el dato y cópialo manualmente.' : 'Select the value and copy it manually.'}</small>}</div>;
 }
 
+// El cliente sube su comprobante: recibe un correo de «estamos verificando tu pago»
+// y Luis lo confirma desde la oficina (entonces llega el correo de pago confirmado).
+const PROOF_COPY = {
+  es: { title: '¿Ya pagaste? Sube tu comprobante', method: 'Método de pago', reference: 'Número de referencia (opcional)', file: 'Captura o PDF del pago', fileHelp: 'JPG, PNG, WebP o PDF, máximo 3 MB.', choose: 'Elegir archivo', change: 'Cambiar archivo', send: 'Enviar comprobante', sending: 'Enviando…', note: 'Te llegará un correo confirmando que lo recibimos. Cuando verifique el pago, te llegará otro con la confirmación.', pickMethod: 'Elige cómo pagaste.', pickFile: 'Adjunta la captura o el PDF de tu pago.', fileError: 'El archivo debe ser JPG, PNG, WebP o PDF de máximo 3 MB.', error: 'No pude registrar tu comprobante. Inténtalo de nuevo o envíamelo por WhatsApp.', confirmed: 'Este pago ya está confirmado.', rate: 'Hiciste varios intentos seguidos. Espera unos minutos o envíamelo por WhatsApp.', doneTitle: 'Recibimos tu comprobante', doneEmail: email => `Te enviamos un correo a ${email} con tu constancia. Cuando verifique el pago, te llegará otro correo con la confirmación.`, doneNoEmail: 'Lo estoy verificando. Te avisaré en cuanto confirme el pago.', another: 'Enviar otro comprobante' },
+  en: { title: 'Already paid? Upload your receipt', method: 'Payment method', reference: 'Reference number (optional)', file: 'Screenshot or PDF of the payment', fileHelp: 'JPG, PNG, WebP or PDF, up to 3 MB.', choose: 'Choose file', change: 'Change file', send: 'Send receipt', sending: 'Sending…', note: "You'll get an email confirming we received it. Once I verify the payment, you'll get another one with the confirmation.", pickMethod: 'Choose how you paid.', pickFile: 'Attach the screenshot or PDF of your payment.', fileError: 'The file must be a JPG, PNG, WebP or PDF up to 3 MB.', error: "I couldn't register your receipt. Try again or send it to me on WhatsApp.", confirmed: 'This payment is already confirmed.', rate: 'Too many attempts in a row. Wait a few minutes or send it on WhatsApp.', doneTitle: 'We received your receipt', doneEmail: email => `We sent an email to ${email} with your proof of submission. Once I verify the payment, you'll get another email with the confirmation.`, doneNoEmail: "I'm verifying it. I'll let you know as soon as the payment is confirmed.", another: 'Send another receipt' }
+};
+
+function PaymentProof({ paymentKey, lang, whatsappUrl }) {
+  const p = PROOF_COPY[lang === 'es' ? 'es' : 'en'];
+  const [metodo, setMetodo] = React.useState('');
+  const [referencia, setReferencia] = React.useState('');
+  const [file, setFile] = React.useState(null);
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [done, setDone] = React.useState(null);
+  const [serverError, setServerError] = React.useState(false);
+  const pick = e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    if (f.size > 3 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(f.type)) { setError(p.fileError); return; }
+    setFile(f); setError('');
+  };
+  const submit = async e => {
+    e.preventDefault();
+    if (busy) return;
+    if (!metodo) { setError(p.pickMethod); return; }
+    if (!file) { setError(p.pickFile); return; }
+    setBusy(true); setError(''); setServerError(false);
+    try {
+      const body = new FormData();
+      body.set('key', paymentKey); body.set('metodo', metodo); body.set('referencia', referencia.trim()); body.set('lang', lang === 'es' ? 'es' : 'en');
+      body.set('comprobante', file);
+      const response = await fetch('/api/pago', { method: 'POST', body, signal: AbortSignal.timeout(40000) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) { setServerError(data.error !== 'file'); setError(data.error === 'confirmed' ? p.confirmed : data.error === 'rate' ? p.rate : data.error === 'file' ? p.fileError : p.error); return; }
+      setDone({ email: data.emailed ? data.email : null });
+    } catch { setServerError(true); setError(p.error); } finally { setBusy(false); }
+  };
+  if (done) return <article className="nv-brief__payment nv-brief__proof nv-brief__proof--done" role="status">
+    <h3>✓ {p.doneTitle}</h3>
+    <p className="nv-order__text">{done.email ? p.doneEmail(done.email) : p.doneNoEmail}</p>
+    <button type="button" className="nv-plan__examples nv-brief__linkbtn" onClick={() => { setDone(null); setFile(null); setReferencia(''); }}>{p.another}</button>
+  </article>;
+  return <form className="nv-brief__payment nv-brief__proof" onSubmit={submit} noValidate>
+    <h3>{p.title}</h3>
+    <fieldset className="nv-brief__methods"><legend>{p.method}</legend>
+      {[['binance', 'Binance Pay'], ['pagomovil', 'Pago Móvil']].map(([value, label]) => <label key={value} className={metodo === value ? 'is-active' : ''}><input type="radio" name="proof-method" value={value} checked={metodo === value} onChange={() => { setMetodo(value); setError(''); }} />{label}</label>)}
+    </fieldset>
+    <label className="nv-brief__proof-field" htmlFor="proof-ref"><span>{p.reference}</span><input id="proof-ref" type="text" value={referencia} maxLength={80} onChange={e => setReferencia(e.target.value.replace(/[\r\n]/g, ''))} autoComplete="off" /></label>
+    <div className="nv-brief__upload"><p className="nv-brief__proof-label">{p.file}</p><div className="nv-brief__filepick"><input id="proof-file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={pick} aria-describedby="proof-help" /><label htmlFor="proof-file">{file ? p.change : p.choose}</label><span id="proof-help">{file ? `${file.name} · ${Math.max(1, Math.round(file.size / 1024))} KB` : p.fileHelp}</span></div></div>
+    {error && <p role="alert" className="nv-brief__error">{error}{serverError && whatsappUrl && <> <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">WhatsApp</a></>}</p>}
+    <button type="submit" className="nv-btn nv-btn--primary" disabled={busy}>{busy ? p.sending : p.send}</button>
+    <p className="nv-order__text">{p.note}</p>
+  </form>;
+}
+
 function OrderModal({ pkg, t, lang, onClose }) {
   const c = BRIEF_COPY[lang === 'es' ? 'es' : 'en'];
   const [step, setStep] = React.useState(0);
@@ -137,7 +193,7 @@ function OrderModal({ pkg, t, lang, onClose }) {
       }
       let safePaymentUrl = null;
       try { const url = new URL(data.paymentUrl); if (url.protocol === 'https:') safePaymentUrl = url.href; } catch {}
-      setResult({ requestId: data.requestId, complete: data.complete, paymentUrl: safePaymentUrl });
+      setResult({ requestId: data.requestId, complete: data.complete, paymentUrl: safePaymentUrl, paymentKey: /^[0-9a-f]{64}$/.test(data.paymentKey || '') ? data.paymentKey : null });
     } catch { setError(c.sendError); } finally { setBusy(false); busyRef.current = false; }
   };
   return (
@@ -202,7 +258,8 @@ function OrderModal({ pkg, t, lang, onClose }) {
               {rateState === 'unavailable' && <p className="nv-order__text" role="status">{es ? 'No pude verificar la tasa BCV con fecha de hoy. Confirma conmigo el monto antes de pagar.' : 'Today’s BCV rate could not be verified. Confirm the amount with me before paying.'}</p>}
               <a className="nv-plan__examples" target="_blank" rel="noopener noreferrer" href={`https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent((es ? 'Hola Luis, quiero confirmar el monto en bolívares para pagar por Pago Móvil. Plan: ' : 'Hi Luis, please confirm the amount in bolívares for Pago Móvil. Plan: ') + pkg.name + '. Solicitud: ' + result.requestId)}`}>{es ? 'Consultar monto en bolívares' : 'Confirm local currency amount'}</a>
             </article>
-            <p className="nv-order__text">{es ? 'Después de pagar, envíame el comprobante con tu número de solicitud. El pago se verifica personalmente; esta página no lo confirma automáticamente.' : 'After paying, send me your receipt and request number. Payment is verified personally; this page does not confirm it automatically.'}</p>
+            {result.paymentKey && <PaymentProof paymentKey={result.paymentKey} lang={lang} whatsappUrl={`https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent((es ? 'Hola Luis, te envío el comprobante para la solicitud ' : 'Hi Luis, here is my receipt for request ') + result.requestId + ' (' + pkg.name + ').')}`} />}
+            <p className="nv-order__text">{result.paymentKey ? (es ? 'El pago se verifica personalmente: la confirmación te llega por correo cuando lo reviso. Si prefieres, también puedes enviarme el comprobante por WhatsApp.' : 'Payments are verified personally: the confirmation reaches you by email once I review it. You can also send me the receipt on WhatsApp.') : (es ? 'Después de pagar, envíame el comprobante con tu número de solicitud. El pago se verifica personalmente; esta página no lo confirma automáticamente.' : 'After paying, send me your receipt and request number. Payment is verified personally; this page does not confirm it automatically.')}</p>
             <a className="nv-btn nv-btn--ghost" target="_blank" rel="noopener noreferrer" href={`https://wa.me/${NV_WHATSAPP_NUMBER}?text=${encodeURIComponent((es ? 'Hola Luis, te envío el comprobante para la solicitud ' : 'Hi Luis, here is my receipt for request ') + result.requestId + ' (' + pkg.name + ').')}`}>{es ? 'Enviar comprobante por WhatsApp' : 'Send receipt via WhatsApp'}</a>
           </section>}
         </>}

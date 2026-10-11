@@ -189,6 +189,19 @@ details.brief summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bo
 .share-card span{color:var(--muted);font-size:11.5px}
 .design input[type=file]{font-size:12.5px;max-width:100%}
 .st.problemas{color:var(--bad);background:#fdeeee;border-color:#f3c9ca}
+/* Pagos de clientes */
+.pay{border:1px solid var(--line);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:13.5px;background:var(--surface)}
+.pay.verificando{border-color:#f3dfa8;background:#fffbf0}
+.pay.confirmado{border-color:#cdebd6;background:#f3fbf5}
+.pay.rechazado{border-color:#f3c9ca;background:#fff7f7}
+.pay p{margin:0}
+.pay .st{justify-self:auto}
+.st.verificando{color:#9a6400;background:#fff6e0;border-color:#f3dfa8}
+.st.confirmado{color:#1f9a48;background:#e8f6ec;border-color:#cdebd6}
+.st.rechazado{color:var(--bad);background:#fdeeee;border-color:#f3c9ca}
+.pay-proof{display:block;max-width:100%;max-height:320px;border-radius:12px;border:1px solid var(--line);background:#fff;object-fit:contain}
+.pay textarea{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13.5px;min-height:70px;resize:vertical}
+.req .pay-flag{color:#9a6400;font-weight:500}
 .scores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .score{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;gap:2px;min-width:0}
 .score b{font-family:var(--f-mono);font-size:18px;font-weight:500}
@@ -994,6 +1007,7 @@ async function loadReqs(first){
   const fresh=first?[]:data.filter(r=>!known.has(r.id));
   const before=new Map(live.reqs.map(r=>[r.id,r.diseno&&r.diseno.estado]));
   const beforeC=new Map(live.reqs.map(r=>[r.id,r.contenido&&r.contenido.estado]));
+  const beforeP=new Map(live.reqs.map(r=>[r.id,r.pago&&r.pago.enviado_at]));
   // Conserva el objeto abierto para no perder lo que estás escribiendo en el borrador.
   live.reqs=data.map(r=>{const old=live.reqs.find(x=>x.id===r.id);return old?Object.assign(old,r):r;});
   const a=salesAgent();
@@ -1016,6 +1030,9 @@ async function loadReqs(first){
       delete live.urls[r.id];pushFeed(t?t.id:'',`Terminó la propuesta de redes de ${r.brand}`);toast(`Teo terminó la propuesta de redes de ${r.brand}`);
     }
   });
+  if(!first)live.reqs.forEach(r=>{
+    if(beforeP.has(r.id)&&payPending(r)&&beforeP.get(r.id)!==r.pago.enviado_at){pushFeed(a?a.id:'',`${r.name} subió el comprobante de pago`);toast(`💳 ${r.brand} envió un comprobante de pago`);}
+  });
   if(fresh.length)toast(fresh.length===1?`Nueva solicitud de ${fresh[0].name}`:`${fresh.length} solicitudes nuevas`);
   if(live.on)syncSales();
   return true;
@@ -1026,8 +1043,10 @@ function syncSales(){
   const k=$('#kLeads');k.textContent=abiertas;const em=k.nextElementSibling;
   em.textContent=nuevas?`${nuevas} sin revisar`:'al día';em.className=nuevas?'warn':'up';
   const a=salesAgent();
+  const pagos=live.reqs.filter(payPending).length;
   if(a&&a.status!=='thinking'&&a.status!=='paused'&&!live.analyzing){
-    if(nuevas){a.status='alert';a.task=nuevas===1?'1 solicitud nueva':`${nuevas} solicitudes nuevas`;}
+    if(pagos){a.status='alert';a.task=pagos===1?'1 pago por verificar':`${pagos} pagos por verificar`;}
+    else if(nuevas){a.status='alert';a.task=nuevas===1?'1 solicitud nueva':`${nuevas} solicitudes nuevas`;}
     else{a.status='idle';a.task='';}
     refreshAgent(a);
   }
@@ -1062,7 +1081,7 @@ function syncSales(){
   if([a,c,t,v].some(x=>x&&selected===x.id))renderPanel();
   // Avisa al admin para el contador junto a «Equipo» en el menú.
   try{
-    const attention=live.reqs.filter(r=>r.status==='nueva'||(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)||(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto)).length
+    const attention=live.reqs.filter(r=>r.status==='nueva'||payPending(r)||(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)||(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto)).length
       +(latest&&latest.estado!=='ok'&&!latest.visto?1:0)
       +live.monitor.cambios.filter(c=>c.estado==='en_revision').length;
     if(window.parent!==window)window.parent.postMessage({type:'nv-team-attention',count:attention},location.origin);
@@ -1081,7 +1100,7 @@ function liveTabs(a){
   const lm=live.monitor.reports[0];
   const n=tech?(lm&&lm.estado!=='ok'&&!lm.visto?lm.hallazgos.filter(h=>h.tipo!=='mejora').length:0)+live.monitor.cambios.filter(c=>c.estado==='en_revision').length:designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length
     :writer?live.reqs.filter(r=>r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto).length
-    :live.reqs.filter(r=>r.status==='nueva').length;
+    :live.reqs.filter(r=>r.status==='nueva'||payPending(r)).length;
   $('#reqCount').textContent=n?String(n):'';
   $('#pSources').innerHTML=tech?'<span class="src">navasvisual.com</span> <span class="src">PageSpeed</span> <span class="src">IA</span>':(designer||writer)?'<span class="src">Briefs de Marta</span> <span class="src">IA de textos e imágenes</span>':'<span class="src">Formulario de la web</span> <span class="src">IA</span>';
   const q=$('#quick');q.innerHTML='';
@@ -1109,7 +1128,7 @@ function renderReqs(force){
   box.replaceChildren(...list.map(r=>el('button',{type:'button',class:'req',onclick:()=>openReq(r)},
     el('b',{text:`${r.brand} · ${r.name}`}),
     el('span',{class:'st '+r.status,text:REQ_STATES[r.status]||r.status}),
-    el('small',{text:`${r.service_name} ${r.tier} · $${r.price}${live.role==='diseno'?` · ${designLabel(r)}`:live.role==='contenido'?` · ${contentLabel(r)}`:r.ai&&r.ai.prioridad?` · prioridad ${r.ai.prioridad}`:''}`}),
+    el('small',null,payPending(r)&&el('span',{class:'pay-flag',text:'💳 Pago por verificar · '}),`${r.service_name} ${r.tier} · $${r.price}${live.role==='diseno'?` · ${designLabel(r)}`:live.role==='contenido'?` · ${contentLabel(r)}`:r.ai&&r.ai.prioridad?` · prioridad ${r.ai.prioridad}`:''}`),
     el('time',{datetime:r.created_at,text:since(r.created_at)}))));
 }
 function openReq(r){
@@ -1156,7 +1175,83 @@ function reqDetail(r){
     ...(live.role==='diseno'
       ?[meta,designBox(r),aiBox,brief]
       :live.role==='contenido'?[meta,contentBox(r),aiBox,brief]
-      :[meta,aiBox,isDesign(r)&&designBox(r),isContent(r)&&contentBox(r),draft,brief,el('p',{class:'note',text:'Marta no envía nada al cliente. Revisa el borrador y envíalo tú desde tu correo.'})]));
+      :[meta,payBox(r),aiBox,isDesign(r)&&designBox(r),isContent(r)&&contentBox(r),draft,brief,el('p',{class:'note',text:'Marta no envía nada al cliente. Revisa el borrador y envíalo tú desde tu correo.'})]));
+}
+const PAY_STATES={verificando:'Esperando tu verificación',confirmado:'Pago confirmado',rechazado:'Pago no confirmado'};
+const PAY_METHODS={binance:'Binance Pay (USDT)',pagomovil:'Pago Móvil',otro:'Otro método'};
+const payPending=r=>!!(r.pago&&r.pago.estado==='verificando');
+const fmtDate=iso=>iso?new Date(iso).toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'}):'';
+// Pago del cliente: ver comprobante, confirmar (le llega el recibo) o rechazar con motivo.
+function payBox(r){
+  const p=r.pago||null,busy=live.paying===r.id;
+  const box=el('section',{class:'pay '+(p?p.estado:''),'aria-label':'Pago'});
+  const head=el('div',{class:'row between'},el('p',{class:'eyebrow',text:'Pago'}),p&&el('span',{class:'st '+p.estado,text:PAY_STATES[p.estado]||p.estado}));
+  box.append(head);
+  if(!p){
+    box.append(el('p',{class:'note',text:'El cliente todavía no ha subido comprobante. Si te pagó por otro medio, puedes marcarlo como pagado y le llegará el correo de confirmación.'}));
+    const b=el('button',{type:'button',class:'btn small',onclick:()=>confirmPayment(r)},busy?'Confirmando…':'Marcar como pagado');b.disabled=busy;
+    box.append(el('div',{class:'row'},b));
+    return box;
+  }
+  box.append(el('dl',{class:'rd-meta'},
+    el('dt',{text:'Método'}),el('dd',{text:PAY_METHODS[p.metodo]||p.metodo||'—'}),
+    p.referencia&&el('dt',{text:'Referencia'}),p.referencia&&el('dd',{class:'selectable mono',text:p.referencia}),
+    el('dt',{text:'Monto del plan'}),el('dd',{text:`$${r.price} USD`}),
+    p.enviado_at&&el('dt',{text:'Comprobante'}),p.enviado_at&&el('dd',{text:fmtDate(p.enviado_at)}),
+    p.confirmado_at&&p.estado==='confirmado'&&el('dt',{text:'Confirmado'}),p.confirmado_at&&p.estado==='confirmado'&&el('dd',{text:fmtDate(p.confirmado_at)}),
+    p.estado==='rechazado'&&p.motivo&&el('dt',{text:'Motivo'}),p.estado==='rechazado'&&p.motivo&&el('dd',{text:p.motivo})));
+  const preview=el('div');
+  const actions=el('div',{class:'row'});
+  if(p.archivo)actions.append(el('button',{type:'button',class:'btn small',onclick:()=>showProof(r,preview)},'Ver comprobante'));
+  if(p.estado!=='confirmado'){
+    const ok=el('button',{type:'button',class:'btn small primary',onclick:()=>confirmPayment(r)},busy?'Confirmando…':'Confirmar pago');ok.disabled=busy;
+    actions.append(ok);
+    if(p.estado==='verificando'){
+      const no=el('button',{type:'button',class:'btn small',onclick:()=>{
+        const motivo=el('textarea',{'aria-label':'Motivo del rechazo',placeholder:'Ej.: No veo el pago en mi cuenta. ¿Puedes enviarme el comprobante completo?'});
+        const send=el('button',{type:'button',class:'btn small',onclick:()=>rejectPayment(r,motivo.value)},'Enviar al cliente');
+        no.replaceWith(el('div',{style:'display:flex;flex-direction:column;gap:8px;width:100%'},el('p',{class:'note',text:'El cliente recibirá un correo con este motivo:'}),motivo,el('div',{class:'row'},send)));
+        motivo.focus();
+      }},'Rechazar');
+      no.disabled=busy;actions.append(no);
+    }
+  }
+  box.append(actions,preview);
+  if(p.estado==='verificando')box.append(el('p',{class:'note',text:'Al confirmar, el cliente recibe el correo «Pago confirmado» con su recibo y la solicitud pasa a «Aceptada».'}));
+  if(p.estado==='confirmado')box.append(el('p',{class:'note',text:p.correo_confirmado?'El cliente recibió el correo de confirmación. Contáctalo para empezar.':'No se pudo enviar el correo de confirmación: avísale tú al cliente.'}));
+  return box;
+}
+async function showProof(r,target){
+  target.replaceChildren(el('p',{class:'note',text:'Abriendo el comprobante…'}));
+  try{
+    const {url,type}=await agentApi({action:'comprobante',id:r.id});
+    if(!url)throw new Error('nf');
+    target.replaceChildren(type&&type.startsWith('image/')?el('a',{href:url,target:'_blank',rel:'noopener'},el('img',{class:'pay-proof',src:url,alt:'Comprobante de pago'})):el('a',{class:'btn small',href:url,target:'_blank',rel:'noopener'},'Abrir PDF del comprobante'));
+  }catch(e){target.replaceChildren(el('p',{class:'note',text:'No pude abrir el comprobante. Inténtalo de nuevo.'}));}
+}
+async function confirmPayment(r){
+  if(live.paying)return;
+  if(!confirm(`¿Confirmas que recibiste el pago de $${r.price} de ${r.brand}?\n\nA ${r.email} le llegará el correo «Pago confirmado».`))return;
+  live.paying=r.id;renderReqs(true);
+  try{
+    const res=await agentApi({action:'pago',id:r.id,decision:'confirmar'});
+    Object.assign(r,res.solicitud||{});
+    toast(res.email?`Pago confirmado. ${r.name} recibió el correo de confirmación.`:'Pago confirmado, pero no pude enviar el correo. Avísale tú.');
+    pushFeed(salesAgent()?.id||'',`Confirmaste el pago de ${r.brand}`);
+  }catch(e){toast('No pude confirmar el pago. Revisa tu conexión e inténtalo de nuevo.');}
+  live.paying=null;syncSales();renderReqs(true);
+}
+async function rejectPayment(r,motivo){
+  motivo=String(motivo||'').trim();
+  if(!motivo){toast('Escribe el motivo para el cliente.');return;}
+  if(live.paying)return;
+  live.paying=r.id;renderReqs(true);
+  try{
+    const res=await agentApi({action:'pago',id:r.id,decision:'rechazar',motivo});
+    Object.assign(r,res.solicitud||{});
+    toast(res.email?'Le enviamos al cliente el correo con el motivo.':'Guardado, pero no pude enviar el correo. Avísale tú.');
+  }catch(e){toast('No pude guardar el rechazo. Inténtalo de nuevo.');}
+  live.paying=null;syncSales();renderReqs(true);
 }
 async function setReqStatus(r,value,quiet){
   const prev=r.status;if(prev===value)return;
