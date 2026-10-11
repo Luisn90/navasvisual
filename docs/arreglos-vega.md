@@ -30,6 +30,7 @@ Luis pide cambios desde la ficha de Vega o hablando con Vega en el chat (ella lo
 - `aprobado`: actualiza la rama del PR con `main`, ejecuta las pruebas y espera a que la vista previa de Vercel esté en `READY`. Si todo está bien, **une el PR** (squash) y pon `estado = 'hecho'`, `resuelto_at = now()` y una `respuesta` corta. Si algo falla, no lo unas: déjalo en `en_revision` y explica en `respuesta` qué pasó.
 - `rechazado`: cierra el PR con un comentario breve y pon `estado = 'descartado'`.
 - Un PR que necesita revisión **solo se une si su fila está en `aprobado`**.
+- **Si Vercel no crea la vista previa** de la rama en 5 minutos (a veces no le llega el aviso de GitHub), sube un commit vacío (`git commit --allow-empty -m "Vuelve a pedir la vista previa a Vercel"`) y espera otros 10 minutos. Solo si tampoco aparece, deja la fila como está y explícalo; no la devuelvas a `en_revision`, para que Luis no tenga que aprobarla otra vez.
 
 ### 2. Pendientes
 
@@ -70,7 +71,7 @@ Atiende los que tengan `estado = 'pendiente'`, del más antiguo al más nuevo:
      values ('Qué cambia, en palabras simples', 'vega', 'en_revision', 'Por qué y qué riesgo tiene', 'https://github.com/Luisn90/navasvisual/pull/…');
      ```
    - **No se puede arreglar en el código:** servicios externos caídos (BCV, Google), cuotas agotadas, variables o claves que faltan en Vercel, decisiones de negocio o de diseño, y migraciones grandes (por ejemplo, pasar a Vite). Explica el motivo y qué tendría que hacer Luis.
-4. Arreglos seguros: crea una rama `vega/seguro-AAAAMMDD-HHMM` desde `main`, haz los cambios, ejecuta `node --test tests/*.test.mjs` y, si pasan, sube la rama, abre un PR y espera a que el despliegue de vista previa de Vercel de esa rama esté en `READY`. Si todo está bien, une el PR (squash). Si algo falla, no lo unas y trátalo como «con revisión».
+4. Arreglos seguros: crea una rama `vega/seguro-AAAAMMDD-HHMM` desde `main`, haz los cambios, ejecuta `node --test tests/*.test.mjs` y, si pasan, sube la rama, abre un PR y espera a que el despliegue de vista previa de Vercel de esa rama esté en `READY`. Si la vista previa no aparece en 5 minutos, sube un commit vacío para pedirla de nuevo. Si todo está bien, une el PR (squash). Si algo falla, no lo unas y trátalo como «con revisión».
 5. Arreglos con revisión: otra rama `vega/revision-AAAAMMDD-HHMM`, mismo proceso de pruebas, abre el PR y **no lo unas**. Explica en el PR qué cambia y cómo probarlo.
 6. Nunca: borres archivos, toques datos de clientes, cambies precios o textos comerciales, cambies claves, ni hagas push directo a `main`.
 7. Guarda tu informe en Supabase (una sola fila por ejecución, solo si hiciste algo o hay algo nuevo que contar):
