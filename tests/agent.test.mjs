@@ -124,3 +124,36 @@ test('brief submission stores the request for Marta after notifying Telegram', a
   assert.ok(urls.findIndex(u => u.includes('sendDocument')) < urls.findIndex(u => u.includes('on_conflict')));
   assert.ok(urls.some(u => u.includes('sendMessage')));
 });
+
+test('uses Groq when there is no Claude key', async () => {
+  const calls = [];
+  const fetcher = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.includes('on_conflict')) return Response.json([{ ...JSON.parse(options.body), id: ROW_ID, created_at: '2026-10-11T07:00:00Z' }]);
+    if (url.includes('id=eq.')) return Response.json([{ id: ROW_ID }]);
+    if (url.includes('api.groq.com')) return Response.json({ choices: [{ message: { tool_calls: [{ function: { name: 'registrar_analisis', arguments: JSON.stringify(analysis) } }] } }] });
+    if (url.includes('telegram')) return Response.json({ ok: true });
+    throw new Error(`unexpected ${url}`);
+  };
+  const groqEnv = { ...env, ANTHROPIC_API_KEY: '', GROQ_API_KEY: 'gsk_test' };
+  const result = await processNewSolicitud(groqEnv, record, 'https://site.example', fetcher);
+  assert.equal(result.analyzed, true);
+  const call = calls.find(c => c.url.includes('groq'));
+  assert.equal(call.options.headers.Authorization, 'Bearer gsk_test');
+  const body = JSON.parse(call.options.body);
+  assert.equal(body.model, 'openai/gpt-oss-120b');
+  assert.equal(body.tool_choice.function.name, 'registrar_analisis');
+  assert.equal(calls.some(c => c.url.includes('anthropic')), false);
+});
+
+test('Groq chat replies come from the message content', async () => {
+  const fetcher = async url => {
+    if (url.includes('/auth/v1/user')) return Response.json({ email: 'luis@example.com' });
+    if (url.includes('select=')) return Response.json([]);
+    if (url.includes('api.groq.com')) return Response.json({ choices: [{ message: { content: 'No tienes solicitudes pendientes.' } }] });
+    throw new Error(`unexpected ${url}`);
+  };
+  const response = await handleAgent(agentRequest({ action: 'chat', message: 'hola' }), { env: { ...env, ANTHROPIC_API_KEY: '', GROQ_API_KEY: 'gsk_test' }, fetcher });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).reply, 'No tienes solicitudes pendientes.');
+});

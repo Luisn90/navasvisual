@@ -837,7 +837,7 @@ const SB_URL='https://kzbhybcyjjqupojuakuw.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
 const REQ_STATES={nueva:'Nueva',revision:'En revisión',propuesta:'Propuesta enviada',aceptada:'Aceptada',descartada:'Descartada'};
 const REQ_LABELS={name:'Nombre',email:'Correo',brand:'Marca',business:'Actividad',audience:'Público',existing:'Marca nueva o rediseño',goals:'Objetivo',style:'Estilo',colors:'Colores',uses:'Usos del logo',slogan:'Eslogan',scope:'Alcance',platform:'Web o redes actuales',deadline:'Fecha deseada',links:'Enlaces de referencia',notes:'Notas de referencias',reference:'Proyecto de referencia'};
-const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de Claude o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'Claude no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.'};
+const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.'};
 const live={on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false};
 const salesAgent=()=>agents.find(a=>a.role==='ventas');
 function el(tag,props,...kids){
@@ -915,7 +915,7 @@ function liveTabs(a){
   if(!on)return;
   document.querySelectorAll('#pTabs .tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===live.tab)));
   const n=live.reqs.filter(r=>r.status==='nueva').length;$('#reqCount').textContent=n?String(n):'';
-  $('#pSources').innerHTML='<span class="src">Formulario de la web</span> <span class="src">Claude</span>';
+  $('#pSources').innerHTML='<span class="src">Formulario de la web</span> <span class="src">IA</span>';
   const q=$('#quick');q.innerHTML='';
   ['¿Qué solicitudes tengo pendientes?','¿Cuál atiendo primero?','Resume la última solicitud'].forEach(t=>q.append(el('button',{type:'button',text:t,onclick:()=>send(t)})));
   if(showReqs)renderReqs(false);

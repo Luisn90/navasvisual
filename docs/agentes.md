@@ -3,9 +3,9 @@
 Cuando alguien envía un brief desde la web, además del aviso que ya llega a Telegram y al correo:
 
 1. `api/brief.mjs` guarda la solicitud en la tabla `solicitudes` de Supabase.
-2. Marta (la agente comercial) la analiza con Claude: resumen, encaje con el plan, preguntas pendientes, prioridad, siguiente paso y un borrador de respuesta.
+2. Marta (la agente comercial) la analiza con IA (Groq gratis o Claude): resumen, encaje con el plan, preguntas pendientes, prioridad, siguiente paso y un borrador de respuesta.
 3. Llega un segundo mensaje a Telegram con ese análisis y un enlace que abre la solicitud en el admin.
-4. En **Admin → Equipo**, Marta se pone en amarillo y su ficha muestra la pestaña **Solicitudes**: lista, estados, análisis y borrador editable. La pestaña **Chat** habla con Claude sobre tus solicitudes.
+4. En **Admin → Equipo**, Marta se pone en amarillo y su ficha muestra la pestaña **Solicitudes**: lista, estados, análisis y borrador editable. La pestaña **Chat** habla con la IA sobre tus solicitudes.
 
 Marta **nunca envía nada al cliente**. Tú revisas el borrador y lo envías desde tu correo («Abrir en mi correo» o «Copiar»).
 
@@ -28,9 +28,12 @@ En Vercel: **Settings → Environment Variables**, entorno **Production** (y **P
 | --- | --- |
 | `SUPABASE_URL` | `https://kzbhybcyjjqupojuakuw.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → **Project Settings → API Keys** → clave `service_role` (o la *secret key*). Es privada: da acceso total a la base de datos. |
-| `ANTHROPIC_API_KEY` | Créala en [console.anthropic.com](https://console.anthropic.com) → **API Keys**. Necesita saldo o método de pago. |
+| `GROQ_API_KEY` | IA gratuita. Créala en [console.groq.com/keys](https://console.groq.com/keys); empieza por `gsk_`. |
+| `ANTHROPIC_API_KEY` | Opcional, de pago. Si existe, Marta usa Claude en lugar de Groq. Créala en [console.anthropic.com](https://console.anthropic.com) → **API Keys**. |
 | `ADMIN_EMAILS` | El mismo correo del paso 1. Si son varios, sepáralos con comas. |
-| `ANTHROPIC_MODEL` | Opcional. Por defecto `claude-sonnet-5-5`. |
+| `GROQ_MODEL` / `ANTHROPIC_MODEL` | Opcionales. Por defecto `openai/gpt-oss-120b` y `claude-sonnet-5-5`. |
+
+Basta con una de las dos claves de IA. Sin ninguna, las solicitudes se guardan y aparecen en la oficina, pero sin análisis ni borrador.
 
 Después de guardarlas, vuelve a desplegar el sitio (**Deployments → … → Redeploy**).
 
@@ -43,7 +46,7 @@ Después de guardarlas, vuelve a desplegar el sitio (**Deployments → … → R
 
 ## Cómo funciona por dentro
 
-- `api/_solicitudes.mjs`: catálogo de servicios, guardado en Supabase, llamadas a Claude, aviso de Telegram y verificación del admin.
+- `api/_solicitudes.mjs`: catálogo de servicios, guardado en Supabase, llamadas a la IA (Groq o Claude), aviso de Telegram y verificación del admin.
 - `api/agent.mjs`: `POST /api/agent` con `{ action: 'analizar', id }` o `{ action: 'chat', message, history }`. Exige la sesión de Supabase del admin (cabecera `Authorization: Bearer …`) y que su correo esté en `ADMIN_EMAILS`.
 - `admin-equipo.html`: si hay sesión del admin, lee la tabla `solicitudes` (protegida por RLS) y se actualiza en tiempo real. Sin sesión, la oficina sigue en modo ejemplo.
 - El texto del brief lo escribe el cliente; las instrucciones de Marta le indican tratarlo solo como información.
@@ -51,4 +54,4 @@ Después de guardarlas, vuelve a desplegar el sitio (**Deployments → … → R
 
 ## Costos
 
-Cada solicitud usa una llamada a Claude para el análisis, y cada mensaje del chat otra. Con el volumen normal de briefs el gasto es bajo; puedes poner un límite mensual en la consola de Anthropic (**Settings → Limits**).
+Cada solicitud usa una llamada a la IA para el análisis, y cada mensaje del chat otra. Con Groq entra en el plan gratuito, que tiene límites diarios de peticiones muy por encima de este uso. Con Claude se paga por uso; puedes poner un límite mensual en la consola de Anthropic (**Settings → Limits**).

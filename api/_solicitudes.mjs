@@ -16,10 +16,17 @@ export const labels = {
   deadline: 'Fecha deseada', links: 'Enlaces de referencia', notes: 'Notas de referencias', reference: 'Proyecto de referencia'
 };
 export const STATUSES = ['nueva', 'revision', 'propuesta', 'aceptada', 'descartada'];
-const DEFAULT_MODEL = 'claude-sonnet-5-5';
+const DEFAULT_CLAUDE_MODEL = 'claude-sonnet-5-5';
+const DEFAULT_GROQ_MODEL = 'openai/gpt-oss-120b';
 
 export const supabaseReady = env => Boolean(env.SUPABASE_URL?.trim() && env.SUPABASE_SERVICE_ROLE_KEY?.trim());
-export const claudeReady = env => Boolean(env.ANTHROPIC_API_KEY?.trim());
+// Proveedor de IA: Claude si hay clave de Anthropic; si no, Groq (plan gratuito).
+export function aiProvider(env) {
+  if (env.ANTHROPIC_API_KEY?.trim()) return 'claude';
+  if (env.GROQ_API_KEY?.trim()) return 'groq';
+  return null;
+}
+export const aiReady = env => Boolean(aiProvider(env));
 
 async function supabase(env, path, init = {}, fetcher = fetch) {
   const base = env.SUPABASE_URL.trim().replace(/\/$/, '');
@@ -91,11 +98,28 @@ async function claude(env, body, fetcher = fetch) {
   const response = await fetcher('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'x-api-key': env.ANTHROPIC_API_KEY.trim(), 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-    body: JSON.stringify({ model: env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL, ...body }),
+    body: JSON.stringify({ model: env.ANTHROPIC_MODEL?.trim() || DEFAULT_CLAUDE_MODEL, ...body }),
     signal: AbortSignal.timeout(40000)
   });
   if (!response.ok) throw new Error(`claude_${response.status}`);
   return response.json();
+}
+// Groq usa el formato de chat compatible con OpenAI.
+async function groq(env, body, fetcher = fetch) {
+  const response = await fetcher('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.GROQ_API_KEY.trim()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: env.GROQ_MODEL?.trim() || DEFAULT_GROQ_MODEL, ...body }),
+    signal: AbortSignal.timeout(40000)
+  });
+  if (!response.ok) throw new Error(`groq_${response.status}`);
+  return response.json();
+}
+function parseJsonLoose(text) {
+  if (!text) return null;
+  const start = text.indexOf('{'), end = text.lastIndexOf('}');
+  if (start < 0 || end <= start) return null;
+  try { return JSON.parse(text.slice(start, end + 1)); } catch { return null; }
 }
 
 const ANALYSIS_TOOL = {
@@ -117,13 +141,26 @@ const ANALYSIS_TOOL = {
 };
 
 export async function analyzeSolicitud(env, row, fetcher = fetch) {
-  const result = await claude(env, {
-    max_tokens: 2000, system: MARTA, tools: [ANALYSIS_TOOL], tool_choice: { type: 'tool', name: ANALYSIS_TOOL.name },
-    messages: [{ role: 'user', content: `Analiza esta solicitud nueva y prepara el borrador de respuesta.\n\n<brief>\n${briefText(row)}\n</brief>` }]
-  }, fetcher);
-  const block = result.content?.find(b => b.type === 'tool_use' && b.name === ANALYSIS_TOOL.name);
-  if (!block?.input?.resumen) throw new Error('claude_format');
-  const a = block.input;
+  const prompt = `Analiza esta solicitud nueva y prepara el borrador de respuesta.\n\n<brief>\n${briefText(row)}\n</brief>`;
+  let a;
+  if (aiProvider(env) === 'claude') {
+    const result = await claude(env, {
+      max_tokens: 2000, system: MARTA, tools: [ANALYSIS_TOOL], tool_choice: { type: 'tool', name: ANALYSIS_TOOL.name },
+      messages: [{ role: 'user', content: prompt }]
+    }, fetcher);
+    a = result.content?.find(b => b.type === 'tool_use' && b.name === ANALYSIS_TOOL.name)?.input;
+  } else if (aiProvider(env) === 'groq') {
+    const result = await groq(env, {
+      max_tokens: 3000, temperature: 0.4,
+      messages: [{ role: 'system', content: MARTA }, { role: 'user', content: prompt }],
+      tools: [{ type: 'function', function: { name: ANALYSIS_TOOL.name, description: ANALYSIS_TOOL.description, parameters: ANALYSIS_TOOL.input_schema } }],
+      tool_choice: { type: 'function', function: { name: ANALYSIS_TOOL.name } }
+    }, fetcher);
+    const message = result.choices?.[0]?.message;
+    const call = message?.tool_calls?.find(c => c.function?.name === ANALYSIS_TOOL.name);
+    a = parseJsonLoose(call?.function?.arguments) || parseJsonLoose(message?.content);
+  } else throw new Error('ai_config');
+  if (!a?.resumen) throw new Error('ai_format');
   return {
     resumen: String(a.resumen), encaje: String(a.encaje || ''),
     faltantes: Array.isArray(a.faltantes) ? a.faltantes.map(String).slice(0, 10) : [],
@@ -145,13 +182,16 @@ export async function chatWithMarta(env, { message, history = [], solicitudes = 
     if (messages.length && messages.at(-1).role === t.role) messages.at(-1).content += `\n\n${t.content}`;
     else messages.push({ ...t });
   }
-  const result = await claude(env, {
-    max_tokens: 1200,
-    system: `${MARTA}\n\nEstás hablando con Luis en su panel. Responde breve y útil. Solicitudes recientes (estado, fecha UTC, cliente, plan, resumen):\n${context}`,
-    messages
-  }, fetcher);
-  const text = result.content?.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-  if (!text) throw new Error('claude_format');
+  const system = `${MARTA}\n\nEstás hablando con Luis en su panel. Responde breve y útil. Solicitudes recientes (estado, fecha UTC, cliente, plan, resumen):\n${context}`;
+  let text;
+  if (aiProvider(env) === 'claude') {
+    const result = await claude(env, { max_tokens: 1200, system, messages }, fetcher);
+    text = result.content?.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+  } else if (aiProvider(env) === 'groq') {
+    const result = await groq(env, { max_tokens: 1500, temperature: 0.5, messages: [{ role: 'system', content: system }, ...messages] }, fetcher);
+    text = result.choices?.[0]?.message?.content?.trim();
+  } else throw new Error('ai_config');
+  if (!text) throw new Error('ai_format');
   return text;
 }
 
@@ -186,7 +226,7 @@ export async function processNewSolicitud(env, record, origin, fetcher = fetch) 
   catch (error) { console.error('Solicitud: no se pudo guardar', error.message); return { stored: false }; }
   if (!row) return { stored: true, duplicate: true };
   let ai = null;
-  if (claudeReady(env)) {
+  if (aiReady(env)) {
     try {
       ai = await analyzeSolicitud(env, row, fetcher);
       await updateSolicitud(env, row.id, { ai, ai_at: new Date().toISOString() }, fetcher);

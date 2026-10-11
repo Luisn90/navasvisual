@@ -1,4 +1,4 @@
-import { verifyAdmin, supabaseReady, claudeReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
+import { verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
 const json = (status, body) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -13,7 +13,7 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
 
   const auth = await verifyAdmin(env, request, fetcher).catch(() => ({ ok: false, status: 503 }));
   if (!auth.ok) return json(auth.status, { error: auth.status === 503 ? 'config' : 'auth' });
-  if (!claudeReady(env) || !supabaseReady(env)) return json(503, { error: 'config' });
+  if (!aiReady(env) || !supabaseReady(env)) return json(503, { error: 'config' });
 
   let body;
   try {
