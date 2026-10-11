@@ -12,6 +12,7 @@ function site({ brokenImage = false, previous = null, slow = false } = {}) {
     calls.push({ url, options });
     const u = new URL(url);
     if (u.host === 'db.example.co') {
+      if (u.pathname.endsWith('/monitor_fixes')) return Response.json([]);
       if (u.pathname.endsWith('/solicitudes')) return Response.json([{ id: '1', brand: 'Chess', created_at: new Date(Date.now() - 3600e3).toISOString(), ai: null }]);
       if (options.method === 'POST') return Response.json([{ ...JSON.parse(options.body), id: 'r1', created_at: new Date().toISOString() }]);
       if (options.method === 'DELETE') return new Response('');
@@ -103,4 +104,28 @@ test('the scheduled route requires the shared secret', async () => {
   const ok = await handleMonitor(new Request(`${BASE}/api/monitor?modo=completo`, { method: 'POST', headers: { Authorization: 'Bearer s3cret' } }), { env, fetcher });
   assert.equal(ok.status, 202);
   assert.equal((await ok.json()).modo, 'completo');
+});
+
+test('Vega relays Claude fix reports to Telegram once', async () => {
+  const { telegramFix, notifyFixes } = await import('../api/_monitor.mjs');
+  const fix = { id: 'f1', resumen: 'Revisé 3 hallazgos.', notificado: false,
+    arreglados: [{ hallazgo_id: 'desc:/about.html', titulo: 'Descripción de about', cambio: 'añadí meta description', publicado: true },
+      { hallazgo_id: 'headers', titulo: 'Cabeceras de seguridad', cambio: 'vercel.json', publicado: false, pr_url: 'https://github.com/Luisn90/navasvisual/pull/20' },
+      { titulo: 'Otro', publicado: false, pr_url: 'https://evil.example/x' }],
+    pendientes: [{ hallazgo_id: 'api:rate', titulo: 'Tasa del BCV', motivo: 'La web del BCV no responde.', accion_usuario: 'Nada por ahora.' }] };
+  const text = telegramFix(fix, 'https://site.example/admin.html');
+  assert.match(text, /Arreglado y publicado:\n• Descripción de about — añadí meta description/);
+  assert.match(text, /Listo para que lo revises[\s\S]*pull\/20/);
+  assert.doesNotMatch(text, /evil\.example/);
+  assert.match(text, /No lo pude arreglar:\n• Tasa del BCV: La web del BCV no responde\. Qué hacer: Nada por ahora\./);
+  const calls = [];
+  const fetcher = async (url, options = {}) => {
+    calls.push({ url, options });
+    if (url.includes('monitor_fixes?select')) return Response.json([fix]);
+    if (url.includes('monitor_fixes?id=eq.f1')) return new Response('');
+    return Response.json({ ok: true });
+  };
+  await notifyFixes({ ...env }, 'https://site.example/admin.html', fetcher);
+  assert.equal(calls.filter(c => c.url.includes('sendMessage')).length, 1);
+  assert.deepEqual(JSON.parse(calls.find(c => c.options.method === 'PATCH').options.body), { notificado: true });
 });
