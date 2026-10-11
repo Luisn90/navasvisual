@@ -13,11 +13,13 @@ export async function handleOgImage(request, { env = process.env, fetcher = fetc
     const response = await fetcher(`${base}/storage/v1/object/public/web/${OG_PATH}`, { signal: AbortSignal.timeout(8000) });
     const type = response.headers.get('content-type') || '';
     if (!response.ok || !/^image\/(jpeg|png|webp)/.test(type)) return fallback();
-    const body = request.method === 'HEAD' ? null : await response.arrayBuffer();
-    return new Response(body, {
+    const bytes = await response.arrayBuffer();
+    // Tamaño explícito: algunos robots (como el de WhatsApp) descartan imágenes sin Content-Length.
+    return new Response(request.method === 'HEAD' ? null : bytes, {
       status: 200,
       headers: {
         'Content-Type': type,
+        'Content-Length': String(bytes.byteLength),
         // Corto en el navegador y en Vercel para que un cambio se vea en pocos minutos.
         'Cache-Control': 'public, max-age=300, s-maxage=300, stale-while-revalidate=86400',
         'X-Content-Type-Options': 'nosniff'
