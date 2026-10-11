@@ -230,3 +230,26 @@ test('chat with Camilo uses his persona', async () => {
   const body = JSON.parse(calls.find(c => c.url.includes('anthropic')).options.body);
   assert.match(body.system, /^Eres Camilo/);
 });
+
+test('Groq falls back to JSON mode when the tool call is rejected', async () => {
+  const bodies = [];
+  const fetcher = async (url, options = {}) => {
+    if (url.includes('api.groq.com')) {
+      const body = JSON.parse(options.body); bodies.push(body);
+      if (body.tools) return Response.json({ error: { code: 'tool_use_failed' } }, { status: 400 });
+      return Response.json({ choices: [{ message: { content: JSON.stringify(analysis) } }] });
+    }
+    throw new Error(`unexpected ${url}`);
+  };
+  const { analyzeSolicitud } = await import('../api/_solicitudes.mjs');
+  const ai = await analyzeSolicitud({ GROQ_API_KEY: 'gsk_test' }, { ...record, id: ROW_ID }, fetcher);
+  assert.equal(ai.resumen, analysis.resumen);
+  assert.equal(bodies.length, 2);
+  assert.deepEqual(bodies[1].response_format, { type: 'json_object' });
+});
+
+test('Cloudflare account id is extracted from a pasted dashboard URL', async () => {
+  const { cloudflareAccount } = await import('../api/_diseno.mjs');
+  assert.equal(cloudflareAccount({ CLOUDFLARE_ACCOUNT_ID: 'https://dash.cloudflare.com/0123456789abcdef0123456789abcdef/home' }), '0123456789abcdef0123456789abcdef');
+  assert.equal(cloudflareAccount({ CLOUDFLARE_ACCOUNT_ID: ' 0123456789abcdef0123456789abcdef ' }), '0123456789abcdef0123456789abcdef');
+});
