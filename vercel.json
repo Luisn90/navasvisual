@@ -1,7 +1,10 @@
 {
   "functions": {
     "api/brief.mjs": {
-      "maxDuration": 30
+      "maxDuration": 60
+    },
+    "api/agent.mjs": {
+      "maxDuration": 60
     }
   }
 }

@@ -1,21 +1,9 @@
 import { createHash } from 'node:crypto';
+import { services, labels, buildRecord, processNewSolicitud, afterResponse } from './_solicitudes.mjs';
 
 const MAX_BODY = 4 * 1024 * 1024;
 const MAX_FILES = 3 * 1024 * 1024;
 const MAX_FILE = MAX_FILES;
-const services = {
-  logo: { name: 'Logo', prices: [50, 100, 160], required: ['existing', 'style', 'uses'] },
-  identidad: { name: 'Identidad', prices: [200, 350, 600], required: ['existing', 'style', 'uses'] },
-  wordpress: { name: 'WordPress', prices: [250, 500, 850], required: ['scope'] },
-  vibecode: { name: 'Vibecode', prices: [300, 700, 1400], required: ['scope'] },
-  redes: { name: 'Redes', prices: [60, 110, 180], required: ['scope'] }
-};
-const labels = {
-  name: 'Nombre', email: 'Correo', brand: 'Marca', business: 'Actividad', audience: 'Público',
-  existing: 'Marca nueva o rediseño', goals: 'Objetivo', style: 'Estilo', colors: 'Colores',
-  uses: 'Usos del logo', slogan: 'Eslogan', scope: 'Alcance', platform: 'Web o redes actuales',
-  deadline: 'Fecha deseada', links: 'Enlaces de referencia', notes: 'Notas de referencias', reference: 'Proyecto de referencia'
-};
 // Best-effort safeguards per running function instance. Vercel Firewall rules can add global limits.
 const attempts = new Map();
 const completed = new Map();
@@ -136,6 +124,9 @@ export async function handleBrief(request, { env = process.env, fetcher = fetch,
   if (telegram || email) {
     if (completed.size > 1000) completed.clear();
     completed.set(id, { telegram, email, until: now + 3600000 });
+    // Guarda la solicitud para Marta y le pide el análisis, sin retrasar la respuesta al cliente.
+    const record = buildRecord({ id, serviceKey: input.service, tierIndex: input.tier, values, files });
+    await afterResponse(() => processNewSolicitud(env, record, new URL(request.url).origin, fetcher));
     return json(200, { accepted: true, complete, deliveredTo: { telegram, email }, requestId: id.slice(0, 12), paymentUrl: complete ? paymentUrl(env) : null });
   }
   return json(502, { error: 'delivery' });

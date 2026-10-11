@@ -133,9 +133,47 @@ details.instr textarea{width:100%;box-sizing:border-box;margin-top:8px;min-heigh
 .swatches input:focus-visible+span{outline:2px solid var(--fg);outline-offset:3px}
 .err{color:var(--bad);font-size:13px;margin:0}
 .sheet .actions{display:flex;justify-content:flex-end;gap:8px}
-.toast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:var(--fg);color:var(--accent-ink);font-weight:500;font-size:13px;padding:10px 18px;border-radius:999px;z-index:30;white-space:nowrap}
+.toast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:var(--fg);color:var(--accent-ink);font-weight:500;font-size:13px;padding:10px 18px;border-radius:18px;z-index:30;max-width:min(440px,calc(100% - 32px));box-sizing:border-box;text-align:center}
 .nogl{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}
 
+
+/* Bandeja de solicitudes de Marta */
+.tabs{display:flex;gap:4px;margin:12px 20px 0;padding:4px;background:var(--surface-2);border-radius:999px}
+.tab{flex:1;border:0;background:none;border-radius:999px;padding:8px 12px;font-size:13px;font-weight:500;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgb(0 0 0 / .08)}
+.tab span{font-family:var(--f-mono);font-size:11px;margin-left:4px;color:var(--warn)}
+.reqs{flex:1;overflow-y:auto;min-height:0;padding:10px 10px 16px}
+.req{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:18px;padding:12px}
+.req:hover{background:var(--surface-2)}
+.req b{font-weight:500;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.req small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.req time{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);text-align:right}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;padding:2px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;justify-self:end}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st.nueva{color:#9a6400;background:#fff6e0;border-color:#f3dfa8}
+.st.revision{color:var(--busy)} .st.propuesta{color:#7a4fd6} .st.aceptada{color:#1f9a48} .st.descartada{color:var(--idle)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.5;margin:0}
+.rd{display:flex;flex-direction:column;gap:14px;padding:6px 10px}
+.rd-back{align-self:flex-start}
+.rd h4{margin:0;font-size:24px;font-weight:500;letter-spacing:-.01em;line-height:1.15;text-wrap:balance}
+.rd select{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px}
+.rd-meta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 14px;font-size:13px;margin:0}
+.rd-meta dt{color:var(--muted)} .rd-meta dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.selectable{user-select:all} .mono{font-family:var(--f-mono);font-size:12px}
+.ai{background:var(--surface-2);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;line-height:1.5}
+.ai p{margin:0} .ai ul{margin:4px 0 0;padding-left:18px}
+.prio{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em}
+.prio.alta{color:var(--bad)} .prio.media{color:var(--warn)} .prio.baja{color:#1f9a48}
+.draft{display:flex;flex-direction:column;gap:8px}
+.draft input,.draft textarea{width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13.5px}
+.draft input:focus,.draft textarea:focus{border-color:var(--fg);outline:none}
+.draft textarea{min-height:220px;resize:vertical;line-height:1.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.between{justify-content:space-between}
+a.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
+details.brief summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:8px}
+.note{margin:0;font-size:12px;color:var(--muted)}
+.btn:disabled{opacity:.5;cursor:default}
 @media (max-width:1100px){.navtitle{display:none}}
 @media (max-width:900px){
   .roster{width:220px}
@@ -208,6 +246,11 @@ img{max-width:100%}
         <div class="instr-actions"><button class="btn small" id="pInstrSave" type="button">Guardar instrucciones</button></div>
       </details>
     </div>
+    <div class="tabs" id="pTabs" role="tablist" hidden>
+      <button type="button" class="tab" role="tab" data-tab="reqs" aria-selected="true">Solicitudes <span id="reqCount"></span></button>
+      <button type="button" class="tab" role="tab" data-tab="chat" aria-selected="false">Chat</button>
+    </div>
+    <div class="reqs" id="reqs" hidden></div>
     <div class="chat" id="chat" aria-live="polite"></div>
     <div class="quick" id="quick"></div>
     <form class="composer" id="chatForm">
@@ -252,6 +295,7 @@ img{max-width:100%}
 </div>
 
 <script src="assets/vendor/three-0.158.0.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
@@ -694,6 +738,7 @@ function renderPanel(){
   $('#chatInput').placeholder=`Escribe a ${a.name}…`;
   const q=$('#quick');q.innerHTML='';
   ROLES[a.role].quick.forEach(t=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>send(t);q.appendChild(b);});
+  liveTabs(a);
 }
 function renderChat(){
   const a=byId(selected);if(!a)return;const c=$('#chat');c.innerHTML='';
@@ -720,20 +765,26 @@ function reply(a,text){
 }
 function send(text){
   const a=byId(selected);text=(text||'').trim();if(!a||!text||a.status==='thinking')return;
+  const useLive=live.on&&a.role==='ventas'&&a.status!=='paused';
+  const history=a.msgs.slice(-12);
   a.msgs.push({from:'me',text});
   if(a.status!=='paused'){a.prev=a.status;setStatus(a,'thinking');}
   renderChat();save();
   const id=a.id;
-  setTimeout(()=>{
+  const answer=useLive
+    ?agentApi({action:'chat',message:text,history}).then(j=>j.reply,e=>API_ERR[e.message]||API_ERR.upstream)
+    :new Promise(res=>setTimeout(()=>res(reply(a,text)),900+Math.random()*900));
+  answer.then(ans=>{
     const ag=byId(id);if(!ag)return;
-    ag.msgs.push({from:'agent',text:reply(ag,text)});
+    ag.msgs.push({from:'agent',text:ans});
     if(ag.status==='thinking'){
       let next=ag.prev||'idle';
-      if(ag.role==='ventas'&&/respuest|borrador|redact|prep[aá]r/i.test(text)&&next==='alert'){next='idle';ag.task='';$('#kLeads').nextElementSibling.textContent='3 borradores listos';$('#kLeads').nextElementSibling.className='up';pushFeed(id,'Dejó 3 borradores listos para revisar');}
+      if(!live.on&&ag.role==='ventas'&&/respuest|borrador|redact|prep[aá]r/i.test(text)&&next==='alert'){next='idle';ag.task='';$('#kLeads').nextElementSibling.textContent='3 borradores listos';$('#kLeads').nextElementSibling.className='up';pushFeed(id,'Dejó 3 borradores listos para revisar');}
       ag.prev=undefined;setStatus(ag,next);
     }
     if(selected===id)renderChat();save();
-  },900+Math.random()*900);
+    if(live.on&&ag.role==='ventas')syncSales();
+  });
 }
 $('#chatForm').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatInput');send(i.value);i.value='';});
 $('#pPause').onclick=()=>{
@@ -772,13 +823,205 @@ $('#newForm').addEventListener('submit',e=>{
   agents.push(a);buildAgent(a);save();closeModal();pushFeed(a.id,'Se unió al equipo');toast(`${name} se unió al equipo`);select(a.id);
 });
 let toastT;
-function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,2200);}
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,Math.max(2200,t.length*60));}
 
 /* Visitas en vivo (simuladas) */
 let visits=1284;
 setInterval(()=>{visits+=Math.floor(Math.random()*3);$('#kVisits').textContent=visits.toLocaleString('es-ES');},4000);
 
 renderRoster();renderFeed();
+
+/* ---------- Solicitudes reales: Marta, la agente comercial ---------- */
+// Clave pública (anon) de Supabase, la misma que usa admin.html. Los datos los protege RLS.
+const SB_URL='https://kzbhybcyjjqupojuakuw.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
+const REQ_STATES={nueva:'Nueva',revision:'En revisión',propuesta:'Propuesta enviada',aceptada:'Aceptada',descartada:'Descartada'};
+const REQ_LABELS={name:'Nombre',email:'Correo',brand:'Marca',business:'Actividad',audience:'Público',existing:'Marca nueva o rediseño',goals:'Objetivo',style:'Estilo',colors:'Colores',uses:'Usos del logo',slogan:'Eslogan',scope:'Alcance',platform:'Web o redes actuales',deadline:'Fecha deseada',links:'Enlaces de referencia',notes:'Notas de referencias',reference:'Proyecto de referencia'};
+const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de Claude o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'Claude no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.'};
+const live={on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false};
+const salesAgent=()=>agents.find(a=>a.role==='ventas');
+function el(tag,props,...kids){
+  const e=document.createElement(tag);
+  if(props)for(const [k,v] of Object.entries(props)){
+    if(v==null||v===false)continue;
+    if(k==='class')e.className=v;else if(k==='text')e.textContent=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);
+  }
+  for(const k of kids.flat())if(k!=null&&k!==false)e.append(k.nodeType?k:String(k));
+  return e;
+}
+function since(iso){
+  const m=Math.max(0,Math.round((Date.now()-new Date(iso))/60000));
+  return m<60?ago(m):m<1440?`hace ${Math.round(m/60)} h`:new Date(iso).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+}
+async function agentApi(body){
+  const {data}=await live.sb.auth.getSession();const token=data.session?.access_token;
+  if(!token)throw new Error('auth');
+  let r;
+  try{r=await fetch('/api/agent',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body)});}
+  catch(e){throw new Error('upstream');}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||'upstream');
+  return j;
+}
+async function initLive(){
+  if(!window.supabase)return;
+  try{
+    live.sb=window.supabase.createClient(SB_URL,SB_KEY);
+    const {data}=await live.sb.auth.getSession();
+    if(!data.session)return; // Sin sesión del admin: la oficina queda en modo ejemplo.
+    if(!await loadReqs(true))return;
+    live.on=true;
+    $('.sample').textContent='SOLICITUDES EN VIVO · EL RESTO ES EJEMPLO';
+    $('#kLeads').previousSibling.textContent='Solicitudes abiertas ';
+    try{live.sb.channel('solicitudes-admin').on('postgres_changes',{event:'*',schema:'public',table:'solicitudes'},()=>loadReqs(false)).subscribe();}catch(e){}
+    setInterval(()=>loadReqs(false),60000);
+    syncSales();openFromHash();
+    addEventListener('hashchange',openFromHash);
+  }catch(e){console.warn('Solicitudes no disponibles:',e&&e.message||e);}
+}
+async function loadReqs(first){
+  const {data,error}=await live.sb.from('solicitudes').select('*').order('created_at',{ascending:false}).limit(60);
+  if(error){if(first)console.warn('Solicitudes:',error.message);return false;}
+  const known=new Set(live.reqs.map(r=>r.id));
+  const fresh=first?[]:data.filter(r=>!known.has(r.id));
+  // Conserva el objeto abierto para no perder lo que estás escribiendo en el borrador.
+  live.reqs=data.map(r=>{const old=live.reqs.find(x=>x.id===r.id);return old?Object.assign(old,r):r;});
+  const a=salesAgent();
+  fresh.forEach(r=>pushFeed(a?a.id:'',`Llegó una solicitud de ${r.name} · ${r.service_name}`));
+  if(fresh.length)toast(fresh.length===1?`Nueva solicitud de ${fresh[0].name}`:`${fresh.length} solicitudes nuevas`);
+  if(live.on)syncSales();
+  return true;
+}
+function syncSales(){
+  const nuevas=live.reqs.filter(r=>r.status==='nueva').length;
+  const abiertas=live.reqs.filter(r=>['nueva','revision','propuesta'].includes(r.status)).length;
+  const k=$('#kLeads');k.textContent=abiertas;const em=k.nextElementSibling;
+  em.textContent=nuevas?`${nuevas} sin revisar`:'al día';em.className=nuevas?'warn':'up';
+  const a=salesAgent();
+  if(a&&a.status!=='thinking'&&a.status!=='paused'&&!live.analyzing){
+    if(nuevas){a.status='alert';a.task=nuevas===1?'1 solicitud nueva':`${nuevas} solicitudes nuevas`;}
+    else{a.status='idle';a.task='';}
+    refreshAgent(a);
+  }
+  renderRoster();
+  if(a&&selected===a.id)renderPanel();
+}
+function liveTabs(a){
+  const on=live.on&&a.role==='ventas';
+  $('#pTabs').hidden=!on;
+  const showReqs=on&&live.tab==='reqs';
+  $('#reqs').hidden=!showReqs;$('#chat').hidden=showReqs;$('#quick').hidden=showReqs;$('#chatForm').hidden=showReqs;
+  if(!on)return;
+  document.querySelectorAll('#pTabs .tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===live.tab)));
+  const n=live.reqs.filter(r=>r.status==='nueva').length;$('#reqCount').textContent=n?String(n):'';
+  $('#pSources').innerHTML='<span class="src">Formulario de la web</span> <span class="src">Claude</span>';
+  const q=$('#quick');q.innerHTML='';
+  ['¿Qué solicitudes tengo pendientes?','¿Cuál atiendo primero?','Resume la última solicitud'].forEach(t=>q.append(el('button',{type:'button',text:t,onclick:()=>send(t)})));
+  if(showReqs)renderReqs(false);
+}
+document.querySelectorAll('#pTabs .tab').forEach(t=>t.addEventListener('click',()=>{live.tab=t.dataset.tab;renderPanel();if(live.tab==='chat')renderChat();}));
+function renderReqs(force){
+  const box=$('#reqs');
+  if(live.open){
+    const r=live.reqs.find(x=>x.id===live.open);
+    if(r){
+      if(!force&&box.querySelector('.rd')?.dataset.id===r.id)return;
+      box.replaceChildren(reqDetail(r));box.scrollTop=0;return;
+    }
+    live.open=null;
+  }
+  if(!live.reqs.length){box.replaceChildren(el('p',{class:'empty',text:'Aún no hay solicitudes. Cuando alguien envíe un brief desde la web, aparecerá aquí y te avisaré.'}));return;}
+  box.replaceChildren(...live.reqs.map(r=>el('button',{type:'button',class:'req',onclick:()=>openReq(r)},
+    el('b',{text:`${r.brand} · ${r.name}`}),
+    el('span',{class:'st '+r.status,text:REQ_STATES[r.status]||r.status}),
+    el('small',{text:`${r.service_name} ${r.tier} · $${r.price}${r.ai&&r.ai.prioridad?` · prioridad ${r.ai.prioridad}`:''}`}),
+    el('time',{datetime:r.created_at,text:since(r.created_at)}))));
+}
+function openReq(r){
+  live.open=r.id;renderReqs(true);
+  if(r.status==='nueva')setReqStatus(r,'revision',true);
+}
+function reqDetail(r){
+  const ai=r.ai&&r.ai.resumen?r.ai:null;
+  const status=el('select',{id:'rdStatus','aria-label':'Estado de la solicitud',onchange:e=>setReqStatus(r,e.target.value)},
+    ...Object.entries(REQ_STATES).map(([k,v])=>{const o=el('option',{value:k,text:v});o.selected=k===r.status;return o;}));
+  const analyzeBtn=el('button',{type:'button',class:'btn small',id:'rdAnalyze',onclick:()=>reanalyze(r)},live.analyzing?'Analizando…':ai?'Analizar de nuevo':'Analizar con Marta');
+  analyzeBtn.disabled=live.analyzing;
+  const meta=el('dl',{class:'rd-meta'},
+    el('dt',{text:'Cliente'}),el('dd',{text:r.name}),
+    el('dt',{text:'Correo'}),el('dd',{class:'selectable',text:r.email}),
+    el('dt',{text:'Plan'}),el('dd',{text:`${r.service_name} ${r.tier} · $${r.price} USD`}),
+    el('dt',{text:'Llegó'}),el('dd',{text:new Date(r.created_at).toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'})}),
+    el('dt',{text:'Código'}),el('dd',{class:'mono',text:String(r.request_id).slice(0,12)}));
+  const aiBox=ai?el('section',{class:'ai','aria-label':'Análisis de Marta'},
+      el('div',{class:'row between'},el('p',{class:'eyebrow',text:'Análisis de Marta'}),el('span',{class:'prio '+ai.prioridad,text:'Prioridad '+ai.prioridad})),
+      el('p',{text:ai.resumen}),
+      ai.encaje&&el('p',null,el('b',{text:'Encaje con el plan: '}),ai.encaje),
+      ai.faltantes&&ai.faltantes.length&&el('div',null,el('b',{text:'Falta preguntar'}),el('ul',null,...ai.faltantes.map(f=>el('li',{text:f})))),
+      ai.siguiente_paso&&el('p',null,el('b',{text:'Siguiente paso: '}),ai.siguiente_paso))
+    :el('section',{class:'ai'},el('p',{text:live.analyzing?'Marta está leyendo el brief…':'Marta todavía no ha analizado esta solicitud. Pulsa «Analizar con Marta».'}));
+  const subj=el('input',{id:'rdSubj','aria-label':'Asunto del correo'});
+  subj.value=(r.ai&&r.ai.borrador_asunto)||`Tu proyecto de ${String(r.service_name).toLowerCase()} con Navas Visual`;
+  const bodyT=el('textarea',{id:'rdBody','aria-label':'Borrador de respuesta',placeholder:'Aquí aparecerá el borrador de Marta. También puedes escribir tu respuesta.'});
+  bodyT.value=(r.ai&&r.ai.borrador)||'';
+  const mail=el('a',{class:'btn small',href:'#',target:'_top',onclick:e=>{e.currentTarget.href=`mailto:${r.email}?subject=${encodeURIComponent(subj.value)}&body=${encodeURIComponent(bodyT.value)}`;}},'Abrir en mi correo');
+  const draft=el('section',{class:'draft'},el('p',{class:'eyebrow',text:'Borrador de respuesta'}),subj,bodyT,
+    el('div',{class:'row'},
+      el('button',{type:'button',class:'btn small primary',onclick:()=>copyDraft(subj.value,bodyT)},'Copiar'),
+      mail,
+      el('button',{type:'button',class:'btn small',onclick:()=>saveDraft(r,subj.value,bodyT.value)},'Guardar cambios')));
+  const brief=el('details',{class:'brief'},el('summary',{text:'Ver el brief completo'}),
+    el('dl',{class:'rd-meta'},
+      ...Object.entries(r.data||{}).filter(([,v])=>v).flatMap(([k,v])=>[el('dt',{text:REQ_LABELS[k]||k}),el('dd',{text:String(v)})]),
+      el('dt',{text:'Referencias'}),el('dd',{text:(r.files||[]).map(f=>f.name).join(', ')||'Ninguna'})));
+  return el('div',{class:'rd','data-id':r.id},
+    el('button',{type:'button',class:'btn small rd-back',onclick:()=>{live.open=null;renderReqs(true);}},'← Todas las solicitudes'),
+    el('h4',{text:r.brand}),
+    el('div',{class:'row'},status,analyzeBtn),
+    meta,aiBox,draft,brief,
+    el('p',{class:'note',text:'Marta no envía nada al cliente. Revisa el borrador y envíalo tú desde tu correo.'}));
+}
+async function setReqStatus(r,value,quiet){
+  const prev=r.status;if(prev===value)return;
+  r.status=value;syncSales();
+  const {error}=await live.sb.from('solicitudes').update({status:value}).eq('id',r.id);
+  if(error){r.status=prev;syncSales();renderReqs(true);toast('No pude cambiar el estado. Revisa tu conexión.');return;}
+  if(!quiet){toast(`Marcada como «${REQ_STATES[value]}»`);const a=salesAgent();pushFeed(a?a.id:'',`${r.brand}: ${REQ_STATES[value].toLowerCase()}`);}
+}
+async function saveDraft(r,s,b){
+  const ai={...(r.ai||{}),borrador_asunto:s,borrador:b};
+  const {error}=await live.sb.from('solicitudes').update({ai}).eq('id',r.id);
+  if(error){toast('No pude guardar el borrador. Inténtalo de nuevo.');return;}
+  r.ai=ai;toast('Borrador guardado');
+}
+function copyDraft(s,area){
+  const text=`Asunto: ${s}\n\n${area.value}`;
+  const fallback=()=>{area.focus();area.select();toast('Selecciona el texto y cópialo con Ctrl+C');};
+  try{navigator.clipboard.writeText(text).then(()=>toast('Borrador copiado'),fallback);}catch(e){fallback();}
+}
+async function reanalyze(r){
+  if(live.analyzing)return;
+  live.analyzing=true;const a=salesAgent();
+  if(a){a.task=`Analizando a ${r.brand}`;setStatus(a,'working');}
+  renderReqs(true);
+  try{
+    const {solicitud}=await agentApi({action:'analizar',id:r.id});
+    Object.assign(r,solicitud);toast('Análisis listo');pushFeed(a?a.id:'',`Analizó la solicitud de ${r.brand}`);
+  }catch(e){toast(API_ERR[e.message]||API_ERR.upstream);}
+  finally{live.analyzing=false;syncSales();renderReqs(true);}
+}
+function openFromHash(){
+  const m=location.hash.match(/^#solicitud-([0-9a-f-]{36})$/i);
+  if(!m||!live.on)return;
+  const a=salesAgent();
+  if(!a){toast('Contrata un agente comercial para ver las solicitudes');return;}
+  const r=live.reqs.find(x=>x.id===m[1]);
+  if(!r){toast('No encontré esa solicitud');return;}
+  live.tab='reqs';live.open=r.id;select(a.id);
+  if(r.status==='nueva')setReqStatus(r,'revision',true);
+}
+initLive();
 })();
 </script>
 </body>
