@@ -36,7 +36,8 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
       if (!row) return json(404, { error: 'not_found' });
       if (!DESIGN_SERVICES.includes(row.service)) return json(400, { error: 'not_design' });
       const feedback = typeof body.feedback === 'string' ? body.feedback.trim().slice(0, 1000) : '';
-      const diseno = await runDesign(env, row, { feedback, notify: false }, fetcher);
+      const link = `${new URL(request.url).origin}/admin.html#solicitud-${row.id}`;
+      const diseno = await runDesign(env, row, { feedback, link, notify: true }, fetcher);
       if (!diseno || diseno.estado !== 'listo') return json(502, { error: 'upstream' });
       return json(200, { solicitud: { ...row, diseno } });
     }
