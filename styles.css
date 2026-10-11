@@ -498,19 +498,27 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
 }
 .nv-process-step {
   background: var(--bg);
-  padding: 32px 28px;
+  padding: 30px 28px 32px;
   min-height: 280px;
   display: flex; flex-direction: column; justify-content: space-between;
-  transition: background 0.5s var(--easing), color 0.5s var(--easing);
+  transition: background 0.5s var(--easing);
   cursor: default;
 }
-.nv-process-step:hover { background: var(--fg); color: var(--bg); }
-.nv-process-step:hover .nv-process-step__num,
-.nv-process-step:hover .nv-process-step__desc { color: rgba(255,255,255,0.6); }
+.nv-process-step:hover { background: #fafaf8; }
 
-.nv-process-step__num { font-family: var(--font-mono); font-size: 12px; color: var(--fg-soft); transition: color 0.5s var(--easing); }
+.nv-process-step__num { font-family: var(--font-mono); font-size: 12px; color: var(--fg-soft); }
 .nv-process-step__title { font-size: 28px; font-weight: 500; letter-spacing: -0.025em; margin-top: 14px; }
-.nv-process-step__desc { font-size: 14px; color: var(--fg-muted); line-height: 1.5; transition: color 0.5s var(--easing); margin-top: 12px; }
+.nv-process-step__art { display: grid; place-items: center; margin: 18px auto 8px; width: min(100%, 260px); aspect-ratio: 1; }
+.nv-process-step__art img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 16px rgba(20, 18, 15, .12)); transition: transform 0.7s var(--easing); }
+.nv-process-step:hover .nv-process-step__art img { transform: translateY(-6px) scale(1.03); }
+.nv-process-step__desc { font-size: 14px; color: var(--fg-muted); line-height: 1.5; margin-top: 12px; }
+@media (min-width: 880px) {
+  .nv-process-step__title { min-height: 2.2em; line-height: 1.1; }
+}
+@media (max-width: 539px) {
+  .nv-process-step { min-height: 0; }
+  .nv-process-step__art { width: min(72%, 240px); margin: 10px auto 4px; }
+}
 
 /* === REVEALS === */
 .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.9s var(--easing-out), transform 0.9s var(--easing-out); }
