@@ -185,8 +185,11 @@ test('Camilo generates one image per concept with Cloudflare and sends them to T
   assert.equal(result.design, 'listo');
   const images = calls.filter(c => c.url.includes('cloudflare'));
   assert.equal(images.length, 3);
-  assert.match(images[0].url, /accounts\/acc\/ai\/run\/@cf\/black-forest-labs\/flux-1-schnell$/);
+  assert.match(images[0].url, /accounts\/acc\/ai\/run\/@cf\/black-forest-labs\/flux-2-klein-4b$/);
   assert.equal(images[0].options.headers.Authorization, 'Bearer cf-token');
+  assert.ok(images[0].options.body instanceof FormData);
+  assert.equal(images[0].options.body.get('width'), '1024');
+  assert.match(images[0].options.body.get('prompt'), /^minimal ice cream cone mark\. Professional minimalist logo mark/);
   assert.ok(calls.some(c => c.url.endsWith(`/storage/v1/object/disenos/${ROW_ID}/r1-1.jpg`)));
   const media = calls.find(c => c.url.includes('sendMediaGroup')).options.body;
   assert.equal(JSON.parse(media.get('media')).length, 3);
@@ -252,4 +255,33 @@ test('Cloudflare account id is extracted from a pasted dashboard URL', async () 
   const { cloudflareAccount } = await import('../api/_diseno.mjs');
   assert.equal(cloudflareAccount({ CLOUDFLARE_ACCOUNT_ID: 'https://dash.cloudflare.com/0123456789abcdef0123456789abcdef/home' }), '0123456789abcdef0123456789abcdef');
   assert.equal(cloudflareAccount({ CLOUDFLARE_ACCOUNT_ID: ' 0123456789abcdef0123456789abcdef ' }), '0123456789abcdef0123456789abcdef');
+});
+
+test('image generation falls back to FLUX.1 schnell when FLUX.2 fails', async () => {
+  const { generateImage } = await import('../api/_diseno.mjs');
+  const urls = [];
+  const fetcher = async (url, options) => {
+    urls.push(url);
+    if (url.includes('flux-2')) return Response.json({ errors: [{ code: 5007, message: 'No such model' }] }, { status: 400 });
+    assert.equal(JSON.parse(options.body).steps, 8);
+    return Response.json({ result: { image: Buffer.from([1, 2, 3]).toString('base64') } });
+  };
+  const bytes = await generateImage({ CLOUDFLARE_ACCOUNT_ID: 'acc', CLOUDFLARE_API_TOKEN: 't' }, 'gear', fetcher);
+  assert.deepEqual([...bytes], [1, 2, 3]);
+  assert.equal(urls.length, 2);
+  assert.match(urls[1], /flux-1-schnell$/);
+});
+
+test('a new round requested from the admin is announced on Telegram', async () => {
+  const { calls, fetcher: base } = network();
+  const fetcher = async (url, options = {}) => {
+    if (url.includes('/rest/v1/solicitudes?id=eq.') && options.method !== 'PATCH') return Response.json([{ ...record, id: ROW_ID, diseno: { estado: 'listo', ronda: 2 } }]);
+    return base(url, options);
+  };
+  const response = await handleAgent(agentRequest({ action: 'disenar', id: ROW_ID, feedback: 'Más elegante' }), { env, fetcher });
+  assert.equal(response.status, 200);
+  const text = JSON.parse(calls.find(c => c.url.includes('sendMessage')).options.body).text;
+  assert.match(text, /ronda 3/);
+  assert.match(text, /Tus comentarios: Más elegante/);
+  assert.match(text, new RegExp(`https://site.example/admin.html#solicitud-${ROW_ID}`));
 });
