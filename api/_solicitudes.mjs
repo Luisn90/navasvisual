@@ -16,6 +16,7 @@ export const labels = {
   deadline: 'Fecha deseada', links: 'Enlaces de referencia', notes: 'Notas de referencias', reference: 'Proyecto de referencia'
 };
 import { DESIGN_SERVICES, runDesign } from './_diseno.mjs';
+import { CONTENT_SERVICES, runContent } from './_contenido.mjs';
 
 export const STATUSES = ['nueva', 'revision', 'propuesta', 'aceptada', 'descartada'];
 const DEFAULT_CLAUDE_MODEL = 'claude-sonnet-5-5';
@@ -57,7 +58,7 @@ export async function getSolicitud(env, id, fetcher = fetch) {
   return rows?.[0] || null;
 }
 export async function listSolicitudes(env, limit = 25, fetcher = fetch) {
-  return await supabase(env, `solicitudes?select=id,request_id,created_at,status,service,service_name,tier,price,name,brand,ai,diseno&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
+  return await supabase(env, `solicitudes?select=id,request_id,created_at,status,service,service_name,tier,price,name,brand,ai,diseno,contenido&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
 }
 export async function updateSolicitud(env, id, patch, fetcher = fetch) {
   const rows = await supabase(env, `solicitudes?id=eq.${id}`, {
@@ -107,13 +108,23 @@ async function claude(env, body, fetcher = fetch) {
   return response.json();
 }
 // Groq usa el formato de chat compatible con OpenAI.
-async function groq(env, body, fetcher = fetch) {
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function groq(env, body, fetcher = fetch, attempt = 0) {
+  const model = env.GROQ_MODEL?.trim() || DEFAULT_GROQ_MODEL;
+  // Los modelos gpt-oss razonan antes de responder; en bajo gastan menos de la cuota por minuto.
+  const extra = model.includes('gpt-oss') && !('reasoning_effort' in body) ? { reasoning_effort: 'low' } : {};
   const response = await fetcher('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.GROQ_API_KEY.trim()}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: env.GROQ_MODEL?.trim() || DEFAULT_GROQ_MODEL, ...body }),
+    body: JSON.stringify({ model, ...extra, ...body }),
     signal: AbortSignal.timeout(40000)
   });
+  // El plan gratuito limita tokens por minuto: si se pasa, espera lo que pide Groq y reintenta una vez.
+  if (response.status === 429 && attempt === 0) {
+    const seconds = Math.min(20, Math.max(1, Number(response.headers?.get?.('retry-after')) || 8));
+    await wait(seconds * 1000);
+    return groq(env, body, fetcher, 1);
+  }
   if (!response.ok) {
     const detail = await response.json().then(d => d?.error?.code || d?.error?.message || '', () => '');
     throw new Error(`groq_${response.status}${detail ? ` (${String(detail).slice(0, 200)})` : ''}`);
@@ -201,7 +212,7 @@ export async function analyzeSolicitud(env, row, fetcher = fetch) {
 export async function chatWithMarta(env, { message, history = [], solicitudes = [], persona = null }, fetcher = fetch) {
   const context = solicitudes.length ? solicitudes.map(r => {
     const when = new Date(r.created_at).toISOString().slice(0, 16).replace('T', ' ');
-    return `- [${r.status}] ${when} · ${r.name} (${r.brand}) · ${r.service_name} ${r.tier} $${r.price}${r.ai?.resumen ? ` · ${r.ai.resumen}` : ''}${r.ai?.prioridad ? ` · prioridad ${r.ai.prioridad}` : ''}${r.diseno?.conceptos?.length ? ` · conceptos de Camilo (ronda ${r.diseno.ronda}): ${r.diseno.conceptos.map(c => c.titulo).join(', ')}` : ''}`;
+    return `- [${r.status}] ${when} · ${r.name} (${r.brand}) · ${r.service_name} ${r.tier} $${r.price}${r.ai?.resumen ? ` · ${r.ai.resumen}` : ''}${r.ai?.prioridad ? ` · prioridad ${r.ai.prioridad}` : ''}${r.diseno?.conceptos?.length ? ` · conceptos de Camilo (ronda ${r.diseno.ronda}): ${r.diseno.conceptos.map(c => c.titulo).join(', ')}` : ''}${r.contenido?.pilares?.length ? ` · propuesta de Teo (ronda ${r.contenido.ronda}): pilares ${r.contenido.pilares.map(p => p.nombre).join(', ')}; ${r.contenido.publicaciones?.length || 0} publicaciones` : ''}`;
   }).join('\n') : 'No hay solicitudes guardadas todavía.';
   const turns = history.filter(m => m && (m.from === 'me' || m.from === 'agent') && typeof m.text === 'string')
     .slice(-12).map(m => ({ role: m.from === 'me' ? 'user' : 'assistant', content: m.text.slice(0, 2000) }));
@@ -234,7 +245,7 @@ export async function sendTelegram(env, text, fetcher = fetch) {
   if (!response.ok) throw new Error('telegram_followup');
 }
 
-export function telegramAnalysis(row, ai, link, toDesign = false) {
+export function telegramAnalysis(row, ai, link, handoff = null) {
   const lines = [`🤖 Marta analizó la solicitud ${row.request_id.slice(0, 12)}`, `${row.brand} · ${row.service_name} ${row.tier} · $${row.price}`, ''];
   if (ai) {
     lines.push(`Resumen: ${ai.resumen}`, `Prioridad: ${ai.prioridad}`, `Encaje: ${ai.encaje}`);
@@ -243,7 +254,8 @@ export function telegramAnalysis(row, ai, link, toDesign = false) {
   } else {
     lines.push('Guardada en el admin. El análisis automático no está disponible ahora.');
   }
-  if (toDesign) lines.push('', '🎨 Se la pasé a Camilo para que prepare conceptos visuales.');
+  if (handoff === 'diseno' || handoff === true) lines.push('', '🎨 Se la pasé a Camilo para que prepare conceptos visuales.');
+  if (handoff === 'contenido') lines.push('', '📱 Se la pasé a Teo para que prepare la propuesta de redes.');
   lines.push(link);
   return lines.join('\n');
 }
@@ -264,11 +276,14 @@ export async function processNewSolicitud(env, record, origin, fetcher = fetch) 
   }
   const link = `${origin}/admin.html#solicitud-${row.id}`;
   const toDesign = DESIGN_SERVICES.includes(row.service) && aiReady(env);
-  try { await sendTelegram(env, telegramAnalysis(row, ai, link, toDesign), fetcher); }
+  const toContent = CONTENT_SERVICES.includes(row.service) && aiReady(env);
+  try { await sendTelegram(env, telegramAnalysis(row, ai, link, toDesign ? 'diseno' : toContent ? 'contenido' : null), fetcher); }
   catch (error) { console.error('Solicitud: aviso de seguimiento falló', error.message); }
   // Marta le pasa a Camilo los briefs de diseño, con su análisis incluido.
   let design = null;
   if (toDesign) design = await runDesign(env, { ...row, ai }, { link }, fetcher).catch(error => { console.error('Diseño:', error.message); return null; });
+  // Los briefs de Redes van a Teo, el creador de contenido.
+  if (toContent) design = await runContent(env, { ...row, ai }, { link }, fetcher).catch(error => { console.error('Contenido:', error.message); return null; });
   return { stored: true, id: row.id, analyzed: Boolean(ai), design: design ? design.estado : null };
 }
 

@@ -174,7 +174,18 @@ a.btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
 details.brief summary{cursor:pointer;color:var(--muted);font-size:13px;margin-bottom:8px}
 .note{margin:0;font-size:12px;color:var(--muted)}
 .btn:disabled{opacity:.5;cursor:default}
-/* Propuestas de Camilo */
+/* Propuestas de Camilo y Teo */
+.block{display:flex;flex-direction:column;gap:4px}
+.block h5{margin:0 0 2px;font-size:13px;font-weight:600}
+.block ul{margin:0;padding-left:18px}
+.posts{display:flex;flex-direction:column;gap:8px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.post .btn{align-self:flex-start}
+.fmt{font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;background:var(--surface-2);border-radius:999px;padding:2px 8px}
+.post .small{color:var(--muted);font-size:12px}
+.post .idea{font-weight:500}
+.post .copy{white-space:pre-wrap;overflow-wrap:anywhere}
+.post .tags{color:var(--busy);font-size:12px;overflow-wrap:anywhere}
 .design{background:var(--surface-2);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;font-size:13.5px;line-height:1.5}
 .design p{margin:0}
 .concepts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -357,7 +368,7 @@ const ROLES={
        [/semana|cu[aá]nto|total/i,'Esta semana entraron 19 contactos: 11 consultas de precio, 5 de distribución y 3 de soporte. Respondimos 16 en menos de 24 horas.']],
     fb:'Llevo el seguimiento de los contactos de la web. Pregúntame por pendientes, totales o pídeme un borrador.'},
   contenido:{label:'Creador de contenido',sources:['Instagram'],help:'Ideas, textos y calendario para redes sociales.',
-    defInstr:'Propón contenido basado en lo que mejor funcionó el mes anterior. Textos cortos y en tono cercano.',
+    defInstr:'Cuando Marta me pase un brief de Redes, prepara estrategia, pilares, publicaciones con texto y hashtags, estilo visual con imágenes de ejemplo y propuesta de perfil.',
     greet:'Estoy armando las ideas de la semana. Ya tengo 3 casi listas.',
     quick:['Dame ideas para reels','¿Qué contenido funciona mejor?','¿A qué hora publico?'],
     r:[[/idea|reel|post|publica(?!r a)/i,'Tres ideas para esta semana: un detrás de cámaras del empaque, una pregunta frecuente respondida en 15 segundos y un antes y después con un cliente. La segunda es la más fácil de grabar.'],
@@ -808,7 +819,7 @@ function reply(a,text){
 }
 function send(text){
   const a=byId(selected);text=(text||'').trim();if(!a||!text||a.status==='thinking')return;
-  const useLive=live.on&&(a.role==='ventas'||a.role==='diseno')&&a.status!=='paused';
+  const useLive=live.on&&['ventas','diseno','contenido'].includes(a.role)&&a.status!=='paused';
   const history=a.msgs.slice(-12);
   a.msgs.push({from:'me',text});
   if(a.status!=='paused'){a.prev=a.status;setStatus(a,'thinking');}
@@ -826,7 +837,7 @@ function send(text){
       ag.prev=undefined;setStatus(ag,next);
     }
     if(selected===id)renderChat();save();
-    if(live.on&&(ag.role==='ventas'||ag.role==='diseno'))syncSales();
+    if(live.on&&['ventas','diseno','contenido'].includes(ag.role))syncSales();
   });
 }
 $('#chatForm').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatInput');send(i.value);i.value='';});
@@ -880,10 +891,13 @@ const SB_URL='https://kzbhybcyjjqupojuakuw.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6Ymh5YmN5ampxdXBvanVha3V3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjc5MzMsImV4cCI6MjA5NDcwMzkzM30.K0ICrpd3gf9WCout5_NbegpaU6Ds8QEBppRqXIqJ-AI';
 const REQ_STATES={nueva:'Nueva',revision:'En revisión',propuesta:'Propuesta enviada',aceptada:'Aceptada',descartada:'Descartada'};
 const REQ_LABELS={name:'Nombre',email:'Correo',brand:'Marca',business:'Actividad',audience:'Público',existing:'Marca nueva o rediseño',goals:'Objetivo',style:'Estilo',colors:'Colores',uses:'Usos del logo',slogan:'Eslogan',scope:'Alcance',platform:'Web o redes actuales',deadline:'Fecha deseada',links:'Enlaces de referencia',notes:'Notas de referencias',reference:'Proyecto de referencia'};
-const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.',not_design:'Camilo solo trabaja con briefs de logo e identidad.'};
-const live={on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,role:null,pendingOpen:null,urls:{}};
+const API_ERR={config:'Falta terminar la configuración en Vercel: la clave de IA (Groq o Claude) o los correos del admin.',auth:'Tu sesión expiró. Vuelve a iniciar sesión en el admin.',upstream:'La IA no respondió. Inténtalo de nuevo en un momento.',not_found:'No encontré esa solicitud.',not_design:'Camilo solo trabaja con briefs de logo e identidad.',not_content:'Teo solo trabaja con briefs de Redes.'};
+const live={on:false,sb:null,reqs:[],open:null,tab:'reqs',analyzing:false,designing:null,writing:null,role:null,pendingOpen:null,urls:{}};
 const DESIGN=['logo','identidad'];
 const designAgent=()=>agents.find(a=>a.role==='diseno');
+const contentAgent=()=>agents.find(a=>a.role==='contenido');
+const CONTENT=['redes'];
+const isContent=r=>CONTENT.includes(r.service);
 const isDesign=r=>DESIGN.includes(r.service);
 const staleDesign=d=>d&&d.estado==='generando'&&Date.now()-new Date(d.desde||0)>5*60000;
 function sendErrand(from,to,text){
@@ -937,6 +951,7 @@ async function loadReqs(first){
   const known=new Set(live.reqs.map(r=>r.id));
   const fresh=first?[]:data.filter(r=>!known.has(r.id));
   const before=new Map(live.reqs.map(r=>[r.id,r.diseno&&r.diseno.estado]));
+  const beforeC=new Map(live.reqs.map(r=>[r.id,r.contenido&&r.contenido.estado]));
   // Conserva el objeto abierto para no perder lo que estás escribiendo en el borrador.
   live.reqs=data.map(r=>{const old=live.reqs.find(x=>x.id===r.id);return old?Object.assign(old,r):r;});
   const a=salesAgent();
@@ -946,9 +961,17 @@ async function loadReqs(first){
     if(a&&c)sendErrand(a,c,`Camilo, te paso el brief de ${r.brand}`);
     pushFeed(c?c.id:'',`Recibió de Marta el brief de ${r.brand}`);
   });
+  const t=contentAgent();
+  fresh.filter(isContent).forEach(r=>{
+    if(a&&t)sendErrand(a,t,`Teo, te paso el brief de redes de ${r.brand}`);
+    pushFeed(t?t.id:'',`Recibió de Marta el brief de redes de ${r.brand}`);
+  });
   if(!first)live.reqs.forEach(r=>{
     if(before.has(r.id)&&before.get(r.id)!=='listo'&&r.diseno&&r.diseno.estado==='listo'&&!(live.designing&&live.designing.id===r.id)){
       delete live.urls[r.id];pushFeed(c?c.id:'',`Terminó los conceptos de ${r.brand}`);toast(`Camilo terminó los conceptos de ${r.brand}`);
+    }
+    if(beforeC.has(r.id)&&beforeC.get(r.id)!=='listo'&&r.contenido&&r.contenido.estado==='listo'&&!(live.writing&&live.writing.id===r.id)){
+      delete live.urls[r.id];pushFeed(t?t.id:'',`Terminó la propuesta de redes de ${r.brand}`);toast(`Teo terminó la propuesta de redes de ${r.brand}`);
     }
   });
   if(fresh.length)toast(fresh.length===1?`Nueva solicitud de ${fresh[0].name}`:`${fresh.length} solicitudes nuevas`);
@@ -975,24 +998,36 @@ function syncSales(){
     else{c.status='idle';c.task='';}
     refreshAgent(c);
   }
+  const t=contentAgent();
+  if(t&&t.status!=='thinking'&&t.status!=='paused'){
+    const gen=live.writing||live.reqs.find(r=>r.contenido&&r.contenido.estado==='generando'&&!staleDesign(r.contenido));
+    const ready=live.reqs.filter(r=>r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto);
+    if(gen){t.status='working';t.task=`Preparando las redes de ${gen.brand}`;}
+    else if(ready.length){t.status='alert';t.task=ready.length===1?`Propuesta lista: ${ready[0].brand}`:`${ready.length} propuestas listas`;}
+    else{t.status='idle';t.task='';}
+    refreshAgent(t);
+  }
   renderRoster();
-  if((a&&selected===a.id)||(c&&selected===c.id))renderPanel();
+  if([a,c,t].some(x=>x&&selected===x.id))renderPanel();
 }
 function liveTabs(a){
-  const on=live.on&&(a.role==='ventas'||a.role==='diseno');
+  const on=live.on&&['ventas','diseno','contenido'].includes(a.role);
   if(on&&live.role!==a.role){live.role=a.role;live.open=live.pendingOpen||null;live.pendingOpen=null;}
-  const designer=a.role==='diseno';
+  const designer=a.role==='diseno',writer=a.role==='contenido';
   $('#pTabs').hidden=!on;
   const showReqs=on&&live.tab==='reqs';
   $('#reqs').hidden=!showReqs;$('#chat').hidden=showReqs;$('#quick').hidden=showReqs;$('#chatForm').hidden=showReqs;
   if(!on)return;
   document.querySelectorAll('#pTabs .tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===live.tab)));
-  $('#pTabs .tab[data-tab="reqs"]').firstChild.textContent=designer?'Diseños ':'Solicitudes ';
-  const n=designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length:live.reqs.filter(r=>r.status==='nueva').length;
+  $('#pTabs .tab[data-tab="reqs"]').firstChild.textContent=designer?'Diseños ':writer?'Propuestas ':'Solicitudes ';
+  const n=designer?live.reqs.filter(r=>r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto).length
+    :writer?live.reqs.filter(r=>r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto).length
+    :live.reqs.filter(r=>r.status==='nueva').length;
   $('#reqCount').textContent=n?String(n):'';
-  $('#pSources').innerHTML=designer?'<span class="src">Briefs de Marta</span> <span class="src">IA de imágenes</span>':'<span class="src">Formulario de la web</span> <span class="src">IA</span>';
+  $('#pSources').innerHTML=(designer||writer)?'<span class="src">Briefs de Marta</span> <span class="src">IA de textos e imágenes</span>':'<span class="src">Formulario de la web</span> <span class="src">IA</span>';
   const q=$('#quick');q.innerHTML='';
-  (designer?['¿En qué estás trabajando?','¿Qué dirección recomiendas para el último brief?','Dame una paleta alternativa']:['¿Qué solicitudes tengo pendientes?','¿Cuál atiendo primero?','Resume la última solicitud']).forEach(t=>q.append(el('button',{type:'button',text:t,onclick:()=>send(t)})));
+  (designer?['¿En qué estás trabajando?','¿Qué dirección recomiendas para el último brief?','Dame una paleta alternativa']
+   :writer?['¿Qué propuestas tienes listas?','Dame 3 ideas de reels para el último brief','Escribe otra bio más corta']:['¿Qué solicitudes tengo pendientes?','¿Cuál atiendo primero?','Resume la última solicitud']).forEach(t=>q.append(el('button',{type:'button',text:t,onclick:()=>send(t)})));
   if(showReqs)renderReqs(false);
 }
 document.querySelectorAll('#pTabs .tab').forEach(t=>t.addEventListener('click',()=>{live.tab=t.dataset.tab;renderPanel();if(live.tab==='chat')renderChat();}));
@@ -1003,17 +1038,17 @@ function renderReqs(force){
     if(r){
       if(!force&&box.querySelector('.rd')?.dataset.id===r.id)return;
       box.replaceChildren(reqDetail(r));box.scrollTop=0;
-      if(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto)markSeen(r);
+      markSeen(r);
       return;
     }
     live.open=null;
   }
-  const list=live.role==='diseno'?live.reqs.filter(isDesign):live.reqs;
-  if(!list.length){box.replaceChildren(el('p',{class:'empty',text:live.role==='diseno'?'Todavía no hay briefs de logo o identidad. Cuando llegue uno, Marta me lo pasa y preparo las propuestas.':'Aún no hay solicitudes. Cuando alguien envíe un brief desde la web, aparecerá aquí y te avisaré.'}));return;}
+  const list=live.role==='diseno'?live.reqs.filter(isDesign):live.role==='contenido'?live.reqs.filter(isContent):live.reqs;
+  if(!list.length){box.replaceChildren(el('p',{class:'empty',text:live.role==='diseno'?'Todavía no hay briefs de logo o identidad. Cuando llegue uno, Marta me lo pasa y preparo las propuestas.':live.role==='contenido'?'Todavía no hay briefs de Redes. Cuando llegue uno, Marta me lo pasa y preparo la propuesta.':'Aún no hay solicitudes. Cuando alguien envíe un brief desde la web, aparecerá aquí y te avisaré.'}));return;}
   box.replaceChildren(...list.map(r=>el('button',{type:'button',class:'req',onclick:()=>openReq(r)},
     el('b',{text:`${r.brand} · ${r.name}`}),
     el('span',{class:'st '+r.status,text:REQ_STATES[r.status]||r.status}),
-    el('small',{text:`${r.service_name} ${r.tier} · $${r.price}${live.role==='diseno'?` · ${designLabel(r)}`:r.ai&&r.ai.prioridad?` · prioridad ${r.ai.prioridad}`:''}`}),
+    el('small',{text:`${r.service_name} ${r.tier} · $${r.price}${live.role==='diseno'?` · ${designLabel(r)}`:live.role==='contenido'?` · ${contentLabel(r)}`:r.ai&&r.ai.prioridad?` · prioridad ${r.ai.prioridad}`:''}`}),
     el('time',{datetime:r.created_at,text:since(r.created_at)}))));
 }
 function openReq(r){
@@ -1059,7 +1094,8 @@ function reqDetail(r){
     el('div',{class:'row'},status,analyzeBtn),
     ...(live.role==='diseno'
       ?[meta,designBox(r),aiBox,brief]
-      :[meta,aiBox,isDesign(r)&&designBox(r),draft,brief,el('p',{class:'note',text:'Marta no envía nada al cliente. Revisa el borrador y envíalo tú desde tu correo.'})]));
+      :live.role==='contenido'?[meta,contentBox(r),aiBox,brief]
+      :[meta,aiBox,isDesign(r)&&designBox(r),isContent(r)&&contentBox(r),draft,brief,el('p',{class:'note',text:'Marta no envía nada al cliente. Revisa el borrador y envíalo tú desde tu correo.'})]));
 }
 async function setReqStatus(r,value,quiet){
   const prev=r.status;if(prev===value)return;
@@ -1129,9 +1165,10 @@ function designBox(r){
 }
 async function loadImages(r,grid){
   const links=[...grid.querySelectorAll('a.cimg[data-path]')];if(!links.length)return;
+  const sig=`${(r.diseno&&r.diseno.ronda)||0}-${(r.contenido&&r.contenido.ronda)||0}`;
   let cache=live.urls[r.id];
-  if(!cache||cache.ronda!==r.diseno.ronda||Date.now()-cache.at>50*60000){
-    try{const j=await agentApi({action:'imagenes',id:r.id});cache=live.urls[r.id]={map:j.urls||{},ronda:r.diseno.ronda,at:Date.now()};}
+  if(!cache||cache.ronda!==sig||Date.now()-cache.at>50*60000){
+    try{const j=await agentApi({action:'imagenes',id:r.id});cache=live.urls[r.id]={map:j.urls||{},ronda:sig,at:Date.now()};}
     catch(e){links.forEach(a=>{a.querySelector('.ph').textContent='No se pudo cargar';});return;}
   }
   links.forEach(a=>{
@@ -1151,9 +1188,83 @@ async function redesign(r,feedback){
   }catch(e){toast(API_ERR[e.message]||API_ERR.upstream);}
   finally{live.designing=null;syncSales();renderReqs(true);}
 }
+// Marca como vistas las propuestas listas de Camilo o Teo al abrir la solicitud.
 async function markSeen(r){
-  r.diseno={...r.diseno,visto:true};syncSales();
-  try{await live.sb.from('solicitudes').update({diseno:r.diseno}).eq('id',r.id);}catch(e){}
+  const patch={};
+  if(r.diseno&&r.diseno.estado==='listo'&&!r.diseno.visto&&live.role!=='contenido'){r.diseno={...r.diseno,visto:true};patch.diseno=r.diseno;}
+  if(r.contenido&&r.contenido.estado==='listo'&&!r.contenido.visto&&live.role!=='diseno'){r.contenido={...r.contenido,visto:true};patch.contenido=r.contenido;}
+  if(!Object.keys(patch).length)return;
+  syncSales();
+  try{await live.sb.from('solicitudes').update(patch).eq('id',r.id);}catch(e){}
+}
+function contentLabel(r){
+  const c=r.contenido;
+  if((live.writing&&live.writing.id===r.id)||(c&&c.estado==='generando'&&!staleDesign(c)))return 'preparando…';
+  if(c&&c.estado==='listo')return c.visto?`${(c.publicaciones||[]).length} publicaciones`:'propuesta nueva';
+  if(c&&(c.estado==='error'||staleDesign(c)))return 'no se pudo generar';
+  return 'sin propuesta';
+}
+function copyText(text){
+  try{navigator.clipboard.writeText(text).then(()=>toast('Texto copiado'),()=>toast('No pude copiar. Selecciona el texto y cópialo.'));}
+  catch(e){toast('No pude copiar. Selecciona el texto y cópialo.');}
+}
+function contentBox(r){
+  const c=r.contenido,working=(live.writing&&live.writing.id===r.id)||(c&&c.estado==='generando'&&!staleDesign(c));
+  const ready=c&&c.pilares&&c.pilares.length;
+  const sec=el('section',{class:'design','aria-label':'Propuesta de Teo'},
+    el('div',{class:'row between'},el('p',{class:'eyebrow',text:'Propuesta de Teo'}),c&&c.ronda?el('span',{class:'mono',text:`Ronda ${c.ronda}`}):null));
+  if(working)sec.append(el('p',{class:'note',text:'Teo está preparando la propuesta. Suele tardar menos de un minuto.'}));
+  else if(!ready)sec.append(el('p',{text:c&&(c.estado==='error'||staleDesign(c))?(c.error||'No se pudo preparar la propuesta. Prueba de nuevo.'):'Teo todavía no ha preparado la propuesta para esta solicitud.'}));
+  if(ready){
+    const e=c.estrategia||{},st=c.estilo||{},pf=c.perfil||{};
+    sec.append(el('div',{class:'block'},el('h5',{text:'Estrategia'}),
+      el('p',null,el('b',{text:'Objetivo: '}),e.objetivo||''),el('p',null,el('b',{text:'Tono: '}),e.tono||''),el('p',null,el('b',{text:'Frecuencia: '}),e.frecuencia||'')));
+    sec.append(el('div',{class:'block'},el('h5',{text:'Pilares'}),el('ul',null,...c.pilares.map(p=>el('li',null,el('b',{text:p.nombre+': '}),p.descripcion||'')))));
+    const posts=(c.publicaciones||[]).map((p,i)=>{
+      const text=`${p.copy}${p.hashtags&&p.hashtags.length?'\n\n'+p.hashtags.join(' '):''}`;
+      return el('article',{class:'post'},
+        el('div',{class:'row between'},el('span',{class:'fmt',text:p.formato}),el('span',{class:'small',text:p.pilar})),
+        el('p',{class:'idea',text:`${i+1}. ${p.idea}`}),
+        el('p',{class:'copy',text:p.copy}),
+        p.hashtags&&p.hashtags.length&&el('p',{class:'tags',text:p.hashtags.join(' ')}),
+        el('button',{type:'button',class:'btn small',onclick:()=>copyText(text)},'Copiar texto'));
+    });
+    sec.append(el('div',{class:'block'},el('h5',{text:`Publicaciones (${posts.length})`}),el('div',{class:'posts'},...posts)));
+    sec.append(el('div',{class:'block'},el('h5',{text:'Estilo visual'}),el('p',{text:st.descripcion||''}),
+      st.colores&&st.colores.length&&el('div',{class:'swatches-row','aria-label':'Colores: '+st.colores.join(', ')},...st.colores.map(h=>el('span',{class:'sw',title:h,style:`background:${h}`}))),
+      st.tipografia&&el('p',{class:'small'},el('b',{text:'Tipografía: '}),st.tipografia)));
+    if(c.visuales&&c.visuales.length){
+      const grid=el('div',{class:'concepts'});
+      c.visuales.forEach((v,i)=>grid.append(el('article',{class:'concept'},
+        v.imagen?el('a',{class:'cimg',href:'#',target:'_blank',rel:'noopener','data-path':v.imagen,'data-alt':v.titulo,'aria-label':`Ver «${v.titulo}» en grande`},el('span',{class:'ph',text:'Cargando…'}))
+          :el('div',{class:'cimg'},el('span',{class:'ph',text:'Sin imagen'})),
+        el('h5',{text:`${i+1}. ${v.titulo}`}))));
+      sec.append(el('div',{class:'block'},el('h5',{text:'Ejemplos del feed'}),grid));
+      if(!c.con_imagenes)sec.append(el('p',{class:'note',text:'Las imágenes se activan cuando configures Cloudflare en Vercel.'}));
+      loadImages(r,grid);
+    }
+    sec.append(el('div',{class:'block'},el('h5',{text:'Perfil'}),
+      pf.usuario&&el('p',null,el('b',{text:'Usuario: '}),'@'+pf.usuario),
+      el('p',null,el('b',{text:'Bio: '}),pf.bio||''),
+      pf.destacados&&pf.destacados.length&&el('p',null,el('b',{text:'Destacados: '}),pf.destacados.join(' · ')),
+      pf.bio&&el('button',{type:'button',class:'btn small',onclick:()=>copyText(pf.bio)},'Copiar bio')));
+  }
+  const fb=el('textarea',{id:'ctFeedback','aria-label':'Comentarios para Teo',placeholder:'Comentarios para la próxima ronda. Ejemplo: más reels, tono más divertido, enfócate en los torneos.'});
+  const btn=el('button',{type:'button',class:'btn small primary',onclick:()=>rewrite(r,fb.value)},working?'Teo está trabajando…':(ready?'Pedir otra ronda':'Pedir propuesta a Teo'));
+  btn.disabled=working||!!live.writing;
+  sec.append(fb,el('div',{class:'row'},btn),el('p',{class:'note',text:'Revisa los textos antes de publicarlos o enviarlos al cliente.'}));
+  return sec;
+}
+async function rewrite(r,feedback){
+  if(live.writing)return;
+  live.writing=r;syncSales();renderReqs(true);
+  try{
+    const {solicitud}=await agentApi({action:'contenido',id:r.id,feedback});
+    Object.assign(r,solicitud);delete live.urls[r.id];
+    toast(`Teo terminó la ronda ${r.contenido.ronda} para ${r.brand}`);
+    const t=contentAgent();pushFeed(t?t.id:'',`Nueva ronda de redes para ${r.brand}`);
+  }catch(e){toast(API_ERR[e.message]||API_ERR.upstream);}
+  finally{live.writing=null;syncSales();renderReqs(true);}
 }
 function openFromHash(){
   const m=location.hash.match(/^#solicitud-([0-9a-f-]{36})$/i);

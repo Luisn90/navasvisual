@@ -285,3 +285,80 @@ test('a new round requested from the admin is announced on Telegram', async () =
   assert.match(text, /Tus comentarios: Más elegante/);
   assert.match(text, new RegExp(`https://site.example/admin.html#solicitud-${ROW_ID}`));
 });
+
+const plan = {
+  estrategia: { objetivo: 'Atraer jugadores nuevos al club.', tono: 'Cercano y estratégico.', frecuencia: '3 publicaciones por semana.' },
+  pilares: [{ nombre: 'Aprende', descripcion: 'Tácticas' }, { nombre: 'Comunidad', descripcion: 'Torneos' }, { nombre: 'Detrás del tablero', descripcion: 'Historias' }],
+  publicaciones: [
+    { formato: 'reel', pilar: 'Aprende', idea: 'Mate en 2', copy: '¿Lo ves?', hashtags: ['ajedrez', '#chess'] },
+    { formato: 'carrusel', pilar: 'Comunidad', idea: 'Resultados', copy: 'Gracias a todos', hashtags: ['torneo'] },
+    { formato: 'video', pilar: 'Detrás del tablero', idea: 'Historia del club', copy: 'Desde 1990', hashtags: [] }
+  ],
+  estilo: { descripcion: 'Fotos cálidas de partidas.', colores: ['#1A1A1A', 'beige', '#E8D5B7'], tipografia: 'Serif clásica' },
+  visuales: [{ titulo: 'Tablero', prompt_imagen: 'chess board top view' }, { titulo: 'Torneo', prompt_imagen: 'tournament hall' }],
+  perfil: { bio: 'Club de ajedrez para todas las edades.', usuario: '@club chess', destacados: ['Clases', 'Torneos'] }
+};
+const redes = buildRecord({ id: 'c'.repeat(64), serviceKey: 'redes', tierIndex: 1, values: { name: 'Gabriel', email: 'g@example.com', brand: 'Chess', business: 'Club de ajedrez', scope: 'Instagram' }, files: [] });
+
+test('Marta passes Redes briefs to Teo, who prepares the social media proposal', async () => {
+  const { calls, fetcher: base } = network();
+  const fetcher = async (url, options = {}) => {
+    if (url.includes('api.anthropic.com')) {
+      const body = JSON.parse(options.body);
+      if (body.tools?.[0]?.name === 'registrar_plan_redes') { calls.push({ url, options }); return Response.json({ content: [{ type: 'tool_use', name: 'registrar_plan_redes', input: plan }] }); }
+    }
+    if (url.includes('api.cloudflare.com')) { calls.push({ url, options }); return Response.json({ result: { image: Buffer.from([255, 216]).toString('base64') } }); }
+    if (url.includes('/storage/v1/object/disenos/')) { calls.push({ url, options }); return Response.json({}); }
+    if (url.includes('sendMediaGroup')) { calls.push({ url, options }); return Response.json({ ok: true }); }
+    return base(url, options);
+  };
+  const result = await processNewSolicitud({ ...env, CLOUDFLARE_ACCOUNT_ID: 'acc', CLOUDFLARE_API_TOKEN: 't' }, redes, 'https://site.example', fetcher);
+  assert.equal(result.design, 'listo');
+  const texts = calls.filter(c => c.url.includes('sendMessage')).map(c => JSON.parse(c.options.body).text);
+  assert.match(texts[0], /Se la pasé a Teo/);
+  assert.match(texts[1], /Teo preparó la propuesta de redes para Chess/);
+  const teo = calls.filter(c => c.url.includes('anthropic')).map(c => JSON.parse(c.options.body)).find(b => b.tools?.[0]?.name === 'registrar_plan_redes');
+  assert.match(teo.system, /^Eres Teo/);
+  assert.match(teo.messages[0].content, /<analisis_de_marta>/);
+  const saved = calls.filter(c => c.options.method === 'PATCH').map(c => JSON.parse(c.options.body)).find(b => b.contenido?.estado === 'listo');
+  const c = saved.contenido;
+  assert.equal(c.publicaciones[2].formato, 'post');
+  assert.deepEqual(c.publicaciones[0].hashtags, ['#ajedrez', '#chess']);
+  assert.deepEqual(c.estilo.colores, ['#1A1A1A', '#E8D5B7']);
+  assert.equal(c.perfil.usuario, 'clubchess');
+  assert.equal(c.visuales[0].imagen, `${ROW_ID}/c1-1.jpg`);
+  assert.equal(calls.filter(x => x.url.includes('cloudflare')).length, 2);
+  assert.match(calls.find(x => x.url.includes('cloudflare')).options.body.get('prompt'), /Square social media post/);
+});
+
+test('agent API asks Teo for another round and signs both design and content images', async () => {
+  const { calls, fetcher: base } = network();
+  const fetcher = async (url, options = {}) => {
+    if (url.includes('api.anthropic.com') && JSON.parse(options.body).tools?.[0]?.name === 'registrar_plan_redes') return Response.json({ content: [{ type: 'tool_use', name: 'registrar_plan_redes', input: plan }] });
+    if (url.includes('/storage/v1/object/sign/disenos')) { calls.push({ url, options }); return Response.json([]); }
+    if (url.includes('/rest/v1/solicitudes?id=eq.') && options.method !== 'PATCH') return Response.json([{ ...redes, id: ROW_ID, contenido: { estado: 'listo', ronda: 1, visuales: [{ titulo: 'A', imagen: `${ROW_ID}/c1-1.jpg` }] } }]);
+    return base(url, options);
+  };
+  const response = await handleAgent(agentRequest({ action: 'contenido', id: ROW_ID, feedback: 'Más reels' }), { env, fetcher });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).solicitud.contenido.ronda, 2);
+  assert.match(JSON.parse(calls.filter(c => c.url.includes('sendMessage')).at(-1).options.body).text, /ronda 2[\s\S]*Más reels/);
+  await handleAgent(agentRequest({ action: 'imagenes', id: ROW_ID }), { env, fetcher });
+  assert.deepEqual(JSON.parse(calls.find(c => c.url.includes('/object/sign/')).options.body).paths, [`${ROW_ID}/c1-1.jpg`]);
+  const notContent = await handleAgent(agentRequest({ action: 'contenido', id: ROW_ID }), { env, fetcher: async (url, o = {}) => url.includes('id=eq.') && o.method !== 'PATCH' ? Response.json([{ ...record, id: ROW_ID }]) : base(url, o) });
+  assert.equal(notContent.status, 400);
+});
+
+test('Groq waits and retries once when the free plan rate limit is hit', async () => {
+  let n = 0; const bodies = [];
+  const fetcher = async (url, options) => {
+    bodies.push(JSON.parse(options.body));
+    if (++n === 1) return new Response('{}', { status: 429, headers: { 'retry-after': '1' } });
+    return Response.json({ choices: [{ message: { tool_calls: [{ function: { name: 'registrar_analisis', arguments: JSON.stringify(analysis) } }] } }] });
+  };
+  const { analyzeSolicitud } = await import('../api/_solicitudes.mjs');
+  const ai = await analyzeSolicitud({ GROQ_API_KEY: 'gsk' }, { ...record, id: ROW_ID }, fetcher);
+  assert.equal(ai.prioridad, 'alta');
+  assert.equal(n, 2);
+  assert.equal(bodies[0].reasoning_effort, 'low');
+});

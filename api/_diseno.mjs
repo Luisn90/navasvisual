@@ -109,8 +109,8 @@ async function runImageModel(env, model, prompt, fetcher) {
   return Buffer.from(b64, 'base64');
 }
 
-export async function generateImage(env, prompt, fetcher = fetch) {
-  const full = `${prompt.trim().replace(/[.\s]+$/, '')}. ${IMAGE_STYLE}.`;
+export async function generateImage(env, prompt, fetcher = fetch, style = IMAGE_STYLE) {
+  const full = `${prompt.trim().replace(/[.\s]+$/, '')}. ${style}.`;
   const model = env.CLOUDFLARE_IMAGE_MODEL?.trim() || DEFAULT_IMAGE_MODEL;
   try { return await runImageModel(env, model, full, fetcher); }
   catch (error) {
@@ -120,7 +120,7 @@ export async function generateImage(env, prompt, fetcher = fetch) {
   }
 }
 
-async function uploadImage(env, path, bytes, fetcher = fetch) {
+export async function uploadImage(env, path, bytes, fetcher = fetch) {
   const base = env.SUPABASE_URL.trim().replace(/\/$/, '');
   const key = env.SUPABASE_SERVICE_ROLE_KEY.trim();
   const response = await fetcher(`${base}/storage/v1/object/${BUCKET}/${path}`, {
@@ -149,7 +149,7 @@ export async function signedImageUrls(env, paths, fetcher = fetch) {
   return out;
 }
 
-async function sendTelegramPhotos(env, items, fetcher = fetch) {
+export async function sendTelegramPhotos(env, items, fetcher = fetch) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID || !items.length) return;
   const body = new FormData();
   body.set('chat_id', env.TELEGRAM_CHAT_ID);
