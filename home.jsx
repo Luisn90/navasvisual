@@ -194,6 +194,9 @@ function imageForCats(projects, cats) {
   return hit ? hit.image : null;
 }
 
+// Página propia de cada servicio (servicios/*.html, generadas con scripts/servicios.mjs).
+const SERVICE_PAGES = { branding: 'identidad-de-marca', wordpress: 'diseno-web-wordpress', framer: 'diseno-web-framer', vibecode: 'desarrollo-web-a-medida', uiux: 'diseno-ui-ux', grafico: 'diseno-para-redes-sociales' };
+
 // Índice de servicios: filas tipográficas grandes; en escritorio, al pasar el
 // cursor aparece una imagen de un trabajo de esa categoría.
 function ServicesIndex({ t, projects, onPlans, onNavigate }) {
@@ -213,7 +216,7 @@ function ServicesIndex({ t, projects, onPlans, onNavigate }) {
               e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
             } : undefined}
           >
-            <h3 className="nv-sidx__name">{it.name}</h3>
+            <h3 className="nv-sidx__name">{SERVICE_PAGES[it.id] ? <a href={`servicios/${SERVICE_PAGES[it.id]}.html`}>{it.name}</a> : it.name}</h3>
             <p className="nv-sidx__desc">{it.d}</p>
             <div className="nv-sidx__links">
               {it.tab ? (
