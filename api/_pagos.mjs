@@ -71,6 +71,7 @@ export const maskEmail = email => {
   if (!user || !domain) return '';
   return `${user.slice(0, 2)}${'•'.repeat(Math.max(1, Math.min(5, user.length - 2)))}@${domain}`;
 };
+const LOGO_URL = 'https://navasvisual.com/assets/email-logo.jpg';
 const formatDate = (iso, lang) => new Date(iso).toLocaleString(lang === 'en' ? 'en-US' : 'es-VE', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Caracas' });
 
 const COPY = {
@@ -97,6 +98,7 @@ const COPY = {
       note: 'Si crees que es un error, responde a este correo o escríbeme por WhatsApp y lo revisamos juntos.'
     },
     labels: { code: 'N.º de solicitud', plan: 'Plan', amount: 'Monto', method: 'Método de pago', reference: 'Referencia', sent: 'Comprobante enviado', confirmed: 'Pago confirmado', reason: 'Motivo' },
+    tagline: 'Diseño visual digital',
     footer: '¿Dudas? Responde a este correo o escríbeme por WhatsApp.', whatsapp: 'Escribir por WhatsApp'
   },
   en: {
@@ -122,6 +124,7 @@ const COPY = {
       note: "If you think this is a mistake, reply to this email or message me on WhatsApp and we'll sort it out."
     },
     labels: { code: 'Request no.', plan: 'Plan', amount: 'Amount', method: 'Payment method', reference: 'Reference', sent: 'Receipt sent', confirmed: 'Payment confirmed', reason: 'Reason' },
+    tagline: 'Digital visual design',
     footer: 'Questions? Reply to this email or message me on WhatsApp.', whatsapp: 'Message on WhatsApp'
   }
 };
@@ -144,10 +147,17 @@ export function paymentEmail(kind, row, pago) {
     kind === 'rechazado' && pago?.motivo && [L.reason, pago.motivo]
   ].filter(Boolean);
   const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent((lang === 'en' ? 'Hi Luis, about my payment for request ' : 'Hola Luis, te escribo por el pago de la solicitud ') + code)}`;
-  const html = `<!doctype html><html lang="${lang}"><body style="margin:0;background:#f2f1ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#111">
+  const font = "'Elms Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+  const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Elms+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></head>
+<body style="margin:0;background:#f2f1ee;font-family:${font};color:#111">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f1ee;padding:32px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:20px;overflow:hidden">
-<tr><td style="padding:28px 32px 0;font-size:13px;font-weight:600;letter-spacing:.08em">NAVAS VISUAL</td></tr>
+<tr><td style="padding:28px 32px 0"><table role="presentation" cellpadding="0" cellspacing="0"><tr>
+<td style="vertical-align:middle;padding-right:10px"><img src="${LOGO_URL}" width="44" height="44" alt="" style="display:block;width:44px;height:44px;border:0"></td>
+<td style="vertical-align:middle;font-family:${font}"><div style="font-size:21px;line-height:1.1;font-weight:400;color:#111;letter-spacing:.01em">Navas Visual</div>
+<div style="margin-top:4px;font-size:8.5px;line-height:1;font-weight:500;color:#8a8a8a;letter-spacing:.32em">${escapeHtml(t.tagline.toUpperCase())}</div></td>
+</tr></table></td></tr>
 <tr><td style="padding:24px 32px 0"><span style="display:inline-block;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:600;color:${k.color};background:${k.bg}">${escapeHtml(k.badge)}</span>
 <h1 style="margin:16px 0 10px;font-size:26px;line-height:1.15;letter-spacing:-.02em">${escapeHtml(k.title)}</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:#333">${escapeHtml(k.intro(name))}</p></td></tr>
