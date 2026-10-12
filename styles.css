@@ -1608,8 +1608,9 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
   border: 1px solid rgba(255,255,255,0.3);
 }
 .nv-plan__price {
-  font-family: var(--font-serif); font-style: italic; font-weight: 400;
-  font-size: clamp(64px, 6.4vw, 96px); line-height: 0.9; letter-spacing: -0.03em;
+  font-family: var(--font-display); font-style: normal; font-weight: 500;
+  font-size: clamp(56px, 5.6vw, 84px); line-height: 0.9; letter-spacing: -0.04em;
+  font-variant-numeric: lining-nums;
   margin-top: 28px; display: flex; align-items: flex-start;
 }
 .nv-plan__cur { font-size: 0.42em; margin-top: 0.18em; margin-right: 0.04em; opacity: 0.6; }
