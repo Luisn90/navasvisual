@@ -118,7 +118,9 @@ img { display: block; max-width: 100%; }
 }
 .nv-nav__logo:hover { opacity: 1; }
 .nv-nav__logo svg { display: block; }
-.nv-nav__wordmark { margin-left: 12px; font-size: 13px; font-weight: 500; letter-spacing: .02em; white-space: nowrap; color: var(--fg); }
+.nv-nav__wordmark { margin-left: 10px; display: flex; flex-direction: column; white-space: nowrap; color: var(--fg); font-family: var(--font-display); }
+.nv-nav__name { font-size: 17px; line-height: 1.05; font-weight: 400; letter-spacing: .01em; }
+.nv-nav__tagline { margin-top: 3px; font-size: 7px; line-height: 1; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: var(--fg-muted); }
 @media (max-width: 380px), (min-width: 721px) and (max-width: 960px) { .nv-nav__wordmark { display: none; } }
 .nv-nav__links { display: flex; gap: 4px; }
 .nv-nav__link {

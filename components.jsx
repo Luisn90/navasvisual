@@ -159,8 +159,11 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
       <nav className={`nv-nav ${ready ? 'ready' : ''}`}>
         <div className="nv-nav__inner">
           <a href="index.html" onClick={(e) => { e.preventDefault(); handleNav('index.html'); }} className="nv-nav__logo">
-            <LogoSVG size={28} />
-            <span className="nv-nav__wordmark">NAVAS VISUAL</span>
+            <LogoSVG size={30} color="#3a3a3a" />
+            <span className="nv-nav__wordmark">
+              <span className="nv-nav__name">Navas Visual</span>
+              <span className="nv-nav__tagline">{lang === 'en' ? 'Digital visual design' : 'Diseño visual digital'}</span>
+            </span>
           </a>
           <div className="nv-nav__links">
             {links.slice(1).map(l => (
