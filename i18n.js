@@ -72,17 +72,17 @@ window.NV_I18N = {
       eyebrow: "Sobre mí",
       title: "Luis Navas",
       role: "Diseñador visual independiente",
-      bio_1: "Soy diseñador visual. Llevo más de seis años ayudando a marcas, startups y agencias a construir productos y sistemas visuales que comunican con precisión.",
+      bio_1: "Soy diseñador gráfico y visual. Trabajo en diseño desde 2015, ayudando a marcas, emprendedores y agencias a construir identidades, piezas y productos digitales que comunican con precisión.",
       bio_2: "Mi trabajo se mueve entre lo digital y lo editorial, entre el rigor del sistema y la sensibilidad del detalle. Creo en procesos transparentes, comunicación honesta y soluciones que envejecen bien.",
       bio_3: "Trabajo de manera independiente con clientes en toda Latinoamérica, Europa y Estados Unidos.",
       stats: [
         { n: "60+", l: "Proyectos entregados" },
-        { n: "6", l: "Años de experiencia" },
+        { n: "10+", l: "Años de experiencia" },
         { n: "12", l: "Países" },
         { n: "100%", l: "Compromiso" }
       ],
       tools_label: "Herramientas",
-      tools: ["Figma", "Adobe CC", "Webflow", "Framer", "Notion", "Principle", "Cinema 4D"],
+      tools: ["Figma", "Adobe Illustrator", "Photoshop", "After Effects", "Framer", "WordPress", "Vibe code", "Blender"],
       cta: "Conversemos"
     },
     contact: {
@@ -317,17 +317,17 @@ window.NV_I18N = {
       eyebrow: "About",
       title: "Luis Navas",
       role: "Independent visual designer",
-      bio_1: "I'm a visual designer. For over six years I've helped brands, startups and agencies build products and visual systems that communicate with precision.",
+      bio_1: "I'm a graphic and visual designer. I've been working in design since 2015, helping brands, entrepreneurs and agencies build identities, pieces and digital products that communicate with precision.",
       bio_2: "My work moves between digital and editorial, between the rigor of systems and the sensitivity of detail. I believe in transparent processes, honest communication and solutions that age well.",
       bio_3: "I work independently with clients across Latin America, Europe and the United States.",
       stats: [
         { n: "60+", l: "Delivered projects" },
-        { n: "6", l: "Years of experience" },
+        { n: "10+", l: "Years of experience" },
         { n: "12", l: "Countries" },
         { n: "100%", l: "Commitment" }
       ],
       tools_label: "Tools",
-      tools: ["Figma", "Adobe CC", "Webflow", "Framer", "Notion", "Principle", "Cinema 4D"],
+      tools: ["Figma", "Adobe Illustrator", "Photoshop", "After Effects", "Framer", "WordPress", "Vibe code", "Blender"],
       cta: "Let's talk"
     },
     contact: {
