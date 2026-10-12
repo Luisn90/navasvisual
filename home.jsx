@@ -156,20 +156,13 @@ function HeroShowcase({ t, lang }) {
         </div>
 
         {/* 5. UI/UX */}
-        <div className={cls(4)} aria-hidden={active !== 4}>
-          <div className="olea-ux">
-            <div className="olea-phone olea-phone--wire">
-              <i className="w-h" /><i className="w-b" /><i className="w-b" /><i className="w-b" /><i className="w-c" />
-            </div>
-            <span className="olea-ux__arrow" />
-            <div className="olea-phone">
-              <span className="olea-phone__hi">{es ? 'Hola, Ana' : 'Hi, Ana'}</span>
-              {[['Picual', '12'], ['Arbequina', '14'], ['Hojiblanca', '13']].map(([n, p]) => (
-                <div className="olea-phone__item" key={n}><span className="olea-phone__dot" /><span>{n}</span><b>${p}</b></div>
-              ))}
-              <span className="olea-phone__cta">{es ? 'Comprar' : 'Buy'}</span>
-            </div>
-          </div>
+        <div className={`${cls(4)} nv-show__scene--brand nv-show__scene--uiux`} aria-hidden={active !== 4}>
+          <img
+            className="nv-show__brand-image"
+            src="assets/chess-fortune-app.jpg"
+            alt={es ? 'Diseño UI/UX de la app de ajedrez Chess Fortune: inicio de sesión, partida, resultado y mesas' : 'UI/UX design for the Chess Fortune chess app: sign-in, game, result and tables'}
+            loading="lazy"
+          />
         </div>
       </div>
 
