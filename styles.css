@@ -1717,6 +1717,7 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 .nv-show__scene--graphic { background: #f4c20d; }
 .nv-show__scene--uiux { background: #0b1830; }
 .nv-show__scene--app { background: #f6eeee; }
+.nv-show__scene--web { background: #f2742b; }
 @media (prefers-reduced-motion: reduce) { .nv-show__scene { transition: opacity 0.2s linear; transform: none; } }
 
 .nv-show__foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 20px; }

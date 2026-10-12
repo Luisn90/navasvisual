@@ -114,24 +114,13 @@ function HeroShowcase({ t, lang }) {
         </div>
 
         {/* 3. Web */}
-        <div className={cls(2)} aria-hidden={active !== 2}>
-          <div className="olea-browser">
-            <div className="olea-browser__bar"><i /><i /><i /><span>olea.com</span></div>
-            <div className="olea-site">
-              <div className="olea-site__nav">
-                <span className="olea-site__logo"><OleaMark size="1.4em" /> olea</span>
-                <span className="olea-site__links"><i /><i /><i /></span>
-              </div>
-              <div className="olea-site__hero">
-                <div>
-                  <span className="olea-site__h">{es ? 'Aceite de oliva de origen.' : 'Single-origin olive oil.'}</span>
-                  <span className="olea-site__p" /><span className="olea-site__p olea-site__p--short" />
-                  <span className="olea-site__btn">{es ? 'Comprar' : 'Shop now'}</span>
-                </div>
-                <div className="olea-site__img"><span /></div>
-              </div>
-            </div>
-          </div>
+        <div className={`${cls(2)} nv-show__scene--brand nv-show__scene--web`} aria-hidden={active !== 2}>
+          <img
+            className="nv-show__brand-image"
+            src="assets/832-comfort-ac-web.jpg"
+            alt={es ? 'Diseño web para 832 Comfort AC, empresa de aire acondicionado y calefacción en Texas' : 'Website design for 832 Comfort AC, an air conditioning and heating company in Texas'}
+            loading="lazy"
+          />
         </div>
 
         {/* 4. App a medida */}
