@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-equipo.html
+Disallow: /presupuesto.html
+Disallow: /api/
+
+Sitemap: https://navasvisual.com/sitemap.xml

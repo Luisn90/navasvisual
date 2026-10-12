@@ -19,6 +19,7 @@ Si no hay ninguno y la hora en Venezuela no está entre 8:00–8:59 ni 17:00–1
 - Supabase: proyecto `kzbhybcyjjqupojuakuw`.
   - `public.monitor_reports`: revisiones de Vega. Usa la más reciente (`order by created_at desc limit 1`) y su lista `hallazgos` (`id`, `tipo` error/aviso/mejora, `area`, `titulo`, `detalle`, `url`).
   - `public.monitor_fixes`: tus informes. Antes de empezar, lee los de los últimos 3 días para no repetir trabajo ni avisos.
+- Páginas de servicio (`servicios/*.html`) y `sitemap.xml` se generan desde `i18n.js` con `node scripts/servicios.mjs`. Si cambias planes, precios o textos de servicios, vuelve a ejecutarlo (la prueba `tests/seo.test.mjs` falla si quedan desactualizadas).
 - Vercel: proyecto `navasvisual` (`prj_BbP3qvfgo2PQJKLXZKhImUISxAZJ`, equipo `team_ACew8hlSxo1dza4eW2UBqLSf`).
 
 ## Encargos de Luis (primero)

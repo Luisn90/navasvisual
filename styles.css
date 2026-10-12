@@ -578,7 +578,7 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   margin-top: 80px;
 }
 @media (min-width: 720px) {
-  .nv-footer__cols { grid-template-columns: 2fr 1fr 1fr; }
+  .nv-footer__cols { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
 }
 .nv-footer__col h4 {
   font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;

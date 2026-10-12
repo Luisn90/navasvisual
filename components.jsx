@@ -264,6 +264,18 @@ function Footer({ t, lang, onNavigate }) {
             </ul>
           </div>
           <div className="nv-footer__col">
+            <h4>{lang === 'es' ? 'Servicios' : 'Services'}</h4>
+            <ul>
+              <li><a href="servicios/logo.html">{lang === 'es' ? 'Diseño de logo' : 'Logo design'}</a></li>
+              <li><a href="servicios/identidad-de-marca.html">{lang === 'es' ? 'Identidad de marca' : 'Brand identity'}</a></li>
+              <li><a href="servicios/diseno-web-wordpress.html">{lang === 'es' ? 'Web en WordPress' : 'WordPress websites'}</a></li>
+              <li><a href="servicios/desarrollo-web-a-medida.html">{lang === 'es' ? 'Webs y apps a medida' : 'Custom web & apps'}</a></li>
+              <li><a href="servicios/diseno-para-redes-sociales.html">{lang === 'es' ? 'Diseño para redes' : 'Social media design'}</a></li>
+              <li><a href="servicios/diseno-ui-ux.html">UI/UX</a></li>
+              <li><a href="servicios/diseno-web-framer.html">{lang === 'es' ? 'Web en Framer' : 'Framer websites'}</a></li>
+            </ul>
+          </div>
+          <div className="nv-footer__col">
             <h4>{lang === 'es' ? 'Redes' : 'Social'}</h4>
             <ul>
               <li><a href="https://instagram.com/navasvisual.design" target="_blank" rel="noopener">Instagram</a></li>
