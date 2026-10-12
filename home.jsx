@@ -135,24 +135,13 @@ function HeroShowcase({ t, lang }) {
         </div>
 
         {/* 4. App a medida */}
-        <div className={cls(3)} aria-hidden={active !== 3}>
-          <div className="olea-app">
-            <aside className="olea-app__side">
-              <OleaMark size="1.8em" color="#F1EBDD" />
-              <i className="is-on" /><i /><i /><i />
-            </aside>
-            <div className="olea-app__main">
-              <span className="olea-app__title">{es ? 'Pedidos' : 'Orders'}</span>
-              <div className="olea-app__kpis">
-                <div><b>124</b><span>{es ? 'pedidos' : 'orders'}</span></div>
-                <div><b>$3.420</b><span>{es ? 'ventas' : 'sales'}</span></div>
-                <div><b>98%</b><span>{es ? 'a tiempo' : 'on time'}</span></div>
-              </div>
-              <div className="olea-app__chart">
-                {[38, 54, 46, 70, 62, 88, 76].map((h, i) => <span key={i} style={{ height: `${h}%` }} />)}
-              </div>
-            </div>
-          </div>
+        <div className={`${cls(3)} nv-show__scene--brand nv-show__scene--app`} aria-hidden={active !== 3}>
+          <img
+            className="nv-show__brand-image"
+            src="assets/costuras-anabel-app.jpg"
+            alt={es ? 'App a medida para Costuras Anabel: panel de administración para publicar patrones, tutoriales y descuentos' : 'Custom app for Costuras Anabel: admin panel to publish patterns, tutorials and discounts'}
+            loading="lazy"
+          />
         </div>
 
         {/* 5. UI/UX */}
