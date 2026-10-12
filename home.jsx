@@ -104,23 +104,13 @@ function HeroShowcase({ t, lang }) {
         </div>
 
         {/* 2. Gráfico */}
-        <div className={cls(1)} aria-hidden={active !== 1}>
-          <div className="olea-print">
-            <div className="olea-card">
-              <OleaMark size="2.2em" color="#4B5A2A" />
-              <div className="olea-card__info">
-                <strong>Marta Ríos</strong>
-                <span>{es ? 'Maestra de almazara' : 'Head of the mill'}</span>
-                <span>hola@olea.com</span>
-              </div>
-            </div>
-            <div className="olea-post">
-              <span className="olea-post__sun" />
-              <span className="olea-post__kicker">olea</span>
-              <span className="olea-post__title">{es ? 'Cosecha' : 'Harvest'}<br />2026</span>
-              <span className="olea-post__cta">{es ? 'Ya disponible' : 'Out now'}</span>
-            </div>
-          </div>
+        <div className={`${cls(1)} nv-show__scene--brand nv-show__scene--graphic`} aria-hidden={active !== 1}>
+          <img
+            className="nv-show__brand-image"
+            src="assets/ivamaxo-tarjetas.jpg"
+            alt={es ? 'Tarjetas de presentación de Ivamaxo, repuestos para autos y motos, en amarillo y negro' : 'Ivamaxo business cards, auto and motorcycle parts, in yellow and black'}
+            loading="lazy"
+          />
         </div>
 
         {/* 3. Web */}
