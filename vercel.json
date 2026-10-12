@@ -14,6 +14,9 @@
     },
     "api/presupuesto.mjs": {
       "maxDuration": 30
+    },
+    "api/contacto.mjs": {
+      "maxDuration": 30
     }
   },
   "rewrites": [

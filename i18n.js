@@ -102,22 +102,20 @@ window.NV_I18N = {
       direct: "O escríbeme directo",
       email: "hola@navasvisual.com",
       socials: [
-        { n: "Instagram", h: "@navas.visual" },
-        { n: "Behance", h: "behance.net/navasvisual" },
-        { n: "LinkedIn", h: "in/luis-navas" },
-        { n: "WhatsApp", h: "+58 ··· ····" }
+        { n: "Instagram", h: "@navasvisual.design", url: "https://instagram.com/navasvisual.design" },
+        { n: "WhatsApp", h: "+58 412 744 9626" }
       ]
     },
     faq: {
       eyebrow: "Preguntas",
       title: "Preguntas frecuentes",
       items: [
-        { q: "¿Cuánto cuesta un proyecto?", a: "Cada proyecto se cotiza de forma personalizada según alcance, complejidad y tiempos. Tras una primera conversación envío una propuesta detallada con fases, entregables y costos." },
-        { q: "¿Cuánto tarda un proyecto?", a: "Una identidad básica toma entre 3 y 5 semanas. Un sitio web entre 4 y 8 semanas. Una aplicación móvil completa entre 8 y 16 semanas. Los plazos exactos se definen en el brief." },
-        { q: "¿Trabajas con clientes internacionales?", a: "Sí. Trabajo de manera 100% remota con clientes en Latinoamérica, Estados Unidos y Europa. Uso herramientas colaborativas para mantener todo claro y documentado." },
-        { q: "¿Qué incluye una propuesta?", a: "Cada propuesta incluye alcance detallado, entregables, cronograma con hitos, condiciones comerciales y términos de revisión. Sin sorpresas." },
-        { q: "¿Trabajas con equipos o agencias?", a: "Sí. Colaboro como diseñador externo con agencias y equipos internos. Puedo integrarme a tu flujo o liderar áreas específicas según la necesidad." },
-        { q: "¿Tienes contrato y NDAs?", a: "Siempre. Todo proyecto se firma con contrato. Para clientes que lo requieran, firmo acuerdos de confidencialidad antes de cualquier conversación." }
+        { q: "¿Cuánto cuesta un proyecto?", a: "Logo, identidad, WordPress, Vibecode y redes tienen planes con precio cerrado desde $50. Si necesitas algo distinto o más grande, te preparo un presupuesto personalizado con conceptos, plazos y condiciones, que puedes ver y aceptar en línea." },
+        { q: "¿Cuánto tarda?", a: "Depende del plan: un logo entre 3 y 6 días, una identidad entre 7 y 15, una web en WordPress entre 7 y 20 y un desarrollo a medida entre 5 y 25. El plazo exacto aparece en cada plan o en tu presupuesto." },
+        { q: "¿Cómo se paga?", a: "Con Binance Pay (USDT) o Pago Móvil. En los planes subes tu comprobante desde la web y te llega la confirmación por correo cuando lo verifico. En los proyectos a medida se paga un anticipo para empezar y el resto a la entrega, según lo acordado en el presupuesto." },
+        { q: "¿Cuántos cambios incluye?", a: "Cada plan indica sus rondas de revisiones, de 2 a 5 según el plan. En los presupuestos a medida también queda escrito cuántas rondas incluye y cuánto cuesta una adicional." },
+        { q: "¿Trabajas con clientes de otros países?", a: "Sí. Trabajo 100% en remoto con clientes de cualquier país, por correo, WhatsApp y videollamada." },
+        { q: "¿Qué recibo al final?", a: "Los archivos finales listos para usar según tu plan o presupuesto: por ejemplo, el logo en PNG, JPG y SVG, el manual de marca en PDF o tu web publicada con tu dominio." }
       ]
     },
     svc: {
@@ -347,22 +345,20 @@ window.NV_I18N = {
       direct: "Or email me directly",
       email: "hola@navasvisual.com",
       socials: [
-        { n: "Instagram", h: "@navas.visual" },
-        { n: "Behance", h: "behance.net/navasvisual" },
-        { n: "LinkedIn", h: "in/luis-navas" },
-        { n: "WhatsApp", h: "+58 ··· ····" }
+        { n: "Instagram", h: "@navasvisual.design", url: "https://instagram.com/navasvisual.design" },
+        { n: "WhatsApp", h: "+58 412 744 9626" }
       ]
     },
     faq: {
       eyebrow: "FAQ",
       title: "Frequently asked",
       items: [
-        { q: "How much does a project cost?", a: "Every project is quoted individually based on scope, complexity and timeline. After an initial conversation I send a detailed proposal with phases, deliverables and costs." },
-        { q: "How long does a project take?", a: "A basic identity takes 3 to 5 weeks. A website 4 to 8 weeks. A full mobile app 8 to 16 weeks. Exact timelines are defined in the brief." },
-        { q: "Do you work with international clients?", a: "Yes. I work 100% remotely with clients across Latin America, the US and Europe. I use collaborative tools to keep everything clear and documented." },
-        { q: "What's included in a proposal?", a: "Every proposal includes detailed scope, deliverables, timeline with milestones, commercial terms and revision conditions. No surprises." },
-        { q: "Do you work with teams or agencies?", a: "Yes. I collaborate as an external designer with agencies and in-house teams. I can plug into your flow or lead specific areas as needed." },
-        { q: "Do you work with contracts and NDAs?", a: "Always. Every project is signed with a contract. For clients who require it, I sign NDAs before any conversation." }
+        { q: "How much does a project cost?", a: "Logo, identity, WordPress, Vibecode and social media have fixed-price plans from $50. If you need something different or bigger, I'll prepare a custom quote with items, timelines and terms that you can view and accept online." },
+        { q: "How long does it take?", a: "It depends on the plan: a logo takes 3 to 6 days, an identity 7 to 15, a WordPress site 7 to 20 and a custom build 5 to 25. The exact timeline is shown in each plan or in your quote." },
+        { q: "How do I pay?", a: "With Binance Pay (USDT) or Pago Móvil. For plans, you upload your receipt on the site and get an email confirmation once I verify it. Custom projects start with a deposit and the rest is paid on delivery, as agreed in the quote." },
+        { q: "How many revisions are included?", a: "Each plan states its revision rounds, from 2 to 5 depending on the plan. Custom quotes also state how many rounds are included and the cost of an extra one." },
+        { q: "Do you work with clients abroad?", a: "Yes. I work 100% remotely with clients from any country, by email, WhatsApp and video call." },
+        { q: "What do I get at the end?", a: "The final files ready to use, according to your plan or quote: for example, your logo in PNG, JPG and SVG, your brand guide in PDF or your website live on your domain." }
       ]
     },
     svc: {

@@ -49,13 +49,13 @@ export async function signedProofUrl(env, path, fetcher = fetch) {
   return signedURL ? `${storageBase(env)}${signedURL.startsWith('/') ? '' : '/'}${signedURL}` : null;
 }
 
-export async function sendEmail(env, { to, subject, html, text, attachments = [], key }, fetcher = fetch) {
+export async function sendEmail(env, { to, subject, html, text, attachments = [], key, replyTo }, fetcher = fetch) {
   const response = await fetcher('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json', ...(key ? { 'Idempotency-Key': key } : {}) },
     body: JSON.stringify({
       from: env.BRIEF_EMAIL_FROM, to: [to], subject, html, text,
-      ...(env.BRIEF_EMAIL_TO ? { reply_to: env.BRIEF_EMAIL_TO } : {}),
+      ...(replyTo ? { reply_to: replyTo } : env.BRIEF_EMAIL_TO ? { reply_to: env.BRIEF_EMAIL_TO } : {}),
       attachments: attachments.map(f => ({ filename: f.name, content: f.bytes.toString('base64'), content_type: f.type }))
     }),
     signal: AbortSignal.timeout(18000)
