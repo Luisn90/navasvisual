@@ -2,6 +2,7 @@ import { runDesign, signedImageUrls, DESIGN_SERVICES, CAMILO } from './_diseno.m
 import { runContent, CONTENT_SERVICES, TEO } from './_contenido.mjs';
 import { runMonitor, latestReports, writeSummary, chatWithVega } from './_monitor.mjs';
 import { decidePayment, signedProofUrl } from './_pagos.mjs';
+import { guardarPresupuesto, enviarPresupuesto, getPresupuesto } from './_presupuestos.mjs';
 import { afterResponse, sendTelegram, verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
@@ -41,6 +42,20 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
       if (!row) return json(404, { error: 'not_found' });
       const link = `${new URL(request.url).origin}/admin.html#solicitud-${row.id}`;
       return json(200, await decidePayment(env, row, { decision: body.decision, motivo }, { link }, fetcher));
+    }
+    // Presupuestos personalizados: Luis los guarda y los envía; el cliente los acepta en la web.
+    if (body?.action === 'presupuesto_guardar') {
+      const result = await guardarPresupuesto(env, body.presupuesto || {}, fetcher);
+      if (result.error) return json(result.error === 'not_found' ? 404 : 400, { error: result.error });
+      return json(200, result);
+    }
+    if (body?.action === 'presupuesto_enviar') {
+      const row = await getPresupuesto(env, body.id, fetcher);
+      if (!row) return json(404, { error: 'not_found' });
+      const link = `${new URL(request.url).origin}/admin.html#presupuesto-${row.id}`;
+      const result = await enviarPresupuesto(env, row, { link }, fetcher);
+      if (result.error) return json(result.error === 'email_config' ? 503 : 409, { error: result.error });
+      return json(200, result);
     }
     if (!aiReady(env)) return json(503, { error: 'config' });
     if (body?.action === 'analizar') {

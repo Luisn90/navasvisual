@@ -133,6 +133,36 @@
   .toast.error { background:var(--danger); color:white; }
   .spinner { width:16px; height:16px; border:2px solid rgba(0,0,0,0.2); border-top-color:var(--bg); border-radius:50%; animation:spin 0.6s linear infinite; display:inline-block; }
   @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* PRESUPUESTOS */
+  .badge-amber { background:rgba(245,165,36,0.12); border-color:rgba(245,165,36,0.25); color:#f5a524; }
+  .badge-blue { background:rgba(96,165,250,0.12); border-color:rgba(96,165,250,0.25); color:#60a5fa; }
+  .badge-red { background:rgba(255,68,68,0.1); border-color:rgba(255,68,68,0.2); color:var(--danger); }
+  .pres-row { cursor:pointer; }
+  .pres-num { font-family:var(--mono); font-size:12px; color:var(--fg-3); }
+  .pres-editor { max-width:920px; }
+  .pres-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+  .pres-top .page-title { margin-right:auto; }
+  .pres-card { background:var(--bg-1); border:1px solid var(--line); border-radius:16px; padding:24px; margin-bottom:16px; }
+  .pres-card h3 { font-size:12px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--fg-3); margin-bottom:16px; }
+  .pres-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+  .pres-grid .wide { grid-column:1 / -1; }
+  .pres-items { display:grid; gap:10px; }
+  .pres-item { display:grid; grid-template-columns:1fr 140px 36px; gap:8px; align-items:start; background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:10px; }
+  .pres-item input, .pres-item textarea { width:100%; background:var(--bg); border:1px solid var(--line); border-radius:8px; color:var(--fg); font-family:var(--font); font-size:14px; padding:9px 11px; outline:none; }
+  .pres-item textarea { grid-column:1 / 3; min-height:52px; resize:vertical; font-size:13px; color:var(--fg-2); }
+  .pres-item .x { grid-row:1; grid-column:3; width:36px; height:38px; border-radius:8px; background:transparent; border:1px solid var(--line); color:var(--fg-3); cursor:pointer; font-size:16px; }
+  .pres-item .x:hover { color:var(--danger); border-color:rgba(255,68,68,0.3); }
+  .pres-total { display:flex; justify-content:space-between; align-items:baseline; margin-top:16px; padding-top:16px; border-top:1px solid var(--line); }
+  .pres-total b { font-size:28px; letter-spacing:-0.03em; font-weight:600; }
+  .pres-checks { display:flex; gap:16px; flex-wrap:wrap; font-size:14px; color:var(--fg-2); }
+  .pres-checks label { display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; letter-spacing:0; font-size:14px; font-weight:400; color:var(--fg-2); margin:0; }
+  .pres-checks input { accent-color:white; width:16px; height:16px; }
+  .pres-status { font-size:13px; color:var(--fg-2); line-height:1.7; }
+  .pres-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; position:sticky; bottom:0; padding:16px 0; background:linear-gradient(transparent, var(--bg) 30%); }
+  .pres-actions .btn-primary { width:auto; }
+  .hint { font-size:12px; color:var(--fg-3); margin-top:-8px; margin-bottom:16px; }
+  @media (max-width:760px) { .pres-grid { grid-template-columns:1fr; } .pres-item { grid-template-columns:1fr 100px 36px; } }
 </style>
 </head>
 <body>
@@ -188,6 +218,7 @@
     <div class="sidebar-label">Menú</div>
     <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="icon">▦</span> Dashboard</div>
     <div class="nav-item" onclick="showPage('projects')" id="nav-projects"><span class="icon">◫</span> Proyectos</div>
+    <div class="nav-item" onclick="showPage('presupuestos')" id="nav-presupuestos"><span class="icon">❏</span> Presupuestos <span class="nav-badge" id="presBadge" hidden></span></div>
     <div class="nav-item" onclick="showPage('team')" id="nav-team"><span class="icon">◉</span> Equipo <span class="nav-badge" id="teamBadge" hidden></span></div>
     <div class="sidebar-footer">
       <div class="user-info" id="userEmail">—</div>
@@ -239,6 +270,102 @@
           <div style="font-size:13px">Crea tu primer proyecto arriba</div>
         </div>
       </div>
+    </div>
+
+    <!-- PRESUPUESTOS -->
+    <div id="page-presupuestos" style="display:none">
+      <div id="presList">
+        <div class="page-header">
+          <div><div class="page-title">Presupuestos</div><div class="page-sub">Prepara, envía y sigue tus presupuestos personalizados</div></div>
+          <button class="btn btn-primary" style="width:auto" onclick="presNew()">+ Nuevo presupuesto</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="search-input" placeholder="Buscar cliente o proyecto..." oninput="presRender(this.value)" />
+            <span style="font-size:12px;color:var(--fg-3)">Te aviso por Telegram cuando el cliente lo abre o lo acepta</span>
+          </div>
+          <table>
+            <thead><tr><th>N.º</th><th>Cliente</th><th>Proyecto</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
+            <tbody id="presTable"></tbody>
+          </table>
+          <div class="empty-state" id="presEmpty" style="display:none">
+            <div class="empty-icon">❏</div>
+            <div class="empty-title">Aún no hay presupuestos</div>
+            <div style="font-size:13px">Crea el primero con «+ Nuevo presupuesto»</div>
+          </div>
+        </div>
+      </div>
+
+      <form id="presEditor" class="pres-editor" style="display:none" onsubmit="event.preventDefault()">
+        <div class="pres-top">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="presBack()">← Volver</button>
+          <div class="page-title" id="presTitle">Nuevo presupuesto</div>
+          <span class="badge" id="presState"></span>
+        </div>
+        <div class="pres-card" id="presStatusCard" style="display:none"><div class="pres-status" id="presStatus"></div></div>
+
+        <div class="pres-card">
+          <h3>Cliente</h3>
+          <div class="pres-grid">
+            <div class="field"><label for="pCliente">Nombre *</label><input id="pCliente" maxlength="120" required /></div>
+            <div class="field"><label for="pEmail">Correo *</label><input id="pEmail" type="email" maxlength="160" required /></div>
+            <div class="field"><label for="pMarca">Marca o empresa</label><input id="pMarca" maxlength="120" /></div>
+            <div class="field"><label for="pLang">Idioma del presupuesto</label><select id="pLang"><option value="es">Español</option><option value="en">Inglés</option></select></div>
+          </div>
+        </div>
+
+        <div class="pres-card">
+          <h3>Proyecto</h3>
+          <div class="field"><label for="pTitulo">Título *</label><input id="pTitulo" maxlength="140" placeholder="Ej: Identidad visual para Café Luna" required /></div>
+          <div class="field"><label for="pIntro">Introducción (opcional)</label><textarea id="pIntro" maxlength="1200" placeholder="Un par de frases sobre lo que entendiste del proyecto y lo que propones."></textarea></div>
+        </div>
+
+        <div class="pres-card">
+          <h3>Conceptos y precios (USD)</h3>
+          <div class="pres-items" id="pItems"></div>
+          <button type="button" class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="presAddItem()">+ Añadir concepto</button>
+          <div class="pres-total"><span style="color:var(--fg-3);font-size:13px">TOTAL</span><b id="pTotal">$0</b></div>
+        </div>
+
+        <div class="pres-card">
+          <h3>Plazos y entregables</h3>
+          <div class="field"><label for="pPlazo">Plazo estimado</label><input id="pPlazo" maxlength="200" placeholder="Ej: 3 a 4 semanas desde el anticipo" /></div>
+          <div class="field"><label for="pEntregables">Entregables (uno por línea)</label><textarea id="pEntregables" placeholder="Logo en SVG, PNG y PDF&#10;Manual de marca en PDF"></textarea></div>
+        </div>
+
+        <div class="pres-card">
+          <h3>Rondas de cambios</h3>
+          <div class="pres-grid">
+            <div class="field"><label for="pRondas">Rondas incluidas</label><input id="pRondas" type="number" min="0" max="10" value="2" /></div>
+            <div class="field"><label for="pRondasExtra">Si piden más (opcional)</label><input id="pRondasExtra" maxlength="240" placeholder="Ej: Cada ronda adicional: $40" /></div>
+          </div>
+        </div>
+
+        <div class="pres-card">
+          <h3>Condiciones de pago</h3>
+          <div class="pres-grid">
+            <div class="field"><label for="pAnticipo">Anticipo (%)</label><input id="pAnticipo" type="number" min="0" max="100" value="50" oninput="presTotal()" /></div>
+            <div class="field"><label for="pValidez">Válido durante (días)</label><input id="pValidez" type="number" min="1" max="90" value="15" /></div>
+          </div>
+          <div class="hint" id="pAnticipoHint"></div>
+          <div class="field"><label>Métodos de pago</label>
+            <div class="pres-checks">
+              <label><input type="checkbox" name="pMetodo" value="binance" checked /> Binance Pay (USDT)</label>
+              <label><input type="checkbox" name="pMetodo" value="pagomovil" checked /> Pago Móvil</label>
+              <label><input type="checkbox" name="pMetodo" value="otro" /> Otro método</label>
+            </div>
+          </div>
+          <div class="field"><label for="pNotas">Notas (opcional)</label><textarea id="pNotas" maxlength="1500" placeholder="Ej: Los precios no incluyen impresión."></textarea></div>
+        </div>
+
+        <div class="pres-actions">
+          <button type="button" class="btn btn-ghost" id="pDup" onclick="presDuplicate()" style="display:none">Duplicar como nuevo</button>
+          <button type="button" class="btn btn-ghost" id="pCopy" onclick="presCopyLink()" style="display:none">Copiar enlace</button>
+          <button type="button" class="btn btn-ghost" id="pPreview" onclick="presPreview()">Vista previa</button>
+          <button type="button" class="btn btn-ghost" id="pSave" onclick="presSave()">Guardar borrador</button>
+          <button type="button" class="btn btn-primary" id="pSend" onclick="presSend()">Enviar al cliente</button>
+        </div>
+      </form>
     </div>
   </main>
 </div>
@@ -462,6 +589,8 @@ function showApp(email) {
   document.getElementById('userEmail').textContent = email;
   loadProjects();
   startTeamBadge();
+  presLoad();
+  if (/^#presupuesto-[0-9a-f-]{36}$/i.test(location.hash)) { showPage('presupuestos'); presOpenWhenReady(location.hash.slice(13)); }
   // Enlace desde Telegram: abre la solicitud directamente en la oficina
   if (/^#solicitud-[0-9a-f-]{36}$/i.test(location.hash)) {
     document.getElementById('teamFrame').src = 'admin-equipo.html' + location.hash;
@@ -477,7 +606,7 @@ async function handleLogout() {
 
 // PAGES
 function showPage(page) {
-  ['dashboard','projects','team'].forEach(p => {
+  ['dashboard','projects','presupuestos','team'].forEach(p => {
     document.getElementById('page-'+p).style.display = p===page ? 'block' : 'none';
     document.getElementById('nav-'+p).classList.toggle('active', p===page);
   });
@@ -699,6 +828,181 @@ async function saveProject() {
 // INIT
 document.getElementById('modalOverlay').addEventListener('click', e => { if(e.target===document.getElementById('modalOverlay')) closeModal(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+// PRESUPUESTOS: la oficina lee la lista; guardar y enviar pasa por /api/agent, que valida todo.
+let presAll = [], presCur = null, presReady = false, presWatch = false, presWanted = null;
+const PRES_STATE = { borrador: ['Borrador', 'badge-dim'], enviado: ['Enviado', 'badge-blue'], visto: ['Visto por el cliente', 'badge-amber'], aceptado: ['Aceptado', 'badge-green'], rechazado: ['Rechazado', 'badge-red'], vencido: ['Vencido', 'badge-dim'] };
+const presEsc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const presMoney = n => '$' + Number(n || 0).toLocaleString('de-DE', { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const presNum = r => 'P-' + String(r.numero || 0).padStart(4, '0');
+const presDay = d => d ? new Date(d).toLocaleDateString('es-VE', { day:'numeric', month:'short', year:'numeric', timeZone:'America/Caracas' }) : '—';
+const presDayTime = d => d ? new Date(d).toLocaleString('es-VE', { dateStyle:'long', timeStyle:'short', timeZone:'America/Caracas' }) : '';
+function presStateOf(r) {
+  if (r.estado === 'enviado' && r.enviado_at && Date.now() > new Date(r.enviado_at).getTime() + r.validez_dias * 86400000) return 'vencido';
+  if (r.estado === 'enviado' && r.visto_at) return 'visto';
+  return r.estado;
+}
+async function presLoad() {
+  const { data, error } = await sb.from('presupuestos').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) { showToast('No se pudieron cargar los presupuestos', 'error'); return; }
+  presAll = data || []; presReady = true; presRender(); presBadge();
+  if (presWanted) { const id = presWanted; presWanted = null; presOpen(id); }
+  else if (presCur?.id) { const fresh = presAll.find(r => r.id === presCur.id); if (fresh && fresh.updated_at !== presCur.updated_at) { presCur = fresh; presFillStatus(); } }
+  if (!presWatch) {
+    presWatch = true;
+    try { sb.channel('admin-presupuestos').on('postgres_changes', { event: '*', schema: 'public', table: 'presupuestos' }, () => presLoad()).subscribe(); } catch (e) {}
+  }
+}
+function presOpenWhenReady(id) { if (presReady) presOpen(id); else presWanted = id; }
+function presBadge() {
+  const n = presAll.filter(r => r.estado === 'aceptado' && r.aceptado_at && Date.now() - new Date(r.aceptado_at).getTime() < 3 * 86400000).length;
+  const b = document.getElementById('presBadge'); b.hidden = !n; b.textContent = n;
+}
+function presRender(search = document.querySelector('#presList .search-input')?.value || '') {
+  const q = search.trim().toLowerCase();
+  const list = presAll.filter(r => !q || [r.cliente_nombre, r.marca, r.titulo, r.cliente_email, presNum(r)].join(' ').toLowerCase().includes(q));
+  document.getElementById('presEmpty').style.display = list.length ? 'none' : 'block';
+  document.getElementById('presTable').innerHTML = list.map(r => {
+    const [label, cls] = PRES_STATE[presStateOf(r)] || ['—', ''];
+    return `<tr class="pres-row" onclick="presOpen('${r.id}')">
+      <td class="pres-num">${presNum(r)}</td>
+      <td class="project-title-cell">${presEsc(r.cliente_nombre)}<div style="font-size:12px;color:var(--fg-3);font-weight:400">${presEsc(r.marca || r.cliente_email)}</div></td>
+      <td>${presEsc(r.titulo)}</td>
+      <td style="color:var(--fg);font-weight:500">${presMoney(r.total)}</td>
+      <td><span class="badge ${cls}">${label}</span></td>
+      <td style="font-size:12px;color:var(--fg-3)">${presDay(r.enviado_at || r.created_at)}</td></tr>`;
+  }).join('');
+}
+function presShowEditor(on) {
+  document.getElementById('presList').style.display = on ? 'none' : 'block';
+  document.getElementById('presEditor').style.display = on ? 'block' : 'none';
+  window.scrollTo(0, 0);
+}
+function presBack() { presCur = null; presShowEditor(false); if (location.hash.startsWith('#presupuesto-')) history.replaceState(null, '', location.pathname); }
+function presItemRow(c = {}) {
+  const row = document.createElement('div'); row.className = 'pres-item';
+  row.innerHTML = '<input class="d" maxlength="160" placeholder="Concepto (ej: Logotipo y variantes)" /><input class="p" type="number" min="0" step="0.01" placeholder="Precio" /><button type="button" class="x" title="Quitar" aria-label="Quitar concepto">×</button><textarea class="t" maxlength="500" placeholder="Detalle (opcional)"></textarea>';
+  row.querySelector('.d').value = c.descripcion || '';
+  row.querySelector('.p').value = c.precio ?? '';
+  row.querySelector('.t').value = c.detalle || '';
+  row.querySelector('.p').addEventListener('input', presTotal);
+  row.querySelector('.x').addEventListener('click', () => { row.remove(); if (!document.querySelectorAll('#pItems .pres-item').length) presAddItem(); presTotal(); });
+  return row;
+}
+function presAddItem(c) { document.getElementById('pItems').append(presItemRow(c)); presTotal(); }
+function presItems() {
+  return [...document.querySelectorAll('#pItems .pres-item')].map(r => ({ descripcion: r.querySelector('.d').value.trim(), precio: r.querySelector('.p').value === '' ? '' : Number(r.querySelector('.p').value), detalle: r.querySelector('.t').value.trim() }))
+    .filter(c => c.descripcion || c.detalle || c.precio !== '');
+}
+function presTotal() {
+  const total = presItems().reduce((s, c) => s + (Number(c.precio) || 0), 0);
+  document.getElementById('pTotal').textContent = presMoney(Math.round(total * 100) / 100) + ' USD';
+  const a = Math.min(100, Math.max(0, Number(document.getElementById('pAnticipo').value) || 0));
+  document.getElementById('pAnticipoHint').textContent = a ? `Anticipo: ${presMoney(Math.round(total * a) / 100)} USD · Resto: ${presMoney(Math.round(total * (100 - a)) / 100)} USD` : 'Sin anticipo';
+}
+function presFill(r) {
+  const v = (id, val) => { document.getElementById(id).value = val ?? ''; };
+  v('pCliente', r.cliente_nombre); v('pEmail', r.cliente_email); v('pMarca', r.marca); v('pLang', r.lang || 'es');
+  v('pTitulo', r.titulo); v('pIntro', r.intro); v('pPlazo', r.plazo); v('pEntregables', (r.entregables || []).join('\n'));
+  v('pRondas', r.rondas ?? 2); v('pRondasExtra', r.rondas_extra); v('pAnticipo', r.anticipo ?? 50); v('pValidez', r.validez_dias ?? 15); v('pNotas', r.notas);
+  const metodos = r.metodos || ['binance', 'pagomovil'];
+  document.querySelectorAll('input[name=pMetodo]').forEach(c => { c.checked = metodos.includes(c.value); });
+  const items = document.getElementById('pItems'); items.replaceChildren();
+  (r.conceptos?.length ? r.conceptos : [{}]).forEach(c => items.append(presItemRow(c)));
+  presTotal(); presFillStatus();
+}
+function presFillStatus() {
+  const r = presCur || {};
+  const st = r.id ? presStateOf(r) : 'borrador';
+  const [label, cls] = PRES_STATE[st];
+  document.getElementById('presTitle').textContent = r.id ? `Presupuesto ${presNum(r)}` : 'Nuevo presupuesto';
+  const badge = document.getElementById('presState'); badge.textContent = label; badge.className = 'badge ' + cls;
+  const lines = [];
+  if (r.enviado_at) lines.push(`Enviado a ${presEsc(r.cliente_email)} · ${presDayTime(r.enviado_at)}`);
+  if (r.visto_at) lines.push(`El cliente lo abrió · ${presDayTime(r.visto_at)}`);
+  if (r.aceptado_at) lines.push(`<b style="color:var(--success)">Aceptado · ${presDayTime(r.aceptado_at)}</b> — escríbele para coordinar el anticipo.`);
+  if (r.rechazado_at) lines.push(`<b style="color:var(--danger)">Rechazado · ${presDayTime(r.rechazado_at)}</b>${r.motivo_rechazo ? ' — motivo: «' + presEsc(r.motivo_rechazo) + '»' : ''}`);
+  if (st === 'vencido') lines.push('Venció sin respuesta. Puedes ajustar el presupuesto y reenviarlo: se renueva la validez.');
+  document.getElementById('presStatus').innerHTML = lines.join('<br>');
+  document.getElementById('presStatusCard').style.display = lines.length ? 'block' : 'none';
+  const closed = ['aceptado', 'rechazado'].includes(r.estado);
+  document.querySelectorAll('#presEditor input, #presEditor textarea, #presEditor select, #presEditor .pres-item .x').forEach(el => { el.disabled = closed; });
+  document.querySelector('#presEditor [onclick="presAddItem()"]').style.display = closed ? 'none' : '';
+  document.getElementById('pSave').style.display = closed ? 'none' : '';
+  document.getElementById('pSend').style.display = closed ? 'none' : '';
+  document.getElementById('pSend').textContent = r.estado === 'enviado' ? 'Guardar y reenviar' : 'Enviar al cliente';
+  document.getElementById('pSave').textContent = r.estado === 'enviado' ? 'Guardar cambios (sin reenviar)' : 'Guardar borrador';
+  document.getElementById('pCopy').style.display = r.estado && r.estado !== 'borrador' ? '' : 'none';
+  document.getElementById('pDup').style.display = r.id ? '' : 'none';
+}
+function presNew(base = {}) { presCur = null; presFill(base); presShowEditor(true); document.getElementById('pCliente').focus(); }
+function presOpen(id) {
+  const r = presAll.find(x => x.id === id);
+  if (!r) { showToast('No encontré ese presupuesto', 'error'); return; }
+  presCur = r; presFill(r); presShowEditor(true);
+  history.replaceState(null, '', '#presupuesto-' + r.id);
+}
+function presDuplicate() {
+  const { id, numero, token, estado, enviado_at, visto_at, aceptado_at, rechazado_at, motivo_rechazo, ...rest } = presCur || {};
+  presNew({ ...rest, titulo: rest.titulo ? rest.titulo + ' (copia)' : '' });
+  showToast('Copia lista: revisa los datos y guárdala');
+}
+function presForm() {
+  const n = id => document.getElementById(id).value;
+  return {
+    id: presCur?.id, lang: n('pLang'), cliente_nombre: n('pCliente'), cliente_email: n('pEmail'), marca: n('pMarca'),
+    titulo: n('pTitulo'), intro: n('pIntro'), conceptos: presItems(), plazo: n('pPlazo'), entregables: n('pEntregables'),
+    rondas: n('pRondas'), rondas_extra: n('pRondasExtra'), anticipo: n('pAnticipo'), validez_dias: n('pValidez'), notas: n('pNotas'),
+    metodos: [...document.querySelectorAll('input[name=pMetodo]:checked')].map(c => c.value)
+  };
+}
+const PRES_ERR = { cliente_nombre: 'Falta el nombre del cliente', cliente_email: 'Revisa el correo del cliente', titulo: 'Falta el título del proyecto', conceptos: 'Añade al menos un concepto con su nombre y precio', cerrado: 'Este presupuesto ya fue respondido y no se puede cambiar', email_config: 'El envío de correos no está configurado', not_found: 'No encontré ese presupuesto' };
+async function presApi(body) {
+  const { data } = await sb.auth.getSession();
+  const token = data.session?.access_token;
+  const r = await fetch('/api/agent', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
+  const out = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(PRES_ERR[out.error] || 'No se pudo completar. Inténtalo de nuevo.');
+  return out;
+}
+function presBusy(on) { ['pSave', 'pSend', 'pPreview'].forEach(id => { document.getElementById(id).disabled = on; }); }
+async function presSave(quiet = false) {
+  presBusy(true);
+  try {
+    const { presupuesto } = await presApi({ action: 'presupuesto_guardar', presupuesto: presForm() });
+    presCur = presupuesto; presFillStatus();
+    history.replaceState(null, '', '#presupuesto-' + presupuesto.id);
+    if (!quiet) showToast(presupuesto.estado === 'enviado' ? 'Cambios guardados: el cliente ya los ve en su enlace' : 'Borrador guardado');
+    presLoad();
+    return presupuesto;
+  } catch (e) { showToast(e.message, 'error'); return null; }
+  finally { presBusy(false); }
+}
+async function presPreview() {
+  const w = window.open('', '_blank');
+  const r = await presSave(true);
+  if (!r) { w && w.close(); return; }
+  const url = `/presupuesto.html?p=${r.token}&vista=1`;
+  if (w) w.location = url; else location.href = url;
+}
+async function presSend() {
+  const f = presForm();
+  const resend = presCur?.estado === 'enviado';
+  if (!confirm(`${resend ? 'Se reenviará' : 'Se enviará'} el presupuesto a ${f.cliente_email}. ¿Continuar?`)) return;
+  const saved = await presSave(true);
+  if (!saved) return;
+  presBusy(true);
+  try {
+    const { presupuesto } = await presApi({ action: 'presupuesto_enviar', id: saved.id });
+    presCur = presupuesto; presFillStatus(); presLoad();
+    showToast(resend ? 'Presupuesto reenviado' : 'Presupuesto enviado al cliente');
+  } catch (e) { showToast(e.message, 'error'); }
+  finally { presBusy(false); }
+}
+async function presCopyLink() {
+  const url = `${location.origin}/presupuesto.html?p=${presCur.token}`;
+  try { await navigator.clipboard.writeText(url); showToast('Enlace copiado'); } catch (e) { prompt('Copia el enlace:', url); }
+}
 
 if (recoveringPassword) showRecovery(false);
 sb.auth.getSession().then(({ data, error }) => {
