@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="no-referrer" />
+<title>Presupuesto · Navas Visual</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Elms+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg:#f2f1ee; --card:#fff; --fg:#111; --muted:#6f6d68; --soft:#9a9893; --line:#e7e5e0; --line-2:#efede9; --ok:#1f7a3d; --ok-bg:#e8f6ec; --warn:#9a6400; --warn-bg:#fff6e0; --bad:#b42318; --bad-bg:#fdeeee; }
+  body { font-family:'Elms Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); -webkit-font-smoothing:antialiased; line-height:1.5; }
+  .wrap { max-width:820px; margin:0 auto; padding:40px 16px 64px; }
+  .sheet { background:var(--card); border-radius:24px; padding:clamp(24px,5vw,56px); }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand svg { width:44px; height:44px; flex:none; }
+  .brand__name { font-size:22px; line-height:1.1; letter-spacing:.01em; }
+  .brand__tag { margin-top:5px; font-size:9px; font-weight:500; letter-spacing:.32em; color:var(--soft); text-transform:uppercase; }
+  .top { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; }
+  .meta { text-align:right; font-size:13px; color:var(--muted); }
+  .meta strong { display:block; font-size:15px; color:var(--fg); font-weight:600; letter-spacing:.02em; }
+  .banner { margin-top:28px; padding:12px 16px; border-radius:14px; font-size:14px; font-weight:500; }
+  .banner--ok { background:var(--ok-bg); color:var(--ok); } .banner--warn { background:var(--warn-bg); color:var(--warn); } .banner--bad { background:var(--bad-bg); color:var(--bad); }
+  .for { margin-top:40px; font-size:13px; color:var(--muted); }
+  .for b { color:var(--fg); font-weight:500; }
+  h1 { margin-top:8px; font-size:clamp(28px,4.6vw,44px); line-height:1.05; letter-spacing:-.03em; font-weight:600; }
+  .intro { margin-top:16px; font-size:16px; color:#333; white-space:pre-line; max-width:62ch; }
+  h2 { font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--soft); margin:44px 0 14px; }
+  .items { border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .item { display:grid; grid-template-columns:1fr auto; gap:16px; padding:16px 20px; border-top:1px solid var(--line-2); }
+  .item:first-child { border-top:0; }
+  .item__d { font-size:15px; font-weight:500; } .item__x { font-size:13px; color:var(--muted); margin-top:3px; white-space:pre-line; }
+  .item__p { font-size:15px; font-weight:500; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .total { display:flex; justify-content:space-between; align-items:baseline; padding:18px 20px; background:var(--fg); color:#fff; }
+  .total span { font-size:13px; letter-spacing:.06em; text-transform:uppercase; opacity:.7; }
+  .total b { font-size:28px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .box { border:1px solid var(--line); border-radius:16px; padding:18px 20px; font-size:14px; color:#333; }
+  .box dt { font-size:12px; color:var(--soft); } .box dd { margin:2px 0 12px; font-size:15px; color:var(--fg); font-weight:500; } .box dd:last-child { margin-bottom:0; }
+  ul.list { list-style:none; display:grid; gap:8px; }
+  ul.list li { position:relative; padding-left:22px; font-size:15px; }
+  ul.list li::before { content:''; position:absolute; left:2px; top:.62em; width:8px; height:8px; border-radius:50%; background:var(--fg); }
+  .notes { font-size:14px; color:#444; white-space:pre-line; }
+  .actions { margin-top:48px; display:flex; flex-wrap:wrap; gap:10px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 24px; border-radius:999px; font:inherit; font-size:15px; font-weight:500; cursor:pointer; border:1px solid var(--fg); background:transparent; color:var(--fg); text-decoration:none; transition:opacity .2s, background .2s; }
+  .btn:hover { opacity:.8; } .btn:focus-visible { outline:2px solid var(--fg); outline-offset:3px; }
+  .btn--primary { background:var(--fg); color:#fff; }
+  .btn--quiet { border-color:var(--line); color:var(--muted); }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .sign { margin-top:48px; padding-top:24px; border-top:1px solid var(--line-2); display:flex; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  .sign__who { padding-right:16px; border-right:1px solid var(--line); }
+  .sign__who b { display:block; font-size:15px; color:var(--fg); font-weight:600; }
+  .sign a { color:var(--fg); text-decoration:none; display:block; }
+  .state { text-align:center; padding:80px 16px; color:var(--muted); }
+  dialog { margin:auto; border:0; border-radius:20px; padding:28px; max-width:440px; width:calc(100% - 32px); font:inherit; color:var(--fg); }
+  dialog::backdrop { background:rgba(0,0,0,.45); }
+  dialog h3 { font-size:20px; letter-spacing:-.02em; margin-bottom:8px; }
+  dialog p { font-size:14px; color:#444; }
+  dialog textarea { width:100%; margin-top:14px; min-height:90px; border:1px solid var(--line); border-radius:12px; padding:12px; font:inherit; font-size:14px; resize:vertical; }
+  dialog .row { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; flex-wrap:wrap; }
+  .err { margin-top:14px; color:var(--bad); font-size:14px; }
+  @media (max-width:640px) { .grid { grid-template-columns:1fr; } .meta { text-align:left; } .actions .btn { flex:1 1 100%; } .sign__who { border-right:0; padding-right:0; } }
+  @media print {
+    @page { size:A4; margin:14mm; }
+    body { background:#fff; }
+    .wrap { padding:0; max-width:none; }
+    .sheet { padding:0; border-radius:0; }
+    .actions, .no-print, dialog { display:none !important; }
+    .item, .box, .total, .sign { break-inside:avoid; }
+    h2 { break-after:avoid; page-break-after:avoid; }
+    .total { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <article class="sheet" id="sheet" aria-live="polite">
+    <div class="state" id="state">Cargando presupuesto…</div>
+  </article>
+</main>
+
+<dialog id="dlg">
+  <h3 id="dlgTitle"></h3>
+  <p id="dlgText"></p>
+  <textarea id="dlgReason" hidden maxlength="500"></textarea>
+  <div class="err" id="dlgErr" role="alert" hidden></div>
+  <div class="row">
+    <button type="button" class="btn btn--quiet" id="dlgCancel"></button>
+    <button type="button" class="btn btn--primary" id="dlgOk"></button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  const T = {
+    es: { loading: 'Cargando presupuesto…', missing: 'No encontramos este presupuesto. Revisa el enlace del correo o escríbeme por WhatsApp.', error: 'No pudimos cargar el presupuesto. Inténtalo de nuevo en unos minutos.', tag: 'Diseño visual digital', quote: 'Presupuesto', date: 'Fecha', valid: 'Válido hasta', for: 'Para', concepts: 'Conceptos', total: 'Total', deliverables: 'Entregables', timeline: 'Plazo estimado', rounds: 'Rondas de cambios', roundsN: n => n === 0 ? 'No incluye rondas de cambios' : n === 1 ? 'Incluye 1 ronda de cambios' : `Incluye ${n} rondas de cambios`, conditions: 'Condiciones de pago', deposit: 'Anticipo para empezar', balance: 'Resto a la entrega', methods: 'Métodos de pago', validity: 'Validez', days: n => `${n} días desde el envío`, notes: 'Notas', accept: 'Aceptar presupuesto', reject: 'No me interesa', pdf: 'Descargar PDF', wa: 'Escribir por WhatsApp', acceptTitle: '¿Aceptar el presupuesto?', acceptText: total => `Confirmas que aceptas este presupuesto por ${total}. Te escribiré para coordinar el anticipo y empezar.`, rejectTitle: '¿Rechazar el presupuesto?', rejectText: 'Si quieres, cuéntame por qué (opcional). Me ayuda a mejorar o a ajustar la propuesta.', reasonPh: 'Por ejemplo: el precio, los plazos, otra prioridad…', cancel: 'Volver', confirmAccept: 'Sí, acepto', confirmReject: 'Rechazar', sendError: 'No se pudo registrar tu respuesta. Inténtalo de nuevo o escríbeme por WhatsApp.', accepted: d => `Aceptaste este presupuesto el ${d}. ¡Gracias! Te escribiré para coordinar el anticipo.`, rejected: 'Rechazaste este presupuesto. Si cambias de idea o quieres ajustarlo, escríbeme.', expired: 'Este presupuesto venció. Escríbeme y te preparo uno actualizado.', preview: 'Vista previa de un borrador: el cliente aún no lo ha recibido.', waMsg: n => `Hola Luis, te escribo por el presupuesto ${n}` },
+    en: { loading: 'Loading quote…', missing: "We couldn't find this quote. Check the link in the email or message me on WhatsApp.", error: "We couldn't load the quote. Please try again in a few minutes.", tag: 'Digital visual design', quote: 'Quote', date: 'Date', valid: 'Valid until', for: 'For', concepts: 'Items', total: 'Total', deliverables: 'Deliverables', timeline: 'Estimated timeline', rounds: 'Revision rounds', roundsN: n => n === 0 ? 'No revision rounds included' : n === 1 ? 'Includes 1 revision round' : `Includes ${n} revision rounds`, conditions: 'Payment terms', deposit: 'Deposit to start', balance: 'Balance on delivery', methods: 'Payment methods', validity: 'Validity', days: n => `${n} days from sending`, notes: 'Notes', accept: 'Accept quote', reject: 'Not interested', pdf: 'Download PDF', wa: 'Message on WhatsApp', acceptTitle: 'Accept the quote?', acceptText: total => `You confirm you accept this quote for ${total}. I'll write to you to arrange the deposit and get started.`, rejectTitle: 'Decline the quote?', rejectText: 'If you like, tell me why (optional). It helps me improve or adjust the proposal.', reasonPh: 'For example: price, timeline, other priorities…', cancel: 'Back', confirmAccept: 'Yes, I accept', confirmReject: 'Decline', sendError: "Your answer couldn't be saved. Please try again or message me on WhatsApp.", accepted: d => `You accepted this quote on ${d}. Thank you! I'll write to you to arrange the deposit.`, rejected: 'You declined this quote. If you change your mind or want to adjust it, message me.', expired: 'This quote has expired. Message me and I will prepare an updated one.', preview: "Draft preview: the client hasn't received it yet.", waMsg: n => `Hi Luis, about quote ${n}` }
+  };
+  const LOGO = '<svg viewBox="0 0 87 87" aria-hidden="true"><path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z" fill="#3a3a3a"/><path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z" fill="#3a3a3a"/><path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z" fill="#3a3a3a"/></svg>';
+  const params = new URLSearchParams(location.search);
+  const token = params.get('p') || '';
+  const preview = params.get('vista') === '1';
+  const sheet = document.getElementById('sheet');
+  let q = null, t = T.es, draft = false;
+
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const money = n => '$' + Number(n || 0).toLocaleString(q.lang === 'en' ? 'en-US' : 'de-DE', { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 }) + ' USD';
+  const day = d => new Date(d).toLocaleDateString(q.lang === 'en' ? 'en-US' : 'es-VE', { dateStyle: 'long', timeZone: 'America/Caracas' });
+  const waLink = () => `https://wa.me/${q.whatsapp}?text=${encodeURIComponent(t.waMsg(q.numero))}`;
+  function state(text) { sheet.replaceChildren(el('div', 'state', text)); }
+
+  function render() {
+    t = T[q.lang] || T.es;
+    document.documentElement.lang = q.lang;
+    document.title = `${t.quote} ${q.numero} · Navas Visual`;
+    const f = document.createDocumentFragment();
+
+    const top = el('div', 'top');
+    const brand = el('div', 'brand'); brand.insertAdjacentHTML('afterbegin', LOGO);
+    const bt = el('div'); bt.append(el('div', 'brand__name', 'Navas Visual'), el('div', 'brand__tag', t.tag)); brand.append(bt);
+    const meta = el('div', 'meta');
+    meta.append(el('strong', '', `${t.quote} ${q.numero}`), el('div', '', `${t.date}: ${day(q.fecha)}`));
+    if (q.vence && !draft) meta.append(el('div', '', `${t.valid}: ${day(q.vence)}`));
+    top.append(brand, meta); f.append(top);
+
+    if (draft) f.append(el('div', 'banner banner--warn no-print', t.preview));
+    else if (q.estado === 'aceptado') f.append(el('div', 'banner banner--ok', t.accepted(day(q.aceptado_at))));
+    else if (q.estado === 'rechazado') f.append(el('div', 'banner banner--bad no-print', t.rejected));
+    else if (q.estado === 'vencido') f.append(el('div', 'banner banner--warn no-print', t.expired));
+
+    const who = el('p', 'for'); who.append(`${t.for} `, el('b', '', q.cliente_nombre + (q.marca ? ` · ${q.marca}` : '')));
+    f.append(who, el('h1', '', q.titulo));
+    if (q.intro) f.append(el('p', 'intro', q.intro));
+
+    f.append(el('h2', '', t.concepts));
+    const items = el('div', 'items');
+    for (const c of q.conceptos) {
+      const row = el('div', 'item'); const d = el('div');
+      d.append(el('div', 'item__d', c.descripcion)); if (c.detalle) d.append(el('div', 'item__x', c.detalle));
+      row.append(d, el('div', 'item__p', money(c.precio))); items.append(row);
+    }
+    const tot = el('div', 'total'); tot.append(el('span', '', t.total), el('b', '', money(q.total))); items.append(tot);
+    f.append(items);
+
+    if (q.entregables.length || q.plazo) {
+      const g = el('div', 'grid');
+      if (q.entregables.length) { const b = el('div'); b.append(el('h2', '', t.deliverables)); const ul = el('ul', 'list'); q.entregables.forEach(x => ul.append(el('li', '', x))); b.append(ul); g.append(b); }
+      const side = el('div');
+      if (q.plazo) { side.append(el('h2', '', t.timeline), el('p', 'notes', q.plazo)); }
+      side.append(el('h2', '', t.rounds), el('p', 'notes', t.roundsN(q.rondas) + (q.rondas_extra ? `. ${q.rondas_extra}` : '.')));
+      g.append(side); f.append(g);
+    }
+
+    f.append(el('h2', '', t.conditions));
+    const box = el('dl', 'box');
+    const add = (k, v) => box.append(el('dt', '', k), el('dd', '', v));
+    if (q.anticipo > 0) {
+      add(t.deposit, `${q.anticipo}% · ${money(q.total * q.anticipo / 100)}`);
+      if (q.anticipo < 100) add(t.balance, `${100 - q.anticipo}% · ${money(q.total * (100 - q.anticipo) / 100)}`);
+    }
+    if (q.metodos.length) add(t.methods, q.metodos.join(' · '));
+    add(t.validity, t.days(q.validez_dias));
+    f.append(box);
+
+    if (q.notas) f.append(el('h2', '', t.notes), el('p', 'notes', q.notas));
+
+    const actions = el('div', 'actions');
+    if (q.estado === 'enviado' && !preview) {
+      const ok = el('button', 'btn btn--primary', t.accept); ok.type = 'button'; ok.onclick = () => ask('aceptar');
+      const no = el('button', 'btn btn--quiet', t.reject); no.type = 'button'; no.onclick = () => ask('rechazar');
+      actions.append(ok);
+      actions.append(pdfBtn(), waBtn(), no);
+    } else actions.append(pdfBtn(), waBtn());
+    f.append(actions);
+
+    const sign = el('div', 'sign');
+    const w = el('div', 'sign__who'); w.append(el('b', '', q.firma.nombre), el('span', '', `${q.firma.cargo} · Navas Visual`));
+    const links = el('div');
+    const a1 = el('a', '', q.firma.web); a1.href = 'https://' + q.firma.web;
+    const a2 = el('a', '', 'WhatsApp'); a2.href = waLink(); a2.target = '_blank'; a2.rel = 'noopener';
+    const a3 = el('a', '', '@' + q.firma.instagram); a3.href = 'https://instagram.com/' + q.firma.instagram; a3.target = '_blank'; a3.rel = 'noopener';
+    links.append(a1, a2, a3); sign.append(w, links); f.append(sign);
+
+    sheet.replaceChildren(f);
+  }
+  function pdfBtn() { const b = el('button', 'btn', t.pdf); b.type = 'button'; b.onclick = () => window.print(); return b; }
+  function waBtn() { const a = el('a', 'btn btn--quiet', t.wa); a.href = waLink(); a.target = '_blank'; a.rel = 'noopener'; return a; }
+
+  const dlg = document.getElementById('dlg');
+  const reason = document.getElementById('dlgReason');
+  const err = document.getElementById('dlgErr');
+  let pending = null;
+  function ask(accion) {
+    pending = accion;
+    document.getElementById('dlgTitle').textContent = accion === 'aceptar' ? t.acceptTitle : t.rejectTitle;
+    document.getElementById('dlgText').textContent = accion === 'aceptar' ? t.acceptText(money(q.total)) : t.rejectText;
+    reason.hidden = accion !== 'rechazar'; reason.placeholder = t.reasonPh; reason.value = '';
+    document.getElementById('dlgCancel').textContent = t.cancel;
+    document.getElementById('dlgOk').textContent = accion === 'aceptar' ? t.confirmAccept : t.confirmReject;
+    err.hidden = true; dlg.showModal();
+  }
+  document.getElementById('dlgCancel').onclick = () => dlg.close();
+  document.getElementById('dlgOk').onclick = async (e) => {
+    const btn = e.currentTarget; btn.disabled = true; err.hidden = true;
+    try {
+      const r = await fetch('/api/presupuesto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ p: token, accion: pending, motivo: reason.value }) });
+      const body = await r.json().catch(() => ({}));
+      if (r.ok && body.presupuesto) { q = body.presupuesto; dlg.close(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      else if (r.status === 409) { dlg.close(); load(); }
+      else { err.textContent = t.sendError; err.hidden = false; }
+    } catch { err.textContent = t.sendError; err.hidden = false; }
+    btn.disabled = false;
+  };
+
+  async function load() {
+    if (!/^[0-9a-f]{64}$/.test(token)) return state(T.es.missing);
+    try {
+      const r = await fetch(`/api/presupuesto?p=${token}${preview ? '&vista=1' : ''}`, { cache: 'no-store' });
+      if (r.status === 404) return state(T.es.missing);
+      if (!r.ok) return state(T.es.error);
+      const body = await r.json(); q = body.presupuesto; draft = Boolean(body.preview); render();
+    } catch { state(T.es.error); }
+  }
+  load();
+})();
+</script>
+</body>
+</html>
