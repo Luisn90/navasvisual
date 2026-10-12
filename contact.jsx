@@ -7,7 +7,7 @@ function ContactApp() {
   const [sent, setSent] = React.useState(false);
   const [sending, setSending] = React.useState(false);
   const [sendError, setSendError] = React.useState(false);
-  const [form, setForm] = React.useState({ name: '', email: '', company: '', service: '', message: '' });
+  const [form, setForm] = React.useState({ name: '', email: '', company: '', service: '', message: '', website: '' });
 
   React.useEffect(() => {
     setTimeout(() => setReady(true), 100);
@@ -19,24 +19,21 @@ function ContactApp() {
     setTimeout(() => { window.location.href = href; }, 600);
   };
 
-  // Formspree: reemplazar 'YOUR_FORM_ID' por el ID real una vez creado
-  // el formulario en https://formspree.io (destino: hola@navasvisual.com)
-  const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
-
   const submit = async (e) => {
     e.preventDefault();
     setSending(true);
     setSendError(false);
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      // El mensaje llega a Luis por correo y Telegram; el cliente recibe una confirmación.
+      const res = await fetch('/api/contacto', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(form),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, lang }),
       });
-      if (!res.ok) throw new Error('Formspree error');
+      if (!res.ok) throw new Error('contacto_' + res.status);
       setSent(true);
-      setTimeout(() => setSent(false), 4000);
-      setForm({ name: '', email: '', company: '', service: '', message: '' });
+      setTimeout(() => setSent(false), 6000);
+      setForm({ name: '', email: '', company: '', service: '', message: '', website: '' });
     } catch (err) {
       console.error('Contact form submit failed:', err);
       setSendError(true);
@@ -59,7 +56,7 @@ function ContactApp() {
             <div className="reveal">
               <Eyebrow>{t.contact.eyebrow}</Eyebrow>
               <h1 className="nv-h1" style={{ marginTop: 24, fontSize: 'clamp(48px, 9vw, 156px)' }}>
-                <VarTitle>{t.contact.title} <br /><span className="nv-serif">{t.contact.title_2}</span></VarTitle>
+                {t.contact.title} <br /><span className="nv-serif">{t.contact.title_2}</span>
               </h1>
               <p className="nv-work__lede" style={{ marginTop: 32, maxWidth: 540 }}>{t.contact.lede}</p>
             </div>
@@ -85,7 +82,8 @@ function ContactApp() {
                     <label>{t.contact.form.service}</label>
                     <select value={form.service} onChange={upd('service')}>
                       <option value="">—</option>
-                      {t.services.list.map(s => <option key={s.n} value={s.t}>{s.t}</option>)}
+                      {t.svc.items.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                      <option value={lang === 'es' ? 'Otro' : 'Other'}>{lang === 'es' ? 'Otro' : 'Other'}</option>
                     </select>
                   </div>
                 </div>
@@ -93,6 +91,7 @@ function ContactApp() {
                   <label>{t.contact.form.message}</label>
                   <textarea required value={form.message} onChange={upd('message')} rows="4" />
                 </div>
+                <input type="text" name="website" value={form.website} onChange={upd('website')} tabIndex="-1" autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
                 <button type="submit" className="nv-btn nv-btn--primary nv-form__submit" disabled={sending}>
                   {sent ? t.contact.form.sent : sending ? (lang === 'es' ? 'Enviando…' : 'Sending…') : t.contact.form.send}
                   <span className="nv-btn__arrow">↗</span>
@@ -125,7 +124,7 @@ function ContactApp() {
                         <span className="nv-social-row__handle">{s.h} ↗</span>
                       </a>
                     ) : (
-                      <a href="#" className="nv-social-row" key={i}>
+                      <a href={s.url} target="_blank" rel="noopener" className="nv-social-row" key={i}>
                         <span className="nv-social-row__name">{s.n}</span>
                         <span className="nv-social-row__handle">{s.h} ↗</span>
                       </a>

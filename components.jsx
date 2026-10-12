@@ -263,9 +263,8 @@ function Footer({ t, lang, onNavigate }) {
           <div className="nv-footer__col">
             <h4>{lang === 'es' ? 'Redes' : 'Social'}</h4>
             <ul>
-              <li><a href="#">Instagram</a></li>
-              <li><a href="#">Behance</a></li>
-              <li><a href="#">LinkedIn</a></li>
+              <li><a href="https://instagram.com/navasvisual.design" target="_blank" rel="noopener">Instagram</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); openWhatsApp(); }}>WhatsApp</a></li>
             </ul>
           </div>
           <div className="nv-footer__col">
