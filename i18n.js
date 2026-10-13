@@ -5,18 +5,18 @@ window.NV_I18N = {
     loader: { based: "Disponible en remoto", role: "Diseñador visual", since: "Desde 2019" },
     intro: {
       lines: ["DISEÑO", "VISUAL", "DIGITAL"],
-      lede: "Branding, diseño web y contenido visual con enfoque estratégico.",
+      lede: "Branding, diseño web y contenido visual con buen gusto y enfoque estratégico.",
       left: ["IDEAS", "MARCAS", "EXPERIENCIAS", "REALES"],
-      right: ["DISEÑO", "ESTRATEGIA", "CREATIVIDAD", "RESULTADOS"],
+      right: ["DISEÑO", "ESTRATEGIA", "TASTE", "RESULTADOS"],
       work: "Ver proyectos",
       contact: "Hablemos"
     },
     hero: {
       eyebrow: "",
       title_1: "Diseño",
-      title_2: "con criterio.",
+      title_2: "con taste.",
       title_3: "",
-      lede: "Marca, web, apps o redes. Diseño y desarrollo las piezas que hacen que tus clientes te elijan, con planes de precio cerrado o proyectos a medida.",
+      lede: "Marca, web, apps o redes. Diseño con buen gusto y criterio las piezas que hacen que tus clientes te elijan, con planes de precio cerrado o proyectos a medida.",
       show_caption: "Una marca de ejemplo, todas sus piezas.",
       show_tabs: ["Marca", "Gráfico", "Web", "App a medida", "UI/UX"],
       cta_packages: "Ver planes",
@@ -28,7 +28,7 @@ window.NV_I18N = {
       meta_loc: "Remoto",
       meta_year: "Est. 2019"
     },
-    marquee: ["Branding", "WordPress", "Framer", "Vibecode", "UI/UX", "Diseño gráfico"],
+    marquee: ["Taste", "Branding", "WordPress", "Buen gusto", "Framer", "Vibecode", "UI/UX", "Diseño gráfico"],
     services: {
       eyebrow: "Servicios",
       title: "Lo que ofrezco",
@@ -60,11 +60,11 @@ window.NV_I18N = {
     process: {
       eyebrow: "Proceso",
       title: "Cómo trabajo",
-      lede: "Un proceso transparente en cuatro fases. Cada etapa con entregables claros y momentos de validación.",
+      lede: "Un proceso transparente en cuatro fases, guiado por el taste: buen gusto para decidir y criterio para explicarlo. Cada etapa con entregables claros y momentos de validación.",
       steps: [
         { n: "01", t: "Descubrimiento", d: "Entender el negocio, el problema y a las personas. Inmersión, entrevistas y benchmark estratégico." },
         { n: "02", t: "Definición", d: "Sintetizar hallazgos, definir objetivos, alcance y dirección creativa. Cierre conjunto del brief." },
-        { n: "03", t: "Diseño", d: "Iteraciones de concepto, exploración visual, prototipado y refinamiento con feedback continuo." },
+        { n: "03", t: "Diseño", d: "Iteraciones de concepto, exploración visual con buen gusto, prototipado y refinamiento de cada detalle con feedback continuo." },
         { n: "04", t: "Entrega", d: "Archivos finales, manuales, handoff técnico y acompañamiento post-lanzamiento." }
       ]
     },
@@ -73,7 +73,7 @@ window.NV_I18N = {
       title: "Luis Navas",
       role: "Diseñador visual independiente",
       bio_1: "Soy diseñador gráfico y visual. Trabajo en diseño desde 2015, ayudando a marcas, emprendedores y agencias a construir identidades, piezas y productos digitales que comunican con precisión.",
-      bio_2: "Mi trabajo se mueve entre lo digital y lo editorial, entre el rigor del sistema y la sensibilidad del detalle. Creo en procesos transparentes, comunicación honesta y soluciones que envejecen bien.",
+      bio_2: "Mi trabajo se mueve entre lo digital y lo editorial, entre el rigor del sistema y la sensibilidad del detalle. Para mí el taste, el buen gusto aplicado al diseño, no es un adorno: es saber elegir qué se queda y qué sobra, y es lo que hace que una marca se sienta cuidada. Creo en procesos transparentes, comunicación honesta y soluciones con gusto que envejecen bien.",
       bio_3: "Trabajo de manera independiente con clientes en toda Latinoamérica, Europa y Estados Unidos.",
       stats: [
         { n: "60+", l: "Proyectos entregados" },
@@ -114,6 +114,7 @@ window.NV_I18N = {
         { q: "¿Cuánto tarda?", a: "Depende del plan: un logo entre 3 y 6 días, una identidad entre 7 y 15, una web en WordPress entre 7 y 20 y un desarrollo a medida entre 5 y 25. El plazo exacto aparece en cada plan o en tu presupuesto." },
         { q: "¿Cómo se paga?", a: "Con Binance Pay (USDT) o Pago Móvil. En los planes subes tu comprobante desde la web y te llega la confirmación por correo cuando lo verifico. En los proyectos a medida se paga un anticipo para empezar y el resto a la entrega, según lo acordado en el presupuesto." },
         { q: "¿Cuántos cambios incluye?", a: "Cada plan indica sus rondas de revisiones, de 2 a 5 según el plan. En los presupuestos a medida también queda escrito cuántas rondas incluye y cuánto cuesta una adicional." },
+        { q: "¿Qué significa diseñar con taste?", a: "Taste es el buen gusto aplicado al diseño: saber elegir tipografías, colores, espacios y detalles para que tu marca se vea cuidada y coherente, no genérica. Hoy muchas empresas lo piden como requisito, porque cualquiera puede generar piezas, pero no todas tienen gusto. En cada proyecto combino ese taste con estrategia: cada decisión tiene un motivo." },
         { q: "¿Trabajas con clientes de otros países?", a: "Sí. Trabajo 100% en remoto con clientes de cualquier país, por correo, WhatsApp y videollamada." },
         { q: "¿Qué recibo al final?", a: "Los archivos finales listos para usar según tu plan o presupuesto: por ejemplo, el logo en PNG, JPG y SVG, el manual de marca en PDF o tu web publicada con tu dominio." }
       ]
@@ -121,12 +122,12 @@ window.NV_I18N = {
     svc: {
       eyebrow: "Servicios",
       title: "Lo que hago",
-      lede: "Seis formas de ayudarte, desde el logo hasta la web o la app que tu negocio necesita.",
+      lede: "Seis formas de ayudarte con el mismo taste, desde el logo hasta la web o la app que tu negocio necesita.",
       plans_link: "Ver planes",
       custom_link: "Cotizar",
       work_link: "Ver trabajos",
       items: [
-        { id: "branding", name: "Branding e identidad", d: "Logos, paletas, tipografías y manuales para que tu marca se vea igual de bien en todas partes.", tab: "logo", cats: ["Branding"] },
+        { id: "branding", name: "Branding e identidad", d: "Logos, paletas, tipografías y manuales con buen gusto para que tu marca se vea igual de bien en todas partes.", tab: "logo", cats: ["Branding"] },
         { id: "wordpress", name: "WordPress", d: "Webs corporativas y landings que puedes editar tú mismo desde el panel, sin depender de nadie.", tab: "wordpress", cats: ["Diseño web", "WordPress"] },
         { id: "framer", name: "Framer", d: "Webs con animación y un CMS visual, para marcas que quieren destacar desde el primer scroll.", tab: null, cats: ["Framer"] },
         { id: "vibecode", name: "Vibecode", d: "Webs y apps a medida desarrolladas con IA: MVPs, reservas, calculadoras o herramientas internas en días, no meses.", tab: "vibecode", cats: ["Vibecode", "Desarrollo"] },
@@ -137,7 +138,7 @@ window.NV_I18N = {
     featured: {
       eyebrow: "Trabajo destacado",
       title: "Proyectos recientes",
-      lede: "Una selección de marcas, webs y productos digitales que he diseñado.",
+      lede: "Una selección de marcas, webs y productos digitales que he diseñado con gusto y criterio.",
       view_all: "Ver todos los trabajos"
     },
     shop: {
@@ -195,10 +196,10 @@ window.NV_I18N = {
     approach: {
       eyebrow: "Cómo trabajo",
       title: "Hablas directo conmigo, de principio a fin",
-      body: "Llevo más de diez años diseñando marcas y webs. No hay intermediarios ni cuentas que pasan de mano en mano: la persona que te escucha es la misma que diseña y entrega.",
+      body: "Llevo más de diez años diseñando marcas y webs, y hoy el taste, tener buen gusto para el diseño, es lo que más piden las marcas y los equipos. No hay intermediarios ni cuentas que pasan de mano en mano: la persona que te escucha es la misma que diseña y entrega.",
       points: [
         { t: "Primero escucho", d: "Antes de abrir el programa entiendo tu negocio, tu cliente y lo que quieres conseguir." },
-        { t: "Propongo con criterio", d: "Cada propuesta viene explicada. Sabrás por qué funciona, no solo cómo se ve." },
+        { t: "Propongo con taste", d: "Buen gusto con argumentos: cada propuesta viene explicada. Sabrás por qué funciona, no solo cómo se ve." },
         { t: "Cumplo los plazos", d: "El plazo de cada plan es un compromiso. Si algo cambia, te aviso antes, no después." },
         { t: "Todo es tuyo", d: "Al terminar recibes los archivos finales y los derechos de uso de tu diseño." }
       ],
@@ -248,18 +249,18 @@ window.NV_I18N = {
     loader: { based: "Available remotely", role: "Visual designer", since: "Since 2019" },
     intro: {
       lines: ["DESIGN", "VISUAL", "DIGITAL"],
-      lede: "Branding, web design and visual content with a strategic focus.",
+      lede: "Branding, web design and visual content with taste and a strategic focus.",
       left: ["IDEAS", "BRANDS", "REAL", "EXPERIENCES"],
-      right: ["DESIGN", "STRATEGY", "CREATIVITY", "RESULTS"],
+      right: ["DESIGN", "STRATEGY", "TASTE", "RESULTS"],
       work: "View projects",
       contact: "Let's talk"
     },
     hero: {
       eyebrow: "",
       title_1: "Design",
-      title_2: "with purpose.",
+      title_2: "with taste.",
       title_3: "",
-      lede: "Brand, web, apps or social. I design and build the pieces that make customers choose you, with fixed-price plans or custom projects.",
+      lede: "Brand, web, apps or social. I design, with taste and judgment, the pieces that make customers choose you, with fixed-price plans or custom projects.",
       show_caption: "One example brand, every piece.",
       show_tabs: ["Brand", "Graphic", "Web", "Custom app", "UI/UX"],
       cta_packages: "See plans",
@@ -271,7 +272,7 @@ window.NV_I18N = {
       meta_loc: "Remote",
       meta_year: "Est. 2019"
     },
-    marquee: ["Branding", "WordPress", "Framer", "Vibecode", "UI/UX", "Graphic design"],
+    marquee: ["Taste", "Branding", "WordPress", "Good taste", "Framer", "Vibecode", "UI/UX", "Graphic design"],
     services: {
       eyebrow: "Services",
       title: "What I offer",
@@ -303,11 +304,11 @@ window.NV_I18N = {
     process: {
       eyebrow: "Process",
       title: "How I work",
-      lede: "A transparent four-phase process. Every stage with clear deliverables and validation moments.",
+      lede: "A transparent four-phase process, guided by taste: the eye to decide and the reasoning to explain it. Every stage with clear deliverables and validation moments.",
       steps: [
         { n: "01", t: "Discovery", d: "Understand business, problem and people. Immersion, interviews and strategic benchmark." },
         { n: "02", t: "Definition", d: "Synthesize findings, define objectives, scope and creative direction. Joint brief sign-off." },
-        { n: "03", t: "Design", d: "Concept iterations, visual exploration, prototyping and refinement with continuous feedback." },
+        { n: "03", t: "Design", d: "Concept iterations, tasteful visual exploration, prototyping and refinement of every detail with continuous feedback." },
         { n: "04", t: "Delivery", d: "Final files, guidelines, technical handoff and post-launch support." }
       ]
     },
@@ -316,7 +317,7 @@ window.NV_I18N = {
       title: "Luis Navas",
       role: "Independent visual designer",
       bio_1: "I'm a graphic and visual designer. I've been working in design since 2015, helping brands, entrepreneurs and agencies build identities, pieces and digital products that communicate with precision.",
-      bio_2: "My work moves between digital and editorial, between the rigor of systems and the sensitivity of detail. I believe in transparent processes, honest communication and solutions that age well.",
+      bio_2: "My work moves between digital and editorial, between the rigor of systems and the sensitivity of detail. To me, taste isn't decoration: it's knowing what stays and what goes, and it's what makes a brand feel cared for. I believe in transparent processes, honest communication and tasteful solutions that age well.",
       bio_3: "I work independently with clients across Latin America, Europe and the United States.",
       stats: [
         { n: "60+", l: "Delivered projects" },
@@ -357,6 +358,7 @@ window.NV_I18N = {
         { q: "How long does it take?", a: "It depends on the plan: a logo takes 3 to 6 days, an identity 7 to 15, a WordPress site 7 to 20 and a custom build 5 to 25. The exact timeline is shown in each plan or in your quote." },
         { q: "How do I pay?", a: "With Binance Pay (USDT) or Pago Móvil. For plans, you upload your receipt on the site and get an email confirmation once I verify it. Custom projects start with a deposit and the rest is paid on delivery, as agreed in the quote." },
         { q: "How many revisions are included?", a: "Each plan states its revision rounds, from 2 to 5 depending on the plan. Custom quotes also state how many rounds are included and the cost of an extra one." },
+        { q: "What does designing with taste mean?", a: "Taste is good judgment applied to design: choosing typefaces, colors, spacing and details so your brand feels considered and consistent, not generic. Many companies now list it as a requirement, because anyone can produce assets, but not all of them have taste. In every project I pair that taste with strategy: every decision has a reason." },
         { q: "Do you work with clients abroad?", a: "Yes. I work 100% remotely with clients from any country, by email, WhatsApp and video call." },
         { q: "What do I get at the end?", a: "The final files ready to use, according to your plan or quote: for example, your logo in PNG, JPG and SVG, your brand guide in PDF or your website live on your domain." }
       ]
@@ -364,12 +366,12 @@ window.NV_I18N = {
     svc: {
       eyebrow: "Services",
       title: "What I do",
-      lede: "Six ways I can help, from the logo to the website or app your business needs.",
+      lede: "Six ways I can help, all with the same taste, from the logo to the website or app your business needs.",
       plans_link: "See plans",
       custom_link: "Get a quote",
       work_link: "See work",
       items: [
-        { id: "branding", name: "Branding and identity", d: "Logos, palettes, typefaces and guidelines so your brand looks right everywhere.", tab: "logo", cats: ["Branding"] },
+        { id: "branding", name: "Branding and identity", d: "Tasteful logos, palettes, typefaces and guidelines so your brand looks right everywhere.", tab: "logo", cats: ["Branding"] },
         { id: "wordpress", name: "WordPress", d: "Business sites and landing pages you can edit yourself from the dashboard.", tab: "wordpress", cats: ["Diseño web", "WordPress"] },
         { id: "framer", name: "Framer", d: "Animated sites with a visual CMS, for brands that want to stand out from the first scroll.", tab: null, cats: ["Framer"] },
         { id: "vibecode", name: "Vibecode", d: "Custom websites and apps built with AI: MVPs, booking systems, calculators or internal tools in days, not months.", tab: "vibecode", cats: ["Vibecode", "Desarrollo"] },
@@ -380,7 +382,7 @@ window.NV_I18N = {
     featured: {
       eyebrow: "Featured work",
       title: "Recent projects",
-      lede: "A selection of brands, websites and digital products I've designed.",
+      lede: "A selection of brands, websites and digital products I've designed with taste and judgment.",
       view_all: "See all work"
     },
     shop: {
@@ -438,10 +440,10 @@ window.NV_I18N = {
     approach: {
       eyebrow: "How I work",
       title: "You talk to me directly, start to finish",
-      body: "I've been designing brands and websites for over ten years. No middlemen, no accounts passed from hand to hand: the person who listens to you is the one who designs and delivers.",
+      body: "I've been designing brands and websites for over ten years, and today taste, having a good eye for design, is what brands and teams ask for the most. No middlemen, no accounts passed from hand to hand: the person who listens to you is the one who designs and delivers.",
       points: [
         { t: "I listen first", d: "Before opening any software I learn about your business, your customer and your goal." },
-        { t: "I explain my choices", d: "Every proposal comes with the reasoning. You'll know why it works, not just how it looks." },
+        { t: "Taste, explained", d: "Good taste backed by reasons: every proposal comes with the reasoning. You'll know why it works, not just how it looks." },
         { t: "I keep deadlines", d: "Each plan's timeline is a commitment. If something changes, I tell you before, not after." },
         { t: "It's all yours", d: "When we finish you get the final files and the usage rights to your design." }
       ],

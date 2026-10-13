@@ -19,26 +19,33 @@ export function loadI18n() {
 // Cada página: datos SEO propios + de dónde salen los planes (pestaña de la portada) o, si no hay planes, «a medida».
 export const SERVICIOS = [
   { slug: 'logo', tab: 'logo', svc: 'branding', nombre: 'Diseño de logo', h1: 'Diseño de logo',
-    title: 'Diseño de logo profesional desde $50 — Navas Visual',
-    desc: 'Diseño de logo para tu negocio desde $50: varias propuestas, versiones a color y en negro y archivos PNG, JPG y SVG. Entrega en 3 a 6 días.' },
+    title: 'Diseño de logo con taste desde $50 — Navas Visual',
+    desc: 'Diseño de logo con taste y buen gusto desde $50: varias propuestas, versiones a color y en negro y archivos PNG, JPG y SVG. Entrega en 3 a 6 días.',
+    taste: 'Un logo con taste se nota en lo que no tiene: nada sobra. Elijo cada forma, peso tipográfico y espacio con buen gusto para que tu marca se vea profesional, se recuerde y funcione igual de bien en un avatar diminuto que en un letrero.' },
   { slug: 'identidad-de-marca', tab: 'identidad', svc: 'branding', nombre: 'Identidad de marca', h1: 'Identidad de marca y branding',
-    title: 'Identidad de marca y branding desde $200 — Navas Visual',
-    desc: 'Identidad visual completa: logo, paleta, tipografías, manual de marca, papelería y plantillas para redes. Planes desde $200.' },
+    title: 'Identidad de marca y branding con taste desde $200 — Navas Visual',
+    desc: 'Identidad visual con taste y buen gusto: logo, paleta, tipografías, manual de marca, papelería y plantillas para redes. Planes desde $200.',
+    taste: 'El taste en una identidad es la coherencia: que la paleta, las tipografías y cada pieza hablen el mismo idioma. Diseño sistemas de marca con buen gusto y reglas claras para que se vean cuidados en todas partes, también cuando los usa tu equipo.' },
   { slug: 'diseno-web-wordpress', tab: 'wordpress', svc: 'wordpress', nombre: 'Diseño web en WordPress', h1: 'Diseño web en WordPress',
-    title: 'Diseño de páginas web en WordPress desde $250 — Navas Visual',
-    desc: 'Webs y landing pages en WordPress que puedes editar tú mismo: diseño responsive, SEO básico y formulario de contacto. Desde $250.' },
+    title: 'Diseño web en WordPress con taste desde $250 — Navas Visual',
+    desc: 'Webs y landing pages en WordPress con taste y buen gusto que puedes editar tú mismo: diseño responsive, SEO básico y formulario. Desde $250.',
+    taste: 'Una web con taste no parece una plantilla. Cuido la tipografía, los espacios, las imágenes y el ritmo de cada sección con buen gusto, para que tu web transmita confianza desde el primer segundo y siga siendo fácil de editar.' },
   { slug: 'desarrollo-web-a-medida', tab: 'vibecode', svc: 'vibecode', nombre: 'Desarrollo web y apps a medida', h1: 'Desarrollo web y apps a medida',
-    title: 'Desarrollo de webs y apps a medida con IA desde $300 — Navas Visual',
-    desc: 'Landing pages, web apps y apps a medida desarrolladas con IA (vibecode): código propio, rápido y sin plantillas. Desde $300.' },
+    title: 'Webs y apps a medida con IA y taste desde $300 — Navas Visual',
+    desc: 'Landing pages, web apps y apps a medida con IA (vibecode) y taste de diseño: código propio, rápido, sin plantillas y con buen gusto. Desde $300.',
+    taste: 'La IA permite construir rápido, pero el taste es lo que separa una app genérica de una que da gusto usar. Dirijo cada pantalla con criterio de diseño y buen gusto: jerarquía, microinteracciones y detalles que hacen que tu producto se sienta profesional.' },
   { slug: 'diseno-para-redes-sociales', tab: 'redes', svc: 'grafico', nombre: 'Diseño para redes sociales', h1: 'Diseño gráfico para redes sociales',
-    title: 'Diseño de plantillas para redes sociales desde $60 — Navas Visual',
-    desc: 'Plantillas para Instagram y redes con la identidad de tu marca, editables en Canva o Figma: posts, historias y carruseles. Desde $60.' },
+    title: 'Plantillas para redes sociales con taste desde $60 — Navas Visual',
+    desc: 'Plantillas para Instagram con taste y la identidad de tu marca, editables en Canva o Figma: posts, historias y carruseles. Desde $60.',
+    taste: 'En redes, el taste es lo que hace que alguien se detenga en tu perfil. Diseño plantillas con buen gusto y un estilo reconocible para que tu feed se vea cuidado y coherente, aunque las publique cualquiera de tu equipo.' },
   { slug: 'diseno-ui-ux', tab: null, svc: 'uiux', nombre: 'Diseño UI/UX de apps', h1: 'Diseño UI/UX de apps y productos digitales',
-    title: 'Diseño UI/UX de apps y productos digitales — Navas Visual',
-    desc: 'Diseño UI/UX de apps móviles y productos digitales: del wireframe al prototipo navegable listo para desarrollar. Presupuesto a medida.' },
+    title: 'Diseño UI/UX con taste para apps y productos — Navas Visual',
+    desc: 'Diseño UI/UX con taste para apps móviles y productos digitales: del wireframe al prototipo navegable listo para desarrollar. Presupuesto a medida.',
+    taste: 'En producto, el taste es el buen gusto al servicio del uso: interfaces claras, consistentes y agradables que la gente entiende sin explicaciones. Hoy los equipos lo piden como requisito, y es lo que aporto en cada flujo, componente y prototipo.' },
   { slug: 'diseno-web-framer', tab: null, svc: 'framer', nombre: 'Diseño web en Framer', h1: 'Diseño web en Framer',
-    title: 'Diseño de páginas web en Framer — Navas Visual',
-    desc: 'Webs en Framer con animaciones y CMS visual para marcas que quieren destacar. Presupuesto a medida según tu proyecto.' }
+    title: 'Diseño web en Framer con taste — Navas Visual',
+    desc: 'Webs en Framer con taste: animaciones, buen gusto y CMS visual para marcas que quieren destacar. Presupuesto a medida según tu proyecto.',
+    taste: 'Framer da libertad total, y por eso el taste importa más: animaciones con propósito, tipografía cuidada y detalles con buen gusto que hacen que tu marca destaque sin parecer recargada.' }
 ];
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -60,7 +67,7 @@ export function paginaServicio(s, es) {
   const ld = [
     { '@context': 'https://schema.org', '@type': 'Service', name: s.nombre, serviceType: s.nombre, description: s.desc, url,
       provider: { '@type': 'ProfessionalService', name: 'Navas Visual', url: SITE + '/', image: SITE + '/compartir.jpg', founder: { '@type': 'Person', name: 'Luis Navas' } },
-      areaServed: 'Worldwide', availableLanguage: ['es', 'en'],
+      areaServed: 'Worldwide', availableLanguage: ['es', 'en'], slogan: 'Diseño con taste',
       ...(plans.length ? { offers: plans.map(p => ({ '@type': 'Offer', name: `${s.nombre} · ${p.tier}`, price: p.price, priceCurrency: 'USD', url, availability: 'https://schema.org/InStock' })) } : {}) },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Navas Visual', item: SITE + '/' },
@@ -126,6 +133,10 @@ export function paginaServicio(s, es) {
   </section>
   <section class="sv-section">
       ${planes}
+  </section>
+  <section class="sv-section">
+    <h2>Diseño con taste</h2>
+    <p class="sv-note">${esc(s.taste)}</p>
   </section>
   <section class="sv-section">
     <h2>Cómo trabajamos</h2>
