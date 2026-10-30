@@ -343,24 +343,26 @@ function SolicitarApp() {
     <React.Fragment>
       <Cursor />
       <PageTransition phase={transPhase} />
-      <Nav active="contact" lang={lang} setLang={setLang} t={t} ready={ready} onNavigate={navigate} />
+      <header className="nv-sol__top">
+        <div className="nv-sol__topbar">
+          <ol className="nv-sol__steps" aria-label={c.eyebrow}>
+            {c.steps.map((label, i) => {
+              const state = done || i < step ? 'is-done' : i === step ? 'is-active' : '';
+              return <li key={label} className={state} aria-current={!done && i === step ? 'step' : undefined}>
+                {!done && i < step
+                  ? <button type="button" onClick={() => { setError(''); setMissing([]); setStep(i); }}><span>✓</span><em>{label}</em></button>
+                  : <span className="nv-sol__stepname"><span>{done || i < step ? '✓' : i + 1}</span><em>{label}</em></span>}
+              </li>;
+            })}
+          </ol>
+          <a className="nv-sol__exit" href="index.html" aria-label={L === 'en' ? 'Exit to home' : 'Salir al inicio'} onClick={e => { e.preventDefault(); navigate('index.html'); }}>✕</a>
+        </div>
+        <div className="nv-sol__bar" aria-hidden="true"><span style={{ width: `${done ? 100 : ((step + 1) / total) * 100}%` }} /></div>
+      </header>
       <main>
-        <section className="nv-section nv-sol" style={{ paddingTop: 80 }}>
+        <section className="nv-sol">
           <div className="nv-container">
-            <div className="nv-sol__grid">
-              <div className="nv-sol__intro">
-                <Eyebrow>{c.eyebrow}</Eyebrow>
-                <h1 className="nv-h1 nv-sol__title">{c.title} <span className="nv-serif">{c.title2}</span></h1>
-                <p className="nv-work__lede nv-sol__lede">{c.lede}</p>
-                {!done && <ol className="nv-sol__steps">
-                  {c.steps.map((label, i) => <li key={label} className={i === step ? 'is-active' : i < step ? 'is-done' : ''} aria-current={i === step ? 'step' : undefined}>
-                    {i < step
-                      ? <button type="button" onClick={() => { setError(''); setMissing([]); setStep(i); }}><span>{'✓'}</span>{label}</button>
-                      : <span className="nv-sol__stepname"><span>{i + 1}</span>{label}</span>}
-                  </li>)}
-                </ol>}
-              </div>
-
+            <div className="nv-sol__wrap">
               <div className="nv-sol__card">
                 {done ? <div className="nv-sol__done" role="status">
                   <div className="nv-sol__done-mark" aria-hidden="true">✓</div>
@@ -372,7 +374,6 @@ function SolicitarApp() {
                   </div>
                   <a className="nv-sol__link" href="index.html" onClick={e => { e.preventDefault(); navigate('index.html'); }}>{c.doneHome}</a>
                 </div> : <form onSubmit={next} noValidate>
-                  <div className="nv-sol__bar" aria-hidden="true"><span style={{ width: `${((step + 1) / total) * 100}%` }} /></div>
                   <p className="nv-sol__count">{c.stepOf(step + 1, total)}{svc && step > 0 ? ` · ${svc[L][0]}` : ''}</p>
                   <h2 ref={heading} tabIndex="-1" className="nv-sol__q">{titles[step]}</h2>
                   <p className="nv-sol__p">{hints[step]}</p>
@@ -461,7 +462,6 @@ function SolicitarApp() {
           </div>
         </section>
       </main>
-      <Footer t={t} lang={lang} onNavigate={navigate} />
       <RevealMount />
       <WhatsAppModal lang={lang} />
     </React.Fragment>
