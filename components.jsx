@@ -180,7 +180,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
               <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
               <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
             </div>
-            <a href="contact.html" onClick={(e) => { e.preventDefault(); handleNav('contact.html'); }} className="nv-nav__cta nv-nav__cta--desktop">
+            <a href="solicitar.html" onClick={(e) => { e.preventDefault(); handleNav('solicitar.html'); }} className="nv-nav__cta nv-nav__cta--desktop">
               <span className="nv-nav__cta-dot" />
               {lang === 'es' ? 'Disponible' : 'Available'}
             </a>
@@ -219,7 +219,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
               <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
               <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
             </div>
-            <a href="contact.html" onClick={(e) => { e.preventDefault(); handleNav('contact.html'); }} className="nv-nav__cta">
+            <a href="solicitar.html" onClick={(e) => { e.preventDefault(); handleNav('solicitar.html'); }} className="nv-nav__cta">
               <span className="nv-nav__cta-dot" />
               {lang === 'es' ? 'Disponible' : 'Available'}
             </a>
