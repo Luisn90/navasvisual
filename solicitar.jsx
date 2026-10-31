@@ -345,6 +345,13 @@ function SolicitarApp() {
       <PageTransition phase={transPhase} />
       <header className="nv-sol__top">
         <div className="nv-sol__topbar">
+          <a className="nv-sol__logo" href="index.html" aria-label="Navas Visual" onClick={e => { e.preventDefault(); navigate('index.html'); }}>
+            <LogoSVG size={28} color="#3a3a3a" />
+            <span className="nv-nav__wordmark">
+              <span className="nv-nav__name">Navas Visual</span>
+              <span className="nv-nav__tagline">{L === 'en' ? 'Digital visual design' : 'Diseño visual digital'}</span>
+            </span>
+          </a>
           <ol className="nv-sol__steps" aria-label={c.eyebrow}>
             {c.steps.map((label, i) => {
               const state = done || i < step ? 'is-done' : i === step ? 'is-active' : '';
@@ -462,6 +469,14 @@ function SolicitarApp() {
           </div>
         </section>
       </main>
+      <footer className="nv-sol__foot">
+        <span>© {new Date().getFullYear()} Navas Visual</span>
+        <nav aria-label={L === 'en' ? 'Contact' : 'Contacto'}>
+          <a href="mailto:hola@navasvisual.com">hola@navasvisual.com</a>
+          <a href="https://instagram.com/navasvisual.design" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="#" onClick={e => { e.preventDefault(); openWhatsApp(); }}>WhatsApp</a>
+        </nav>
+      </footer>
       <RevealMount />
       <WhatsAppModal lang={lang} />
     </React.Fragment>

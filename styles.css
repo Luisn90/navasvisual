@@ -1968,7 +1968,10 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 
 /* === SOLICITAR: formulario guiado (solicitar.html) === */
 .nv-sol__top { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.nv-sol__topbar { max-width: 960px; margin: 0 auto; padding: 18px var(--pad); display: flex; align-items: center; gap: 16px; }
+.nv-sol__topbar { max-width: 1320px; margin: 0 auto; padding: 18px var(--pad); display: flex; align-items: center; gap: 32px; }
+.nv-sol__logo { display: flex; align-items: center; flex: none; }
+.nv-sol__topbar .nv-sol__steps { max-width: 860px; margin: 0 auto; }
+@media (max-width: 1180px) { .nv-sol__logo .nv-nav__wordmark { display: none; } }
 .nv-sol__steps { list-style: none; flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .nv-sol__steps li { display: flex; align-items: center; flex: 1; gap: 8px; min-width: 0; }
 .nv-sol__steps li:not(:last-child)::after { content: ""; flex: 1; height: 1px; background: var(--bg-line); min-width: 12px; }
@@ -1988,13 +1991,17 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
 .nv-sol__bar span { display: block; height: 100%; background: var(--fg); transition: width 0.6s var(--easing-out); }
 @media (max-width: 760px) {
   .nv-sol__steps em { display: none; }
-  .nv-sol__topbar { padding: 14px 16px; gap: 10px; }
+  .nv-sol__topbar { padding: 14px 16px; gap: 12px; }
   .nv-sol__steps li > button, .nv-sol__stepname { gap: 6px; font-size: 13px; }
   .nv-sol__steps li > button span, .nv-sol__stepname span { width: 24px; height: 24px; }
 }
 
 main:has(> .nv-sol) { padding-top: 0; }
-.nv-sol { padding: 104px 0 64px; min-height: 100vh; }
+.nv-sol { padding: 104px 0 48px; min-height: calc(100vh - 53px); }
+.nv-sol__foot { border-top: 1px solid var(--bg-line); padding: 16px var(--pad); display: flex; justify-content: space-between; align-items: center; gap: 8px 24px; flex-wrap: wrap; font-size: 12px; color: var(--fg-muted); }
+.nv-sol__foot nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.nv-sol__foot a:hover { color: var(--fg); }
+@media (max-width: 760px) { .nv-sol__foot { flex-direction: column; justify-content: center; padding: 14px 16px; } .nv-sol__foot nav { justify-content: center; gap: 16px; } }
 .nv-sol .nv-container { padding: 0 var(--pad); }
 .nv-sol__wrap { max-width: 860px; margin: 0 auto; }
 .nv-sol__card { background: var(--bg-soft); border-radius: var(--radius-lg); padding: clamp(24px, 4vw, 48px); min-width: 0; }
