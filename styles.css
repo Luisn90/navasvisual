@@ -1993,12 +1993,13 @@ button.nv-faq-item__head { width: 100%; text-align: left; }
   .nv-sol__steps li > button span, .nv-sol__stepname span { width: 24px; height: 24px; }
 }
 
-.nv-sol { padding: 112px 0 80px; min-height: 100vh; }
+main:has(> .nv-sol) { padding-top: 0; }
+.nv-sol { padding: 104px 0 64px; min-height: 100vh; }
 .nv-sol .nv-container { padding: 0 var(--pad); }
 .nv-sol__wrap { max-width: 860px; margin: 0 auto; }
 .nv-sol__card { background: var(--bg-soft); border-radius: var(--radius-lg); padding: clamp(24px, 4vw, 48px); min-width: 0; }
 .nv-sol__count { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-muted); }
-@media (max-width: 600px) { .nv-sol { padding: 92px 0 48px; } .nv-sol .nv-container { padding: 0 12px; } }
+@media (max-width: 600px) { .nv-sol { padding: 84px 0 40px; } .nv-sol .nv-container { padding: 0 12px; } }
 .nv-sol__q { margin-top: 10px; font-size: clamp(26px, 3vw, 38px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 500; outline: none; }
 .nv-sol__p { margin-top: 10px; color: var(--fg-muted); font-size: 15px; max-width: 56ch; }
 .nv-sol__restored { margin-top: 16px; font-size: 13px; color: var(--fg-muted); }
