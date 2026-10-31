@@ -1,5 +1,6 @@
 // Página pública del presupuesto: el cliente lo ve (GET) y lo acepta o rechaza (POST).
 // Solo se entra con el enlace secreto que recibe por correo.
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 import { supabaseReady, sendTelegram } from './_solicitudes.mjs';
 import { TOKEN, getPresupuestoByToken, patchPresupuesto, responderPresupuesto, vistaPublica, numeroDe, SITE } from './_presupuestos.mjs';
 

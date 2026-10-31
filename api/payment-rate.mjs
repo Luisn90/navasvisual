@@ -1,3 +1,4 @@
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 const SOURCE = 'https://www.bcv.org.ve/';
 let cached = null;
 function reply(status, body) { return Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } }); }

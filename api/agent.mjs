@@ -1,3 +1,4 @@
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 import { runDesign, signedImageUrls, DESIGN_SERVICES, CAMILO } from './_diseno.mjs';
 import { runContent, CONTENT_SERVICES, TEO } from './_contenido.mjs';
 import { runMonitor, latestReports, writeSummary, chatWithVega } from './_monitor.mjs';

@@ -1,3 +1,4 @@
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 // Imagen de vista previa al compartir la web (WhatsApp, redes, Google).
 // Sirve la que Luis sube desde la oficina (bucket público «web», og/compartir.jpg);
 // si todavía no hay ninguna, usa la imagen por defecto del repositorio.

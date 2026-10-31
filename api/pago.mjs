@@ -1,5 +1,6 @@
 // El cliente sube el comprobante de su pago. Le llega un correo de «estamos verificando tu pago»
 // y Luis recibe el comprobante por Telegram para confirmarlo desde la oficina.
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 import { supabaseReady, getSolicitudByRequest, updateSolicitud } from './_solicitudes.mjs';
 import { METODOS, PAY_TYPES, MAX_PROOF, isProofFile, uploadProof, sendEmail, emailReady, paymentEmail, telegramProof, maskEmail } from './_pagos.mjs';
 

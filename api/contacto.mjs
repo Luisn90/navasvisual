@@ -1,5 +1,6 @@
 // Formulario de la página de Contacto: el mensaje le llega a Luis por correo (para responder
 // directamente al cliente) y por Telegram, y el cliente recibe una confirmación.
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 import { sendTelegram } from './_solicitudes.mjs';
 import { sendEmail, emailReady, escapeHtml, brandHeader, EMAIL_FONT, EMAIL_HEAD } from './_pagos.mjs';
 import { firmaHtml, FIRMA } from './_presupuestos.mjs';

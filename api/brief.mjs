@@ -1,3 +1,4 @@
+import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
 import { createHash } from 'node:crypto';
 import { services, labels, buildRecord, processNewSolicitud, afterResponse } from './_solicitudes.mjs';
 
