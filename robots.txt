@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 Disallow: /admin.html
+Disallow: /admin-equipo
 Disallow: /admin-equipo.html
+Disallow: /presupuesto
 Disallow: /presupuesto.html
 Disallow: /api/
 

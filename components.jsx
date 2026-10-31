@@ -136,11 +136,11 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
-    { k: 'home', href: 'index.html' },
-    { k: 'work', href: 'work.html' },
-    { k: 'services', href: 'index.html#planes' },
-    { k: 'about', href: 'about.html' },
-    { k: 'contact', href: 'contact.html' },
+    { k: 'home', href: '/' },
+    { k: 'work', href: '/work' },
+    { k: 'services', href: '/#planes' },
+    { k: 'about', href: '/about' },
+    { k: 'contact', href: '/contact' },
   ];
 
   const handleNav = (href) => {
@@ -158,7 +158,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
     <>
       <nav className={`nv-nav ${ready ? 'ready' : ''}`}>
         <div className="nv-nav__inner">
-          <a href="index.html" onClick={(e) => { e.preventDefault(); handleNav('index.html'); }} className="nv-nav__logo">
+          <a href="/" onClick={(e) => { e.preventDefault(); handleNav('/'); }} className="nv-nav__logo">
             <LogoSVG size={30} color="#3a3a3a" />
             <span className="nv-nav__wordmark">
               <span className="nv-nav__name">Navas Visual</span>
@@ -180,7 +180,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
               <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
               <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
             </div>
-            <a href="solicitar.html" onClick={(e) => { e.preventDefault(); handleNav('solicitar.html'); }} className="nv-nav__cta nv-nav__cta--desktop">
+            <a href="/solicitar" onClick={(e) => { e.preventDefault(); handleNav('/solicitar'); }} className="nv-nav__cta nv-nav__cta--desktop">
               <span className="nv-nav__cta-dot" />
               {lang === 'es' ? 'Disponible' : 'Available'}
             </a>
@@ -219,7 +219,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
               <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
               <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
             </div>
-            <a href="solicitar.html" onClick={(e) => { e.preventDefault(); handleNav('solicitar.html'); }} className="nv-nav__cta">
+            <a href="/solicitar" onClick={(e) => { e.preventDefault(); handleNav('/solicitar'); }} className="nv-nav__cta">
               <span className="nv-nav__cta-dot" />
               {lang === 'es' ? 'Disponible' : 'Available'}
             </a>
@@ -249,7 +249,7 @@ function Footer({ t, lang, onNavigate }) {
     <footer className="nv-footer nv-snap--footer">
       <div className="nv-container">
         <div className="nv-footer__cta">
-          <a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>
+          <a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('/contact'); }}>
             {t.footer.cta}
           </a>
         </div>
@@ -257,22 +257,22 @@ function Footer({ t, lang, onNavigate }) {
           <div className="nv-footer__col">
             <h4>{lang === 'es' ? 'Estudio' : 'Studio'}</h4>
             <ul>
-              <li><a href="about.html" onClick={(e) => { e.preventDefault(); onNavigate('about.html'); }}>{t.nav.about}</a></li>
-              <li><a href="work.html" onClick={(e) => { e.preventDefault(); onNavigate('work.html'); }}>{t.nav.work}</a></li>
-              <li><a href="index.html#planes" onClick={(e) => { e.preventDefault(); onNavigate('index.html#planes'); }}>{t.footer.services}</a></li>
-              <li><a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{t.nav.contact}</a></li>
+              <li><a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('/about'); }}>{t.nav.about}</a></li>
+              <li><a href="/work" onClick={(e) => { e.preventDefault(); onNavigate('/work'); }}>{t.nav.work}</a></li>
+              <li><a href="/#planes" onClick={(e) => { e.preventDefault(); onNavigate('/#planes'); }}>{t.footer.services}</a></li>
+              <li><a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('/contact'); }}>{t.nav.contact}</a></li>
             </ul>
           </div>
           <div className="nv-footer__col">
             <h4>{lang === 'es' ? 'Servicios' : 'Services'}</h4>
             <ul>
-              <li><a href="servicios/logo.html">{lang === 'es' ? 'Diseño de logo' : 'Logo design'}</a></li>
-              <li><a href="servicios/identidad-de-marca.html">{lang === 'es' ? 'Identidad de marca' : 'Brand identity'}</a></li>
-              <li><a href="servicios/diseno-web-wordpress.html">{lang === 'es' ? 'Web en WordPress' : 'WordPress websites'}</a></li>
-              <li><a href="servicios/desarrollo-web-a-medida.html">{lang === 'es' ? 'Webs y apps a medida' : 'Custom web & apps'}</a></li>
-              <li><a href="servicios/diseno-para-redes-sociales.html">{lang === 'es' ? 'Diseño para redes' : 'Social media design'}</a></li>
-              <li><a href="servicios/diseno-ui-ux.html">UI/UX</a></li>
-              <li><a href="servicios/diseno-web-framer.html">{lang === 'es' ? 'Web en Framer' : 'Framer websites'}</a></li>
+              <li><a href="/servicios/logo">{lang === 'es' ? 'Diseño de logo' : 'Logo design'}</a></li>
+              <li><a href="/servicios/identidad-de-marca">{lang === 'es' ? 'Identidad de marca' : 'Brand identity'}</a></li>
+              <li><a href="/servicios/diseno-web-wordpress">{lang === 'es' ? 'Web en WordPress' : 'WordPress websites'}</a></li>
+              <li><a href="/servicios/desarrollo-web-a-medida">{lang === 'es' ? 'Webs y apps a medida' : 'Custom web & apps'}</a></li>
+              <li><a href="/servicios/diseno-para-redes-sociales">{lang === 'es' ? 'Diseño para redes' : 'Social media design'}</a></li>
+              <li><a href="/servicios/diseno-ui-ux">UI/UX</a></li>
+              <li><a href="/servicios/diseno-web-framer">{lang === 'es' ? 'Web en Framer' : 'Framer websites'}</a></li>
             </ul>
           </div>
           <div className="nv-footer__col">

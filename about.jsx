@@ -43,7 +43,7 @@ function AboutApp() {
                   </div>
                 </div>
                 <div style={{ marginTop: 40 }}>
-                  <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--primary">
+                  <a href="/contact" onClick={(e) => { e.preventDefault(); navigate('/contact'); }} className="nv-btn nv-btn--primary">
                     {t.about.cta} <span className="nv-btn__arrow">↗</span>
                   </a>
                 </div>

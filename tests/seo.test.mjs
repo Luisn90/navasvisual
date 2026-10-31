@@ -17,7 +17,7 @@ test('cada página tiene título, descripción, canonical y datos estructurados 
     const html = paginaServicio(s, es);
     assert.match(html, /<title>[^<]{20,70}<\/title>/);
     assert.ok(s.desc.length <= 165, `${s.slug}: descripción larga`);
-    assert.match(html, new RegExp(`<link rel="canonical" href="https://navasvisual.com/servicios/${s.slug}.html"`));
+    assert.match(html, new RegExp(`<link rel="canonical" href="https://navasvisual.com/servicios/${s.slug}"`));
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.equal(ld[0]['@type'], 'Service');
     const { plans, desde } = datosServicio(s, es);
@@ -32,7 +32,10 @@ test('robots y sitemap', () => {
   const robots = fs.readFileSync('robots.txt', 'utf8');
   assert.match(robots, /Sitemap: https:\/\/navasvisual.com\/sitemap.xml/);
   assert.match(robots, /Disallow: \/admin.html/);
-  for (const s of SERVICIOS) assert.match(sitemap(), new RegExp(`/servicios/${s.slug}.html`));
+  for (const s of SERVICIOS) assert.match(sitemap(), new RegExp(`/servicios/${s.slug}<`));
+  assert.ok(!sitemap().includes('.html'), 'el sitemap usa direcciones sin .html');
+  const vercel = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+  assert.equal(vercel.cleanUrls, true);
   const home = fs.readFileSync('index.html', 'utf8');
   JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 });

@@ -345,7 +345,7 @@ function SolicitarApp() {
       <PageTransition phase={transPhase} />
       <header className="nv-sol__top">
         <div className="nv-sol__topbar">
-          <a className="nv-sol__logo" href="index.html" aria-label="Navas Visual" onClick={e => { e.preventDefault(); navigate('index.html'); }}>
+          <a className="nv-sol__logo" href="/" aria-label="Navas Visual" onClick={e => { e.preventDefault(); navigate('/'); }}>
             <LogoSVG size={28} color="#3a3a3a" />
             <span className="nv-nav__wordmark">
               <span className="nv-nav__name">Navas Visual</span>
@@ -362,7 +362,7 @@ function SolicitarApp() {
               </li>;
             })}
           </ol>
-          <a className="nv-sol__exit" href="index.html" aria-label={L === 'en' ? 'Exit to home' : 'Salir al inicio'} onClick={e => { e.preventDefault(); navigate('index.html'); }}>✕</a>
+          <a className="nv-sol__exit" href="/" aria-label={L === 'en' ? 'Exit to home' : 'Salir al inicio'} onClick={e => { e.preventDefault(); navigate('/'); }}>✕</a>
         </div>
         <div className="nv-sol__bar" aria-hidden="true"><span style={{ width: `${done ? 100 : ((step + 1) / total) * 100}%` }} /></div>
       </header>
@@ -377,9 +377,9 @@ function SolicitarApp() {
                   <p className="nv-sol__p">{c.doneBody(done.name, done.email)}</p>
                   <div className="nv-sol__actions">
                     <a className="nv-btn nv-btn--primary" href={waUrl} target="_blank" rel="noopener noreferrer">{c.doneWa} <span className="nv-btn__arrow">↗</span></a>
-                    <a className="nv-btn nv-btn--ghost" href="work.html" onClick={e => { e.preventDefault(); navigate('work.html'); }}>{c.doneWork}</a>
+                    <a className="nv-btn nv-btn--ghost" href="/work" onClick={e => { e.preventDefault(); navigate('/work'); }}>{c.doneWork}</a>
                   </div>
-                  <a className="nv-sol__link" href="index.html" onClick={e => { e.preventDefault(); navigate('index.html'); }}>{c.doneHome}</a>
+                  <a className="nv-sol__link" href="/" onClick={e => { e.preventDefault(); navigate('/'); }}>{c.doneHome}</a>
                 </div> : <form onSubmit={next} noValidate>
                   <p className="nv-sol__count">{c.stepOf(step + 1, total)}{svc && step > 0 ? ` · ${svc[L][0]}` : ''}</p>
                   <h2 ref={heading} tabIndex="-1" className="nv-sol__q">{titles[step]}</h2>

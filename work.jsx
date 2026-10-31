@@ -24,7 +24,7 @@ function WorkApp() {
   const sorted = [...projects].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
   const items = filter === 'all' ? sorted : sorted.filter(i => i.tag === filter);
 
-  // Filtro desde la URL (work.html?cat=Branding), usado por los enlaces "Ver ejemplos" de los paquetes
+  // Filtro desde la URL (/work?cat=Branding), usado por los enlaces "Ver ejemplos" de los paquetes
   React.useEffect(() => {
     const cat = new URLSearchParams(window.location.search).get('cat');
     if (!cat || !projects.length) return;
@@ -105,7 +105,7 @@ function WorkApp() {
       <RevealMount />
       <WhatsAppModal lang={lang} />
       {selectedProject && (
-        <ProjectModal requestHref={`index.html?service=${encodeURIComponent(new URLSearchParams(window.location.search).get('service') || t.shop.tabs.find(tab => tab.cats.includes(selectedProject.tag))?.id || 'logo')}&reference=${encodeURIComponent(selectedProject.project)}#planes`} project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
+        <ProjectModal requestHref={`/?service=${encodeURIComponent(new URLSearchParams(window.location.search).get('service') || t.shop.tabs.find(tab => tab.cats.includes(selectedProject.tag))?.id || 'logo')}&reference=${encodeURIComponent(selectedProject.project)}#planes`} project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
       )}
     </React.Fragment>
   );

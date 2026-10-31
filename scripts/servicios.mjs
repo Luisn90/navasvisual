@@ -61,9 +61,9 @@ export function datosServicio(s, es) {
 
 export function paginaServicio(s, es) {
   const { item, tab, plans, desde } = datosServicio(s, es);
-  const url = `${SITE}/servicios/${s.slug}.html`;
+  const url = `${SITE}/servicios/${s.slug}`;
   const cat = (tab?.cats || item.cats)[0];
-  const ordenar = s.tab ? `/index.html?service=${s.tab}#planes` : `/solicitar.html?service=${s.svc}`;
+  const ordenar = s.tab ? `/?service=${s.tab}#planes` : `/solicitar?service=${s.svc}`;
   const ld = [
     { '@context': 'https://schema.org', '@type': 'Service', name: s.nombre, serviceType: s.nombre, description: s.desc, url,
       provider: { '@type': 'ProfessionalService', name: 'Navas Visual', url: SITE + '/', image: SITE + '/compartir.jpg', founder: { '@type': 'Person', name: 'Luis Navas' } },
@@ -71,7 +71,7 @@ export function paginaServicio(s, es) {
       ...(plans.length ? { offers: plans.map(p => ({ '@type': 'Offer', name: `${s.nombre} · ${p.tier}`, price: p.price, priceCurrency: 'USD', url, availability: 'https://schema.org/InStock' })) } : {}) },
     { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Navas Visual', item: SITE + '/' },
-      { '@type': 'ListItem', position: 2, name: 'Servicios', item: SITE + '/index.html#servicios' },
+      { '@type': 'ListItem', position: 2, name: 'Servicios', item: SITE + '/#servicios' },
       { '@type': 'ListItem', position: 3, name: s.nombre, item: url } ] }
   ];
   const planes = plans.length ? `<h2>Planes y precios</h2>
@@ -86,7 +86,7 @@ export function paginaServicio(s, es) {
         </article>`).join('')}
       </div>` : `<h2>Presupuesto a medida</h2>
       <p class="sv-note">Cada proyecto es distinto, así que preparo un presupuesto personalizado con conceptos, plazos y condiciones, que puedes ver y aceptar en línea.</p>
-      <p><a class="sv-btn" href="/solicitar.html?service=${s.tab || s.svc}">Pedir presupuesto</a></p>`;
+      <p><a class="sv-btn" href="/solicitar?service=${s.tab || s.svc}">Pedir presupuesto</a></p>`;
   const otros = SERVICIOS.filter(o => o.slug !== s.slug);
   return `<!DOCTYPE html>
 <html lang="es">
@@ -117,17 +117,17 @@ export function paginaServicio(s, es) {
 <body>
 <header class="sv-nav">
   <a class="sv-brand" href="/" aria-label="Navas Visual, inicio">${LOGO}<span><b>Navas Visual</b><small>Diseño visual digital</small></span></a>
-  <nav aria-label="Principal"><a href="/work.html">Trabajo</a><a href="/index.html#planes">Planes</a><a href="/about.html">Sobre mí</a><a href="/contact.html" class="sv-nav__cta">Contacto</a></nav>
+  <nav aria-label="Principal"><a href="/work">Trabajo</a><a href="/#planes">Planes</a><a href="/about">Sobre mí</a><a href="/contact" class="sv-nav__cta">Contacto</a></nav>
 </header>
 <main>
-  <nav class="sv-crumbs" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/index.html#servicios">Servicios</a> / <span>${esc(s.nombre)}</span></nav>
+  <nav class="sv-crumbs" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/#servicios">Servicios</a> / <span>${esc(s.nombre)}</span></nav>
   <section class="sv-hero">
     <p class="sv-eyebrow">Servicio${desde ? ` · desde ${money(desde)}` : ''}</p>
     <h1>${esc(s.h1)}</h1>
     <p class="sv-lede">${esc(item.d)}</p>
     <div class="sv-actions">
-      <a class="sv-btn" href="${s.tab ? ordenar : `/solicitar.html?service=${s.svc}`}">${s.tab ? 'Ver planes y empezar' : 'Pedir presupuesto'}</a>
-      <a class="sv-btn sv-btn--ghost" href="/work.html?cat=${encodeURIComponent(cat)}">Ver trabajos</a>
+      <a class="sv-btn" href="${s.tab ? ordenar : `/solicitar?service=${s.svc}`}">${s.tab ? 'Ver planes y empezar' : 'Pedir presupuesto'}</a>
+      <a class="sv-btn sv-btn--ghost" href="/work?cat=${encodeURIComponent(cat)}">Ver trabajos</a>
       <a class="sv-btn sv-btn--ghost" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola Luis, quiero información sobre: ${s.nombre}`)}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
     </div>
   </section>
@@ -144,7 +144,7 @@ export function paginaServicio(s, es) {
   </section>
   <section class="sv-section">
     <h2>Otros servicios</h2>
-    <ul class="sv-others">${otros.map(o => `<li><a href="/servicios/${o.slug}.html">${esc(o.nombre)}</a></li>`).join('')}</ul>
+    <ul class="sv-others">${otros.map(o => `<li><a href="/servicios/${o.slug}">${esc(o.nombre)}</a></li>`).join('')}</ul>
   </section>
 </main>
 <footer class="sv-footer">
@@ -157,7 +157,7 @@ export function paginaServicio(s, es) {
 }
 
 export function sitemap() {
-  const urls = ['/', '/work.html', '/about.html', '/contact.html', '/solicitar.html', ...SERVICIOS.map(s => `/servicios/${s.slug}.html`)];
+  const urls = ['/', '/work', '/about', '/contact', '/solicitar', ...SERVICIOS.map(s => `/servicios/${s.slug}`)];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url><loc>${SITE}${u}</loc></url>`).join('\n')}

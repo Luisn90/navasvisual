@@ -275,8 +275,8 @@ function IntroHero({ t, onNavigate }) {
     <div className="nv-intro__bottom">
       <p className="nv-intro__lede">{c.lede}</p>
       <div className="nv-intro__actions">
-        <a className="nv-intro__btn nv-intro__btn--dark" href="work.html" onClick={e => navigate(e, 'work.html')}>{c.work} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a>
-        <a className="nv-intro__btn nv-intro__btn--light" href="contact.html" onClick={e => navigate(e, 'contact.html')}>{c.contact} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></a>
+        <a className="nv-intro__btn nv-intro__btn--dark" href="/work" onClick={e => navigate(e, '/work')}>{c.work} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg></a>
+        <a className="nv-intro__btn nv-intro__btn--light" href="/contact" onClick={e => navigate(e, '/contact')}>{c.contact} <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg></a>
       </div>
     </div>
   </section>;

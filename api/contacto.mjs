@@ -16,7 +16,7 @@ export function cleanContacto(input = {}) {
     service: line(input.service, 80), message: block(input.message, 4000), lang: input.lang === 'en' ? 'en' : 'es',
     phone: line(input.phone, 40), prefer: ['email', 'whatsapp'].includes(input.prefer) ? input.prefer : '',
     source: input.source === 'wizard' ? 'wizard' : 'contacto',
-    // Respuestas del formulario guiado (solicitar.html): pares [pregunta, respuesta].
+    // Respuestas del formulario guiado (/solicitar): pares [pregunta, respuesta].
     details: (Array.isArray(input.details) ? input.details : []).slice(0, 20)
       .map(d => Array.isArray(d) ? [line(d[0], 80), line(d[1], 600)] : null).filter(d => d && d[0] && d[1])
   };

@@ -2,7 +2,7 @@
 // encuentra, avisa por Telegram cuando algo se rompe y resume qué arreglar o mejorar.
 import { sbRest, supabaseReady, aiReady, aiChat, callTool, sendTelegram, afterResponse } from './_solicitudes.mjs';
 
-export const PAGES = ['/', '/work.html', '/about.html', '/contact.html', '/admin.html'];
+export const PAGES = ['/', '/work', '/about', '/contact', '/solicitar', '/admin.html'];
 const SOURCES = ['/components.jsx', '/home.jsx', '/brief.jsx', '/intro.jsx', '/about.jsx', '/work.jsx', '/contact.jsx'];
 const SLOW_MS = 3000, BIG_IMAGE = 600 * 1024, MAX_ASSETS = 60, MAX_EXTERNAL = 15;
 
@@ -74,7 +74,8 @@ export function parseHtml(html) {
 export function parseSource(code) {
   const local = new Set(), pages = new Set(), external = new Set();
   for (const m of code.matchAll(/["'`]((?:\.?\/)?(?:assets|uploads)\/[^"'`$]+\.(?:png|jpe?g|webp|gif|svg|mp4|webm|pdf))["'`]/gi)) local.add('/' + m[1].replace(/^\.?\//, ''));
-  for (const m of code.matchAll(/href=\{?["'`]\/?([\w-]+\.html)(?:#[\w-]*)?["'`]/gi)) pages.add('/' + m[1]);
+  // Páginas internas: con .html (antiguas) o con direcciones limpias (/work, /servicios/logo).
+  for (const m of code.matchAll(/href=\{?["'`]\/?((?:servicios\/)?[\w-]+)(?:\.html)?(?:[?#][^"'`]*)?["'`]/gi)) if (!/^(https?|mailto|tel)$/i.test(m[1])) pages.add('/' + m[1]);
   for (const m of code.matchAll(/href=\{?["'`](https:\/\/[^"'`\s${}]+)["'`]/gi)) external.add(m[1]);
   return { local: [...local], pages: [...pages], external: [...external] };
 }
@@ -113,7 +114,7 @@ async function checkSite(base, fetcher) {
     found.pages.forEach(p => linkedPages.add(p));
     found.external.forEach(u => external.add(u));
   }));
-  linkedPages.forEach(p => { if (!PAGES.includes(p) && p !== '/index.html') assets.set(base + p, 'enlaces internos'); });
+  linkedPages.forEach(p => { if (!PAGES.includes(p) && p !== '/index.html' && p !== '/index') assets.set(base + p, 'enlaces internos'); });
 
   const assetList = [...assets.entries()].slice(0, MAX_ASSETS);
   await mapLimit(assetList, 8, async ([url, from]) => {

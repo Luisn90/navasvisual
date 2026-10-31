@@ -183,7 +183,7 @@ function ServicesIndex({ t, projects, onPlans, onNavigate }) {
     <ul className="nv-sidx">
       {sv.items.map((it) => {
         const img = imageForCats(projects, it.cats);
-        const workHref = `work.html?cat=${encodeURIComponent(it.cats[0])}`;
+        const workHref = `/work?cat=${encodeURIComponent(it.cats[0])}`;
         return (
           <li
             className="nv-sidx__row reveal"
@@ -194,13 +194,13 @@ function ServicesIndex({ t, projects, onPlans, onNavigate }) {
               e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
             } : undefined}
           >
-            <h3 className="nv-sidx__name">{SERVICE_PAGES[it.id] ? <a href={`servicios/${SERVICE_PAGES[it.id]}.html`}>{it.name}</a> : it.name}</h3>
+            <h3 className="nv-sidx__name">{SERVICE_PAGES[it.id] ? <a href={`/servicios/${SERVICE_PAGES[it.id]}`}>{it.name}</a> : it.name}</h3>
             <p className="nv-sidx__desc">{it.d}</p>
             <div className="nv-sidx__links">
               {it.tab ? (
                 <button type="button" className="nv-sidx__link nv-sidx__link--strong" onClick={() => onPlans(it.tab)}>{sv.plans_link}</button>
               ) : (
-                <a href={`solicitar.html?service=${it.id}`} className="nv-sidx__link nv-sidx__link--strong" onClick={(e) => { e.preventDefault(); onNavigate(`solicitar.html?service=${it.id}`); }}>{sv.custom_link}</a>
+                <a href={`/solicitar?service=${it.id}`} className="nv-sidx__link nv-sidx__link--strong" onClick={(e) => { e.preventDefault(); onNavigate(`/solicitar?service=${it.id}`); }}>{sv.custom_link}</a>
               )}
               <a href={workHref} className="nv-sidx__link" onClick={(e) => { e.preventDefault(); onNavigate(workHref); }}>{sv.work_link}</a>
             </div>
@@ -231,7 +231,7 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
     tabRefs.current[next] && tabRefs.current[next].focus();
   };
 
-  const examplesHref = `work.html?cat=${encodeURIComponent(current.cats[0])}&service=${encodeURIComponent(current.id)}`;
+  const examplesHref = `/work?cat=${encodeURIComponent(current.cats[0])}&service=${encodeURIComponent(current.id)}`;
 
   return (
     <div className="nv-plans">
@@ -295,7 +295,7 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
       <div className="nv-plans__foot">
         <p className="nv-plans__more">
           {sh.more}{' '}
-          <a href="solicitar.html" onClick={(e) => { e.preventDefault(); onNavigate('solicitar.html'); }}>{sh.more_link}</a>
+          <a href="/solicitar" onClick={(e) => { e.preventDefault(); onNavigate('/solicitar'); }}>{sh.more_link}</a>
         </p>
         <p className="nv-plans__cur-note">{sh.currency_note}</p>
       </div>
@@ -362,8 +362,8 @@ function HomeApp() {
   }, []);
 
   const navigate = (href) => {
-    // Enlaces internos del home (index.html#seccion o #seccion): solo desplazar
-    const m = href.match(/^(?:index\.html)?#(.+)$/);
+    // Enlaces internos del home (/#seccion o #seccion): solo desplazar
+    const m = href.match(/^(?:\/|index\.html)?#(.+)$/);
     if (m) { scrollToId(m[1]); history.replaceState(null, '', '#' + m[1]); return; }
     setTransPhase('out');
     setTimeout(() => { window.location.href = href; }, 600);
@@ -396,7 +396,7 @@ function HomeApp() {
                 <a href="#planes" onClick={(e) => { e.preventDefault(); navigate('#planes'); }} className="nv-btn nv-btn--primary">
                   {t.hero.cta_packages}
                 </a>
-                <a href="solicitar.html" onClick={(e) => { e.preventDefault(); navigate('solicitar.html'); }} className="nv-btn nv-btn--ghost">
+                <a href="/solicitar" onClick={(e) => { e.preventDefault(); navigate('/solicitar'); }} className="nv-btn nv-btn--ghost">
                   {t.hero.cta_custom}
                 </a>
               </div>
@@ -426,7 +426,7 @@ function HomeApp() {
                 <h2 className="nv-h2" style={{ marginTop: 16 }}>{t.featured.title}</h2>
                 <p className="nv-work__lede">{t.featured.lede}</p>
               </div>
-              <a href="work.html" onClick={(e) => { e.preventDefault(); navigate('work.html'); }} className="nv-btn nv-btn--ghost">
+              <a href="/work" onClick={(e) => { e.preventDefault(); navigate('/work'); }} className="nv-btn nv-btn--ghost">
                 {t.featured.view_all}
               </a>
             </div>
@@ -497,7 +497,7 @@ function HomeApp() {
                 </ul>
               </div>
               <div className="nv-custom__ctas">
-                <a href="solicitar.html" onClick={(e) => { e.preventDefault(); navigate('solicitar.html'); }} className="nv-btn nv-custom__btn--primary">
+                <a href="/solicitar" onClick={(e) => { e.preventDefault(); navigate('/solicitar'); }} className="nv-btn nv-custom__btn--primary">
                   {t.custom.cta}
                 </a>
                 <button type="button" onClick={() => openWhatsApp()} className="nv-btn nv-custom__btn--ghost">

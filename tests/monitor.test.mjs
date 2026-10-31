@@ -27,9 +27,9 @@ function site({ brokenImage = false, previous = null, slow = false } = {}) {
       if (slow) await new Promise(r => setTimeout(r, 5));
       return new Response(page('Inicio', '<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script><script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script><script type="text/babel" src="home.jsx"></script><link rel="stylesheet" href="styles.css">'), { headers: { 'content-type': 'text/html', 'x-content-type-options': 'nosniff' } });
     }
-    if (u.pathname === '/about.html') return new Response(`<html><head><title>Sobre mí</title></head></html>`);
+    if (u.pathname === '/about') return new Response(`<html><head><title>Sobre mí</title></head></html>`);
     if (u.pathname === '/admin.html') return new Response(page('x', '<img src="${p.image_url}">'));
-    if (['/work.html', '/contact.html'].includes(u.pathname)) return new Response(page('x'));
+    if (['/work', '/contact', '/solicitar'].includes(u.pathname)) return new Response(page('x'));
     if (u.pathname === '/home.jsx') return new Response(`<img src="assets/hero.jpg"/> <a href="work.html">x</a> <a href="https://wa.me/123">wa</a> const big = 'assets/foto grande.png';`);
     if (u.pathname.endsWith('.jsx')) return new Response('');
     if (u.pathname === '/assets/hero.jpg') return brokenImage ? new Response('', { status: 404 }) : new Response('', { headers: { 'content-length': '1000' } });
@@ -48,7 +48,7 @@ test('parsers find SEO data, resources and links', () => {
   assert.equal(info.title, 'Hola'); assert.equal(info.lang, 'es'); assert.deepEqual(info.refs.slice(0, 2), ['a.js', 'assets/x.png']);
   const src = parseSource(`<img src="assets/a.png"/> <a href="about.html#x">a</a> <a href={"https://instagram.com/x"}>i</a> url('/uploads/b.webp')`);
   assert.deepEqual(src.local, ['/assets/a.png', '/uploads/b.webp']);
-  assert.deepEqual(src.pages, ['/about.html']);
+  assert.deepEqual(src.pages, ['/about']);
   assert.deepEqual(src.external, ['https://instagram.com/x']);
   assert.equal(summarizeState([{ tipo: 'mejora' }, { tipo: 'aviso' }]), 'avisos');
 });
@@ -60,7 +60,7 @@ test('a full review finds broken files, SEO gaps, heavy images, agent issues and
   assert.equal(report.estado, 'problemas');
   assert.ok(ids.includes('asset:/assets/hero.jpg'));
   assert.ok(ids.includes('ext:https://wa.me/123'));
-  assert.ok(ids.includes('desc:/about.html'));
+  assert.ok(ids.includes('desc:/about'));
   assert.ok(ids.includes('heavy:/assets/foto grande.png'));
   assert.ok(ids.includes('agents:marta'));
   assert.ok(ids.includes('react-dev') && ids.includes('babel-browser') && ids.includes('headers'));
