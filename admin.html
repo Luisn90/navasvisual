@@ -582,8 +582,22 @@ function startTeamBadge() {
   });
 }
 
-function showApp(email) {
+// Solo la cuenta del administrador entra al panel: la base de datos lo confirma (función es_admin).
+// Cualquier otra cuenta se cierra al momento, aunque tenga usuario y contraseña.
+async function esAdmin() {
+  try { const { data, error } = await sb.rpc('es_admin'); return !error && data === true; } catch { return false; }
+}
+async function showApp(email) {
   if (recoveringPassword) return;
+  if (!(await esAdmin())) {
+    await sb.auth.signOut().catch(() => {});
+    const err = document.getElementById('loginError');
+    err.textContent = 'Esta cuenta no tiene acceso al panel.';
+    err.style.display = 'block';
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = false; btn.innerHTML = 'Iniciar sesión';
+    return;
+  }
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('app').classList.add('visible');
   document.getElementById('userEmail').textContent = email;

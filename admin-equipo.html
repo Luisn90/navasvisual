@@ -987,6 +987,9 @@ async function initLive(){
     live.sb=window.supabase.createClient(SB_URL,SB_KEY);
     const {data}=await live.sb.auth.getSession();
     if(!data.session)return; // Sin sesión del admin: la oficina queda en modo ejemplo.
+    // Solo la cuenta del administrador (lo confirma la base de datos); cualquier otra se cierra.
+    const adm=await live.sb.rpc('es_admin').catch(()=>({data:false}));
+    if(adm.error||adm.data!==true){await live.sb.auth.signOut().catch(()=>{});return;}
     if(!await loadReqs(true))return;
     live.on=true;
     $('.sample').textContent='SOLICITUDES EN VIVO · EL RESTO ES EJEMPLO';
