@@ -61,3 +61,22 @@ test('el correo escapa el contenido y lleva la firma', () => {
   const en = contactoEmails(cleanContacto({ ...OK, lang: 'en' }).data);
   assert.match(en.cliente.subject, /I got your message/);
 });
+
+test('formulario guiado: acepta WhatsApp y respuestas, y las incluye en correo y Telegram', async () => {
+  const { fetcher, calls } = fakeFetch();
+  const body = { ...OK, message: '', source: 'wizard', phone: '+58 412 744 9626', prefer: 'whatsapp', service: 'Logo',
+    details: [['Servicio', 'Logo'], ['Plan', 'Estándar · $100'], ['<b>x</b>', 'y'], ['vacío', '']] };
+  assert.equal(cleanContacto(body).data.details.length, 3);
+  assert.equal(cleanContacto({ ...body, phone: 'abc' }).error, 'phone');
+  assert.equal(cleanContacto({ ...body, details: [] }).error, 'message');
+  const res = await handleContacto(req(body), { env, fetcher, ip: 'w' });
+  assert.equal(res.status, 200);
+  const mails = calls.filter(c => c.url.includes('resend')).map(c => JSON.parse(c.options.body));
+  const toLuis = mails.find(m => m.to[0] === 'luis@example.com');
+  assert.match(toLuis.subject, /Nueva solicitud de Ana Pérez · Logo/);
+  assert.match(toLuis.html, /Estándar · \$100/);
+  assert.match(toLuis.html, /\+58 412 744 9626/);
+  assert.ok(!toLuis.html.includes('<b>x</b>'));
+  const tg = calls.find(c => c.url.includes('telegram'));
+  assert.match(tg.options.body, /Plan: Estándar/);
+});

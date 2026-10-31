@@ -200,7 +200,7 @@ function ServicesIndex({ t, projects, onPlans, onNavigate }) {
               {it.tab ? (
                 <button type="button" className="nv-sidx__link nv-sidx__link--strong" onClick={() => onPlans(it.tab)}>{sv.plans_link}</button>
               ) : (
-                <a href="contact.html" className="nv-sidx__link nv-sidx__link--strong" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{sv.custom_link}</a>
+                <a href={`solicitar.html?service=${it.id}`} className="nv-sidx__link nv-sidx__link--strong" onClick={(e) => { e.preventDefault(); onNavigate(`solicitar.html?service=${it.id}`); }}>{sv.custom_link}</a>
               )}
               <a href={workHref} className="nv-sidx__link" onClick={(e) => { e.preventDefault(); onNavigate(workHref); }}>{sv.work_link}</a>
             </div>
@@ -295,7 +295,7 @@ function PlansSection({ t, lang, tab, setTab, onOrder, onNavigate }) {
       <div className="nv-plans__foot">
         <p className="nv-plans__more">
           {sh.more}{' '}
-          <a href="contact.html" onClick={(e) => { e.preventDefault(); onNavigate('contact.html'); }}>{sh.more_link}</a>
+          <a href="solicitar.html" onClick={(e) => { e.preventDefault(); onNavigate('solicitar.html'); }}>{sh.more_link}</a>
         </p>
         <p className="nv-plans__cur-note">{sh.currency_note}</p>
       </div>
@@ -396,7 +396,7 @@ function HomeApp() {
                 <a href="#planes" onClick={(e) => { e.preventDefault(); navigate('#planes'); }} className="nv-btn nv-btn--primary">
                   {t.hero.cta_packages}
                 </a>
-                <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-btn--ghost">
+                <a href="solicitar.html" onClick={(e) => { e.preventDefault(); navigate('solicitar.html'); }} className="nv-btn nv-btn--ghost">
                   {t.hero.cta_custom}
                 </a>
               </div>
@@ -497,7 +497,7 @@ function HomeApp() {
                 </ul>
               </div>
               <div className="nv-custom__ctas">
-                <a href="contact.html" onClick={(e) => { e.preventDefault(); navigate('contact.html'); }} className="nv-btn nv-custom__btn--primary">
+                <a href="solicitar.html" onClick={(e) => { e.preventDefault(); navigate('solicitar.html'); }} className="nv-btn nv-custom__btn--primary">
                   {t.custom.cta}
                 </a>
                 <button type="button" onClick={() => openWhatsApp()} className="nv-btn nv-custom__btn--ghost">

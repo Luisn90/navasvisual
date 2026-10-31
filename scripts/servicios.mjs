@@ -63,7 +63,7 @@ export function paginaServicio(s, es) {
   const { item, tab, plans, desde } = datosServicio(s, es);
   const url = `${SITE}/servicios/${s.slug}.html`;
   const cat = (tab?.cats || item.cats)[0];
-  const ordenar = s.tab ? `/index.html?service=${s.tab}#planes` : '/contact.html';
+  const ordenar = s.tab ? `/index.html?service=${s.tab}#planes` : `/solicitar.html?service=${s.svc}`;
   const ld = [
     { '@context': 'https://schema.org', '@type': 'Service', name: s.nombre, serviceType: s.nombre, description: s.desc, url,
       provider: { '@type': 'ProfessionalService', name: 'Navas Visual', url: SITE + '/', image: SITE + '/compartir.jpg', founder: { '@type': 'Person', name: 'Luis Navas' } },
@@ -86,7 +86,7 @@ export function paginaServicio(s, es) {
         </article>`).join('')}
       </div>` : `<h2>Presupuesto a medida</h2>
       <p class="sv-note">Cada proyecto es distinto, así que preparo un presupuesto personalizado con conceptos, plazos y condiciones, que puedes ver y aceptar en línea.</p>
-      <p><a class="sv-btn" href="/contact.html">Pedir presupuesto</a></p>`;
+      <p><a class="sv-btn" href="/solicitar.html?service=${s.tab || s.svc}">Pedir presupuesto</a></p>`;
   const otros = SERVICIOS.filter(o => o.slug !== s.slug);
   return `<!DOCTYPE html>
 <html lang="es">
@@ -126,7 +126,7 @@ export function paginaServicio(s, es) {
     <h1>${esc(s.h1)}</h1>
     <p class="sv-lede">${esc(item.d)}</p>
     <div class="sv-actions">
-      <a class="sv-btn" href="${s.tab ? ordenar : '/contact.html'}">${s.tab ? 'Ver planes y empezar' : 'Pedir presupuesto'}</a>
+      <a class="sv-btn" href="${s.tab ? ordenar : `/solicitar.html?service=${s.svc}`}">${s.tab ? 'Ver planes y empezar' : 'Pedir presupuesto'}</a>
       <a class="sv-btn sv-btn--ghost" href="/work.html?cat=${encodeURIComponent(cat)}">Ver trabajos</a>
       <a class="sv-btn sv-btn--ghost" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola Luis, quiero información sobre: ${s.nombre}`)}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
     </div>
@@ -157,7 +157,7 @@ export function paginaServicio(s, es) {
 }
 
 export function sitemap() {
-  const urls = ['/', '/work.html', '/about.html', '/contact.html', ...SERVICIOS.map(s => `/servicios/${s.slug}.html`)];
+  const urls = ['/', '/work.html', '/about.html', '/contact.html', '/solicitar.html', ...SERVICIOS.map(s => `/servicios/${s.slug}.html`)];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map(u => `  <url><loc>${SITE}${u}</loc></url>`).join('\n')}
