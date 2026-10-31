@@ -46,7 +46,7 @@ const SOL_COPY = {
       service: 'Elige un servicio para continuar.', details: 'Responde las preguntas marcadas para continuar.',
       plan: 'Elige una opción de plan o presupuesto.', timing: 'Indica para cuándo lo necesitas.',
       description: 'Cuéntame en una frase qué necesitas (mínimo 10 caracteres).',
-      name: 'Escribe tu nombre.', email: 'Revisa tu correo: parece incompleto.',
+      name: 'Escribe tu nombre.', nameBad: 'Escribe solo tu nombre, sin enlaces.', email: 'Revisa tu correo: parece incompleto.',
       phone: 'Revisa el número de WhatsApp: usa solo números y el código de país.',
       phoneReq: 'Si prefieres WhatsApp, déjame tu número.',
       send: 'No se pudo enviar. Tus respuestas siguen aquí: inténtalo de nuevo o escríbeme por WhatsApp.',
@@ -102,7 +102,7 @@ const SOL_COPY = {
       service: 'Choose a service to continue.', details: 'Answer the marked questions to continue.',
       plan: 'Choose a plan or budget option.', timing: 'Tell me when you need it.',
       description: 'Tell me in one sentence what you need (at least 10 characters).',
-      name: 'Enter your name.', email: 'Check your email: it looks incomplete.',
+      name: 'Enter your name.', nameBad: 'Enter just your name, without links.', email: 'Check your email: it looks incomplete.',
       phone: 'Check the WhatsApp number: use digits and the country code only.',
       phoneReq: 'If you prefer WhatsApp, leave me your number.',
       send: 'Couldn’t send. Your answers are still here: try again or message me on WhatsApp.',
@@ -301,6 +301,7 @@ function SolicitarApp() {
       if (!res.ok || !data.ok) {
         if (data.error === 'email') { setMissing(['email']); setError(c.err.email); }
         else if (data.error === 'phone') { setMissing(['phone']); setError(c.err.phone); }
+        else if (data.error === 'name') { setMissing(['name']); setError(c.err.nameBad); }
         else setError(res.status === 429 ? c.err.rate : c.err.send);
         return;
       }

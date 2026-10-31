@@ -18,7 +18,7 @@ function fakeFetch({ failLuis = false } = {}) {
   };
   return { fetcher, calls };
 }
-const req = (body, headers = {}) => new Request('https://navasvisual.com/api/contacto', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json', ...headers } });
+const req = (body, headers = {}) => new Request('https://navasvisual.com/api/contacto', { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'application/json', Origin: 'https://navasvisual.com', ...headers } });
 
 test('valida los campos', () => {
   assert.equal(cleanContacto({ ...OK, email: 'mal' }).error, 'email');
@@ -79,4 +79,27 @@ test('formulario guiado: acepta WhatsApp y respuestas, y las incluye en correo y
   assert.ok(!toLuis.html.includes('<b>x</b>'));
   const tg = calls.find(c => c.url.includes('telegram'));
   assert.match(tg.options.body, /Plan: Estándar/);
+});
+
+test('antispam: sin Origin se rechaza, nombre con enlaces se rechaza y la copia del cliente no lleva enlaces', async () => {
+  const { fetcher, calls } = fakeFetch();
+  const noOrigin = new Request('https://navasvisual.com/api/contacto', { method: 'POST', body: JSON.stringify(OK), headers: { 'Content-Type': 'application/json' } });
+  assert.equal((await handleContacto(noOrigin, { env, fetcher, ip: 's1' })).status, 403);
+  assert.equal(cleanContacto({ ...OK, name: 'Gana dinero en www.spam.xyz' }).error, 'name');
+  assert.equal(cleanContacto({ ...OK, name: 'Promo bit.ly/abc' }).error, 'name');
+  const spam = { ...OK, email: 'victima@example.com', message: 'Compra ya en https://spam.example/oferta y casino.xyz', details: [['Referencias', 'mi web https://cafe-luna.com']] };
+  assert.equal((await handleContacto(req(spam), { env, fetcher, ip: 's2' })).status, 200);
+  const mails = calls.filter(c => c.url.includes('resend')).map(c => JSON.parse(c.options.body));
+  const toClient = mails.find(m => m.to[0] === 'victima@example.com');
+  const toLuis = mails.find(m => m.to[0] === 'luis@example.com');
+  assert.ok(!/spam\.example|casino\.xyz|cafe-luna\.com/.test(toClient.html + toClient.text), 'la copia del cliente no lleva enlaces');
+  assert.match(toClient.html, /\[enlace\]/);
+  assert.match(toLuis.html, /https:\/\/cafe-luna\.com/, 'Luis sí ve los enlaces completos');
+});
+
+test('antispam: cada dirección recibe como máximo 2 copias', async () => {
+  const { fetcher, calls } = fakeFetch();
+  for (let i = 0; i < 4; i++) await handleContacto(req({ ...OK, email: 'repetida@example.com' }), { env, fetcher, ip: 'r' + i });
+  const copias = calls.filter(c => c.url.includes('resend')).map(c => JSON.parse(c.options.body)).filter(m => m.to[0] === 'repetida@example.com');
+  assert.equal(copias.length, 2);
 });

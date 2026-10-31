@@ -5,6 +5,11 @@ import { sendEmail, emailReady, escapeHtml, brandHeader, EMAIL_FONT, EMAIL_HEAD 
 import { firmaHtml, FIRMA } from './_presupuestos.mjs';
 
 const attempts = new Map();
+// Protección antispam: la copia que recibe el cliente nunca lleva enlaces (un bot no puede
+// usar el formulario para mandar publicidad desde el dominio) y cada dirección recibe pocas copias.
+const copies = new Map();
+const LINK = /\b(?:https?:\/\/|www\.)\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|net|org|info|biz|xyz|top|io|co|me|ru|cn|site|online|shop|app|link|click|ly|gl|to|cc|ws|tk|ve|es|mx)\b(?:\/\S*)?/gi;
+export const sinEnlaces = s => String(s ?? '').replace(LINK, '[enlace]');
 const EMAIL = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[a-z]{2,}$/i;
 const json = (status, body) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 const line = (v, max) => String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
@@ -20,7 +25,7 @@ export function cleanContacto(input = {}) {
     details: (Array.isArray(input.details) ? input.details : []).slice(0, 20)
       .map(d => Array.isArray(d) ? [line(d[0], 80), line(d[1], 600)] : null).filter(d => d && d[0] && d[1])
   };
-  if (!data.name) return { error: 'name' };
+  if (!data.name || /https?:|www\.|[<>]/i.test(data.name) || sinEnlaces(data.name) !== data.name) return { error: 'name' };
   if (!EMAIL.test(data.email)) return { error: 'email' };
   if (data.phone && !/^\+?[0-9 ()\-.]{7,25}$/.test(data.phone)) return { error: 'phone' };
   if (data.message.length < 5 && !data.details.length) return { error: 'message' };
@@ -41,17 +46,22 @@ export function contactoEmails(d) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border-radius:20px;overflow:hidden">
 ${brandHeader(COPY[lang].tagline)}${inner}
 </table></td></tr></table></body></html>`;
-  const answers = d.details.length ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border:1px solid #e7e5e0;border-radius:14px;border-collapse:separate">
-${d.details.map(([l, v], i) => `<tr><td style="padding:10px 16px;font-size:13px;color:#777;vertical-align:top;${i ? 'border-top:1px solid #efede9;' : ''}">${escapeHtml(l)}</td><td style="padding:10px 16px;font-size:14px;text-align:right;${i ? 'border-top:1px solid #efede9;' : ''}">${escapeHtml(v)}</td></tr>`).join('')}
+  const tabla = (f = x => x) => d.details.length ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border:1px solid #e7e5e0;border-radius:14px;border-collapse:separate">
+${d.details.map(([l, v], i) => `<tr><td style="padding:10px 16px;font-size:13px;color:#777;vertical-align:top;${i ? 'border-top:1px solid #efede9;' : ''}">${escapeHtml(f(l))}</td><td style="padding:10px 16px;font-size:14px;text-align:right;${i ? 'border-top:1px solid #efede9;' : ''}">${escapeHtml(f(v))}</td></tr>`).join('')}
 </table>` : '';
-  const quote = !d.message ? '' : `<div style="margin-top:18px;padding:16px 18px;border:1px solid #e7e5e0;border-radius:14px;font-size:14px;line-height:1.55;color:#333;white-space:pre-line">${escapeHtml(d.message)}</div>`;
+  const answers = tabla();
+  const box = text => !text ? '' : `<div style="margin-top:18px;padding:16px 18px;border:1px solid #e7e5e0;border-radius:14px;font-size:14px;line-height:1.55;color:#333;white-space:pre-line">${escapeHtml(text)}</div>`;
+  const quote = box(d.message);
+  // Copia para el cliente: mismas respuestas, sin enlaces.
+  const answersCliente = tabla(sinEnlaces);
+  const quoteCliente = box(sinEnlaces(d.message));
   const cliente = {
     subject: t.subject,
     html: shell(`<tr><td style="padding:24px 32px 0"><h1 style="margin:0 0 10px;font-size:26px;line-height:1.15;letter-spacing:-.02em">${escapeHtml(t.title)}</h1>
 <p style="margin:0;font-size:15px;line-height:1.55;color:#333">${escapeHtml(t.intro(first))}</p>
-<p style="margin:22px 0 0;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.08em">${escapeHtml(t.yours)}</p>${answers}${quote}</td></tr>
+<p style="margin:22px 0 0;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.08em">${escapeHtml(t.yours)}</p>${answersCliente}${quoteCliente}</td></tr>
 <tr><td style="padding:26px 32px 30px"><div style="border-top:1px solid #efede9;padding-top:20px">${firmaHtml(d.lang)}</div></td></tr>`, d.lang),
-    text: [t.title, '', t.intro(first), '', `${t.yours}:`, ...d.details.map(([l, v]) => `${l}: ${v}`), d.message, '', `${FIRMA.nombre} · ${FIRMA.cargo[d.lang]} · Navas Visual`, FIRMA.web].join('\n')
+    text: [t.title, '', t.intro(first), '', `${t.yours}:`, ...d.details.map(([l, v]) => `${l}: ${sinEnlaces(v)}`), sinEnlaces(d.message), '', `${FIRMA.nombre} · ${FIRMA.cargo[d.lang]} · Navas Visual`, FIRMA.web].join('\n')
   };
   const rows = [['Nombre', d.name], ['Correo', d.email], d.company && ['Empresa', d.company], d.phone && ['WhatsApp', d.phone], d.prefer && ['Prefiere', d.prefer === 'whatsapp' ? 'WhatsApp' : 'Correo'], d.service && ['Servicio', d.service], ['Idioma', d.lang === 'en' ? 'Inglés' : 'Español']].filter(Boolean);
   const luis = {
@@ -66,10 +76,21 @@ ${rows.map(([l, v], i) => `<tr><td style="padding:10px 16px;font-size:13px;color
   return { cliente, luis };
 }
 
+// Máximo 2 copias por dirección cada 6 horas (por instancia del servidor).
+function copiaPermitida(email, now) {
+  for (const [k, v] of copies) if (v.until <= now) copies.delete(k);
+  if (copies.size > 10000) copies.clear();
+  const c = copies.get(email) || { count: 0, until: now + 6 * 3600e3 };
+  copies.set(email, c);
+  return ++c.count <= 2;
+}
+
 export async function handleContacto(request, { env = process.env, fetcher = fetch, ip = 'unknown', now = Date.now() } = {}) {
   if (request.method !== 'POST') return json(405, { error: 'method' });
+  // Los navegadores siempre envían Origin en este formulario; sin él suele ser un script.
   const origin = request.headers.get('origin');
-  if (origin && origin !== new URL(request.url).origin) return json(403, { error: 'origin' });
+  if (!origin || origin !== new URL(request.url).origin) return json(403, { error: 'origin' });
+  if (!String(request.headers.get('content-type') || '').includes('application/json')) return json(415, { error: 'type' });
   if (!emailReady(env) || !env.BRIEF_EMAIL_TO) return json(503, { error: 'unavailable' });
   for (const [key, value] of attempts) if (value.until <= now) attempts.delete(key);
   let limit = attempts.get(ip);
@@ -95,7 +116,7 @@ export async function handleContacto(request, { env = process.env, fetcher = fet
     return json(502, { error: 'email' });
   }
   await Promise.allSettled([
-    sendEmail(env, { to: data.email, ...cliente }, fetcher),
+    copiaPermitida(data.email, now) ? sendEmail(env, { to: data.email, ...cliente }, fetcher) : Promise.resolve(),
     sendTelegram(env, `${data.source === 'wizard' ? '🧭 Nueva solicitud de servicio' : '✉️ Mensaje desde Contacto'}\n${data.name} · ${data.email}${data.phone ? ` · WhatsApp ${data.phone}` : ''}${data.company ? ` · ${data.company}` : ''}${data.service ? `\nServicio: ${data.service}` : ''}${data.prefer ? `\nPrefiere: ${data.prefer === 'whatsapp' ? 'WhatsApp' : 'correo'}` : ''}${data.details.length ? '\n\n' + data.details.map(([l, v]) => `• ${l}: ${v}`).join('\n') : ''}${data.message ? `\n\n${data.message.slice(0, 1500)}` : ''}`.slice(0, 3900), fetcher)
   ]);
   return json(200, { ok: true });
