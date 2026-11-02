@@ -138,7 +138,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
   const links = [
     { k: 'home', href: '/' },
     { k: 'work', href: '/work' },
-    { k: 'services', href: '/#planes' },
+    { k: 'services', href: window.NV_PLANES_ACTIVOS ? '/#planes' : '/#servicios' },
     { k: 'about', href: '/about' },
     { k: 'contact', href: '/contact' },
   ];
@@ -259,7 +259,7 @@ function Footer({ t, lang, onNavigate }) {
             <ul>
               <li><a href="/about" onClick={(e) => { e.preventDefault(); onNavigate('/about'); }}>{t.nav.about}</a></li>
               <li><a href="/work" onClick={(e) => { e.preventDefault(); onNavigate('/work'); }}>{t.nav.work}</a></li>
-              <li><a href="/#planes" onClick={(e) => { e.preventDefault(); onNavigate('/#planes'); }}>{t.footer.services}</a></li>
+              <li><a href={window.NV_PLANES_ACTIVOS ? '/#planes' : '/#servicios'} onClick={(e) => { e.preventDefault(); onNavigate(window.NV_PLANES_ACTIVOS ? '/#planes' : '/#servicios'); }}>{t.footer.services}</a></li>
               <li><a href="/contact" onClick={(e) => { e.preventDefault(); onNavigate('/contact'); }}>{t.nav.contact}</a></li>
             </ul>
           </div>

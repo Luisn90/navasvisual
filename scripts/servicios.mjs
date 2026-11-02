@@ -10,11 +10,20 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://navasvisual.com';
 const WHATSAPP = '584127449626';
 
-export function loadI18n() {
+function cargar() {
   const ctx = { window: {} };
   vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'i18n.js'), 'utf8'), ctx);
-  return ctx.window.NV_I18N;
+  return ctx.window;
 }
+
+export function loadI18n() {
+  return cargar().NV_I18N;
+}
+
+// Planes en pausa (NV_PLANES_ACTIVOS en i18n.js): sin planes, las páginas no muestran
+// precios ni «desde $X» y llevan a pedir propuesta.
+export const planesActivos = () => Boolean(cargar().NV_PLANES_ACTIVOS);
+const sinPrecio = (txt) => planesActivos() ? txt : txt.replace(/\s*(Planes )?[Dd]esde \$[\d.,]+\.?/g, '');
 
 // Cada página: datos SEO propios + de dónde salen los planes (pestaña de la portada) o, si no hay planes, «a medida».
 export const SERVICIOS = [
@@ -55,7 +64,7 @@ const LOGO = '<svg width="30" height="30" viewBox="0 0 87 87" aria-hidden="true"
 export function datosServicio(s, es) {
   const item = es.svc.items.find(i => i.id === s.svc);
   const tab = s.tab ? es.shop.tabs.find(t => t.id === s.tab) : null;
-  const plans = tab ? tab.plans.map((p, i) => ({ ...p, tier: es.shop.tiers[i] })) : [];
+  const plans = tab && planesActivos() ? tab.plans.map((p, i) => ({ ...p, tier: es.shop.tiers[i] })) : [];
   return { item, tab, plans, desde: plans.length ? Math.min(...plans.map(p => p.price)) : null };
 }
 
@@ -63,9 +72,10 @@ export function paginaServicio(s, es) {
   const { item, tab, plans, desde } = datosServicio(s, es);
   const url = `${SITE}/servicios/${s.slug}`;
   const cat = (tab?.cats || item.cats)[0];
-  const ordenar = s.tab ? `/?service=${s.tab}#planes` : `/solicitar?service=${s.svc}`;
+  const ordenar = plans.length ? `/?service=${s.tab}#planes` : `/solicitar?service=${s.tab || s.svc}`;
+  const titulo = sinPrecio(s.title), descripcion = sinPrecio(s.desc);
   const ld = [
-    { '@context': 'https://schema.org', '@type': 'Service', name: s.nombre, serviceType: s.nombre, description: s.desc, url,
+    { '@context': 'https://schema.org', '@type': 'Service', name: s.nombre, serviceType: s.nombre, description: descripcion, url,
       provider: { '@type': 'ProfessionalService', name: 'Navas Visual', url: SITE + '/', image: SITE + '/compartir.jpg', founder: { '@type': 'Person', name: 'Luis Navas' } },
       areaServed: 'Worldwide', availableLanguage: ['es', 'en'], slogan: 'Diseño con taste',
       ...(plans.length ? { offers: plans.map(p => ({ '@type': 'Offer', name: `${s.nombre} · ${p.tier}`, price: p.price, priceCurrency: 'USD', url, availability: 'https://schema.org/InStock' })) } : {}) },
@@ -93,8 +103,8 @@ export function paginaServicio(s, es) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${esc(s.title)}</title>
-<meta name="description" content="${esc(s.desc)}" />
+<title>${esc(titulo)}</title>
+<meta name="description" content="${esc(descripcion)}" />
 <link rel="canonical" href="${url}" />
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -104,8 +114,8 @@ export function paginaServicio(s, es) {
 <meta property="og:site_name" content="Navas Visual" />
 <meta property="og:locale" content="es_ES" />
 <meta property="og:url" content="${url}" />
-<meta property="og:title" content="${esc(s.title)}" />
-<meta property="og:description" content="${esc(s.desc)}" />
+<meta property="og:title" content="${esc(titulo)}" />
+<meta property="og:description" content="${esc(descripcion)}" />
 <meta property="og:image" content="${SITE}/compartir.jpg" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -117,7 +127,7 @@ export function paginaServicio(s, es) {
 <body>
 <header class="sv-nav">
   <a class="sv-brand" href="/" aria-label="Navas Visual, inicio">${LOGO}<span><b>Navas Visual</b><small>Diseño visual digital</small></span></a>
-  <nav aria-label="Principal"><a href="/work">Trabajo</a><a href="/#planes">Planes</a><a href="/about">Sobre mí</a><a href="/contact" class="sv-nav__cta">Contacto</a></nav>
+  <nav aria-label="Principal"><a href="/work">Trabajo</a>${plans.length ? '<a href="/#planes">Planes</a>' : '<a href="/#servicios">Servicios</a>'}<a href="/about">Sobre mí</a><a href="/contact" class="sv-nav__cta">Contacto</a></nav>
 </header>
 <main>
   <nav class="sv-crumbs" aria-label="Ruta"><a href="/">Inicio</a> / <a href="/#servicios">Servicios</a> / <span>${esc(s.nombre)}</span></nav>
@@ -126,7 +136,7 @@ export function paginaServicio(s, es) {
     <h1>${esc(s.h1)}</h1>
     <p class="sv-lede">${esc(item.d)}</p>
     <div class="sv-actions">
-      <a class="sv-btn" href="${s.tab ? ordenar : `/solicitar?service=${s.svc}`}">${s.tab ? 'Ver planes y empezar' : 'Pedir presupuesto'}</a>
+      <a class="sv-btn" href="${ordenar}">${plans.length ? 'Ver planes y empezar' : 'Pedir presupuesto'}</a>
       <a class="sv-btn sv-btn--ghost" href="/work?cat=${encodeURIComponent(cat)}">Ver trabajos</a>
       <a class="sv-btn sv-btn--ghost" href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Hola Luis, quiero información sobre: ${s.nombre}`)}" target="_blank" rel="noopener">Escribir por WhatsApp</a>
     </div>

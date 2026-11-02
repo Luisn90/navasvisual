@@ -105,7 +105,10 @@ function WorkApp() {
       <RevealMount />
       <WhatsAppModal lang={lang} />
       {selectedProject && (
-        <ProjectModal requestHref={`/?service=${encodeURIComponent(new URLSearchParams(window.location.search).get('service') || t.shop.tabs.find(tab => tab.cats.includes(selectedProject.tag))?.id || 'logo')}&reference=${encodeURIComponent(selectedProject.project)}#planes`} project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
+        <ProjectModal requestHref={!window.NV_PLANES_ACTIVOS
+          // Planes en pausa: «Quiero un proyecto así» lleva directo al formulario.
+          ? `/solicitar?service=${encodeURIComponent(t.svc.items.find(it => it.cats.includes(selectedProject.tag))?.id || 'otro')}`
+          : `/?service=${encodeURIComponent(new URLSearchParams(window.location.search).get('service') || t.shop.tabs.find(tab => tab.cats.includes(selectedProject.tag))?.id || 'logo')}&reference=${encodeURIComponent(selectedProject.project)}#planes`} project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
       )}
     </React.Fragment>
   );

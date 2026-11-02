@@ -489,3 +489,127 @@ window.NV_I18N = {
     }
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLANES EN PAUSA
+// Mientras NV_PLANES_ACTIVOS sea false, la web no muestra planes, precios fijos
+// ni pagos en línea: solo trabajos y contacto directo (formulario /solicitar,
+// contacto, WhatsApp y correo). Los planes de arriba (shop.tabs) quedan guardados.
+// Para volver a mostrarlos: cambia a true y ejecuta `node scripts/servicios.mjs`.
+// ─────────────────────────────────────────────────────────────────────────────
+window.NV_PLANES_ACTIVOS = false;
+
+window.NV_SIN_PLANES = {
+  es: {
+    nav: { services: "Servicios" },
+    footer: { services: "Servicios" },
+    hero: {
+      lede: "Marca, web, apps o redes. Más de diez años de oficio me dan el taste y el criterio para diseñar las piezas que hacen que tus clientes te elijan, en proyectos hechos a tu medida.",
+      cta_packages: "Ver trabajos",
+      strip: ["Disponible para nuevos proyectos", "Trato directo conmigo", "Trabajo remoto"]
+    },
+    svc: { custom_link: "Cuéntame tu proyecto" },
+    faq: {
+      items: [
+        { q: "¿Cuánto cuesta un proyecto?", a: "Depende de lo que necesites. Cuéntame tu proyecto y te preparo una propuesta personalizada con alcance, plazos y precio, que puedes ver y aceptar en línea." },
+        { q: "¿Cuánto tarda?", a: "Depende del proyecto: como referencia, un logo toma entre 3 y 6 días, una identidad entre 7 y 15, una web entre 7 y 20 y un desarrollo a medida entre 5 y 25. El plazo exacto queda escrito en tu propuesta." },
+        { q: "¿Cuántos cambios incluye?", a: "Tu propuesta indica cuántas rondas de revisiones incluye y cuánto cuesta una adicional, para que no haya sorpresas." },
+        { q: "¿Qué significa diseñar con taste?", a: "Taste es el buen gusto aplicado al diseño: saber elegir tipografías, colores, espacios y detalles para que tu marca se vea cuidada y coherente, no genérica. Hoy muchas empresas lo piden como requisito, porque cualquiera puede generar piezas, pero no todas tienen gusto. En cada proyecto combino ese taste con estrategia: cada decisión tiene un motivo." },
+        { q: "¿Trabajas con clientes de otros países?", a: "Sí. Trabajo 100% en remoto con clientes de cualquier país, por correo, WhatsApp y videollamada." },
+        { q: "¿Qué recibo al final?", a: "Los archivos finales listos para usar, según lo acordado: por ejemplo, el logo en PNG, JPG y SVG, el manual de marca en PDF o tu web publicada con tu dominio." }
+      ]
+    },
+    approach: {
+      points: [
+        { t: "Primero escucho", d: "Antes de abrir el programa entiendo tu negocio, tu cliente y lo que quieres conseguir." },
+        { t: "Propongo con taste", d: "Buen gusto con argumentos: cada propuesta viene explicada. Sabrás por qué funciona, no solo cómo se ve." },
+        { t: "Cumplo los plazos", d: "El plazo que acordamos es un compromiso. Si algo cambia, te aviso antes, no después." },
+        { t: "Todo es tuyo", d: "Al terminar recibes los archivos finales y los derechos de uso de tu diseño." }
+      ]
+    },
+    how: {
+      steps: [
+        { n: "01", t: "Mira mis trabajos", d: "Revisa proyectos parecidos al tuyo para ver el estilo y la calidad." },
+        { n: "02", t: "Cuéntame tu proyecto", d: "Completa el formulario por pasos o escríbeme directo por WhatsApp." },
+        { n: "03", t: "Te envío una propuesta", d: "Reviso lo que necesitas y te propongo alcance y plazos antes de empezar." },
+        { n: "04", t: "Recibe tu diseño", d: "Te entrego las propuestas en el plazo acordado y las ajustamos juntos." }
+      ]
+    },
+    custom: {
+      title: "¿Tienes un proyecto en mente?",
+      lede: "Logos, identidad, webs en WordPress o Framer, apps, UI/UX o redes. Cuéntame qué necesitas y te envío una propuesta pensada para tu marca."
+    },
+    shop_faq: {
+      title: "Antes de empezar",
+      items: [
+        { q: "¿Cuándo empieza a contar el plazo?", a: "Desde que confirmamos el alcance y recibo la información de tu marca." },
+        { q: "¿Y si necesito más cambios de los incluidos?", a: "Las revisiones sirven para ajustar el diseño hasta que encaje con tu marca. Si necesitas rondas extra, te las cotizo antes de hacerlas." },
+        { q: "¿Los archivos son míos?", a: "Sí. Al terminar recibes los archivos finales y los derechos de uso de tu diseño." },
+        { q: "¿Trabajas con clientes de otros países?", a: "Sí. Trabajo 100% en remoto, por correo, WhatsApp y videollamada." },
+        { q: "¿Emites factura?", a: "Sí. Si la necesitas, indícalo al escribirme." }
+      ]
+    }
+  },
+  en: {
+    nav: { services: "Services" },
+    footer: { services: "Services" },
+    hero: {
+      lede: "Brand, web, apps or social. Over ten years of practice give me the eye and judgment to design the pieces that make customers choose you, in projects made to measure.",
+      cta_packages: "View work",
+      strip: ["Available for new projects", "You work directly with me", "Remote work"]
+    },
+    svc: { custom_link: "Tell me about your project" },
+    faq: {
+      items: [
+        { q: "How much does a project cost?", a: "It depends on what you need. Tell me about your project and I'll prepare a custom proposal with scope, timeline and price that you can view and accept online." },
+        { q: "How long does it take?", a: "It depends on the project: as a guide, a logo takes 3 to 6 days, an identity 7 to 15, a website 7 to 20 and a custom build 5 to 25. The exact timeline is written in your proposal." },
+        { q: "How many revisions are included?", a: "Your proposal states how many revision rounds are included and the cost of an extra one, so there are no surprises." },
+        { q: "What does designing with taste mean?", a: "Taste is good judgment applied to design: choosing typefaces, colors, spacing and details so your brand feels considered and consistent, not generic. Many companies now list it as a requirement, because anyone can produce assets, but not all of them have taste. In every project I pair that taste with strategy: every decision has a reason." },
+        { q: "Do you work with clients abroad?", a: "Yes. I work 100% remotely with clients from any country, by email, WhatsApp and video call." },
+        { q: "What do I get at the end?", a: "The final files ready to use, as agreed: for example, your logo in PNG, JPG and SVG, your brand guide in PDF or your website live on your domain." }
+      ]
+    },
+    approach: {
+      points: [
+        { t: "I listen first", d: "Before opening any software I learn about your business, your customer and your goal." },
+        { t: "Taste, explained", d: "Good taste backed by reasons: every proposal comes with the reasoning. You'll know why it works, not just how it looks." },
+        { t: "I keep deadlines", d: "The timeline we agree on is a commitment. If something changes, I tell you before, not after." },
+        { t: "It's all yours", d: "When we finish you get the final files and the usage rights to your design." }
+      ]
+    },
+    how: {
+      steps: [
+        { n: "01", t: "Browse my work", d: "Look at projects similar to yours to see the style and quality." },
+        { n: "02", t: "Tell me about your project", d: "Complete the guided form or message me directly on WhatsApp." },
+        { n: "03", t: "Get a proposal", d: "I review what you need and propose scope and timeline before starting." },
+        { n: "04", t: "Get your design", d: "I deliver within the agreed timeline and we refine it together." }
+      ]
+    },
+    custom: {
+      title: "Have a project in mind?",
+      lede: "Logos, identity, WordPress or Framer sites, apps, UI/UX or social. Tell me what you need and I'll send a proposal made for your brand."
+    },
+    shop_faq: {
+      title: "Before we start",
+      items: [
+        { q: "When does the timeline start?", a: "Once we confirm the scope and I receive your brand details." },
+        { q: "What if I need more changes than included?", a: "Revisions are for refining the design until it fits your brand. If you need extra rounds, I'll quote them before doing them." },
+        { q: "Do I own the files?", a: "Yes. When we finish you get the final files and the usage rights to your design." },
+        { q: "Do you work with clients abroad?", a: "Yes. I work 100% remotely, by email, WhatsApp and video call." },
+        { q: "Do you issue invoices?", a: "Yes. If you need one, just mention it when you message me." }
+      ]
+    }
+  }
+};
+
+// Aplica los textos sin planes (las listas se reemplazan completas).
+if (!window.NV_PLANES_ACTIVOS) {
+  const mezclar = (base, cambios) => {
+    for (const k of Object.keys(cambios)) {
+      const v = cambios[k];
+      if (v && typeof v === 'object' && !Array.isArray(v) && base[k] && typeof base[k] === 'object') mezclar(base[k], v);
+      else base[k] = v;
+    }
+  };
+  for (const lang of Object.keys(window.NV_SIN_PLANES)) mezclar(window.NV_I18N[lang], window.NV_SIN_PLANES[lang]);
+}

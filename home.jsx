@@ -172,6 +172,9 @@ function imageForCats(projects, cats) {
   return hit ? hit.image : null;
 }
 
+// Planes en pausa (ver i18n.js): si es false, la portada no muestra planes ni precios.
+const PLANES_ACTIVOS = Boolean(window.NV_PLANES_ACTIVOS);
+
 // Página propia de cada servicio (servicios/*.html, generadas con scripts/servicios.mjs).
 const SERVICE_PAGES = { branding: 'identidad-de-marca', wordpress: 'diseno-web-wordpress', framer: 'diseno-web-framer', vibecode: 'desarrollo-web-a-medida', uiux: 'diseno-ui-ux', grafico: 'diseno-para-redes-sociales' };
 
@@ -197,7 +200,7 @@ function ServicesIndex({ t, projects, onPlans, onNavigate }) {
             <h3 className="nv-sidx__name">{SERVICE_PAGES[it.id] ? <a href={`/servicios/${SERVICE_PAGES[it.id]}`}>{it.name}</a> : it.name}</h3>
             <p className="nv-sidx__desc">{it.d}</p>
             <div className="nv-sidx__links">
-              {it.tab ? (
+              {it.tab && PLANES_ACTIVOS ? (
                 <button type="button" className="nv-sidx__link nv-sidx__link--strong" onClick={() => onPlans(it.tab)}>{sv.plans_link}</button>
               ) : (
                 <a href={`/solicitar?service=${it.id}`} className="nv-sidx__link nv-sidx__link--strong" onClick={(e) => { e.preventDefault(); onNavigate(`/solicitar?service=${it.id}`); }}>{sv.custom_link}</a>
@@ -332,6 +335,8 @@ function HomeApp() {
   });
 
   const scrollToId = (id) => {
+    // Enlaces viejos a #planes llevan a Servicios mientras los planes están en pausa.
+    if (id === 'planes' && !PLANES_ACTIVOS) id = 'servicios';
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -393,7 +398,7 @@ function HomeApp() {
               </div>
               <p className="nv-hero__lede nv-hero2__lede">{t.hero.lede}</p>
               <div className="nv-hero__ctas nv-hero2__ctas">
-                <a href="#planes" onClick={(e) => { e.preventDefault(); navigate('#planes'); }} className="nv-btn nv-btn--primary">
+                <a href={PLANES_ACTIVOS ? '#planes' : '/work'} onClick={(e) => { e.preventDefault(); navigate(PLANES_ACTIVOS ? '#planes' : '/work'); }} className="nv-btn nv-btn--primary">
                   {t.hero.cta_packages}
                 </a>
                 <a href="/solicitar" onClick={(e) => { e.preventDefault(); navigate('/solicitar'); }} className="nv-btn nv-btn--ghost">
@@ -434,13 +439,13 @@ function HomeApp() {
           <WorkSlider projects={featured} lang={lang} onSelect={setSelectedProject} />
         </section>
 
-        {/* PLANES */}
-        <section className="nv-section nv-shop" id="planes">
+        {/* PLANES (en pausa mientras NV_PLANES_ACTIVOS sea false) */}
+        {PLANES_ACTIVOS && <section className="nv-section nv-shop" id="planes">
           <div className="nv-container">
             <SectionHead eyebrow={t.shop.eyebrow} title={t.shop.title} lede={t.shop.lede} />
             <PlansSection t={t} lang={lang} tab={planTab} setTab={setPlanTab} onOrder={setOrderPkg} onNavigate={navigate} />
           </div>
-        </section>
+        </section>}
 
         {/* CÓMO TRABAJO */}
         <section className="nv-section nv-section--soft">
@@ -538,7 +543,7 @@ function HomeApp() {
       {selectedProject && (
         <ProjectModal project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
       )}
-      {orderPkg && (
+      {PLANES_ACTIVOS && orderPkg && (
         <OrderModal pkg={orderPkg} t={t} lang={lang} onClose={() => setOrderPkg(null)} />
       )}
     </React.Fragment>

@@ -7,7 +7,7 @@ const SOL_COPY = {
     eyebrow: 'Solicitar servicio',
     title: 'Cuéntame qué', title2: 'necesitas',
     lede: 'Responde unas preguntas rápidas y te envío una propuesta. Toma unos 2 minutos y no tiene ningún costo.',
-    steps: ['Servicio', 'Detalles', 'Plan y plazo', 'Tu proyecto', 'Contacto'],
+    steps: ['Servicio', 'Detalles', window.NV_PLANES_ACTIVOS ? 'Plan y plazo' : 'Presupuesto y plazo', 'Tu proyecto', 'Contacto'],
     stepOf: (a, b) => `Paso ${a} de ${b}`,
     q: {
       service: '¿Qué servicio necesitas?',
@@ -21,7 +21,7 @@ const SOL_COPY = {
     hint: {
       service: 'Elige el que más se acerque. Si no lo tienes claro, elige «No estoy seguro».',
       details: 'Elige las opciones que apliquen. Puedes marcar varias donde lo indique.',
-      plan: 'Es orientativo: revisamos juntos el alcance antes de cualquier pago.',
+      plan: window.NV_PLANES_ACTIVOS ? 'Es orientativo: revisamos juntos el alcance antes de cualquier pago.' : 'Es orientativo: me ayuda a proponerte algo que encaje contigo.',
       project: 'Con esto preparo una propuesta que encaje con tu marca.',
       contact: 'Último paso. Te respondo en menos de 24 horas.'
     },
@@ -44,7 +44,7 @@ const SOL_COPY = {
     privacy: 'Al enviar, compartes estas respuestas con Luis Navas solo para preparar tu propuesta.',
     err: {
       service: 'Elige un servicio para continuar.', details: 'Responde las preguntas marcadas para continuar.',
-      plan: 'Elige una opción de plan o presupuesto.', timing: 'Indica para cuándo lo necesitas.',
+      plan: window.NV_PLANES_ACTIVOS ? 'Elige una opción de plan o presupuesto.' : 'Elige un presupuesto aproximado.', timing: 'Indica para cuándo lo necesitas.',
       description: 'Cuéntame en una frase qué necesitas (mínimo 10 caracteres).',
       name: 'Escribe tu nombre.', nameBad: 'Escribe solo tu nombre, sin enlaces.', email: 'Revisa tu correo: parece incompleto.',
       phone: 'Revisa el número de WhatsApp: usa solo números y el código de país.',
@@ -63,7 +63,7 @@ const SOL_COPY = {
     eyebrow: 'Request a service',
     title: 'Tell me what', title2: 'you need',
     lede: 'Answer a few quick questions and I’ll send you a proposal. It takes about 2 minutes and it’s free.',
-    steps: ['Service', 'Details', 'Plan & timing', 'Your project', 'Contact'],
+    steps: ['Service', 'Details', window.NV_PLANES_ACTIVOS ? 'Plan & timing' : 'Budget & timing', 'Your project', 'Contact'],
     stepOf: (a, b) => `Step ${a} of ${b}`,
     q: {
       service: 'Which service do you need?',
@@ -77,7 +77,7 @@ const SOL_COPY = {
     hint: {
       service: 'Pick the closest one. If you’re not sure, choose “Not sure yet”.',
       details: 'Pick the options that apply. You can choose several where noted.',
-      plan: 'This is just a guide: we review the scope together before any payment.',
+      plan: window.NV_PLANES_ACTIVOS ? 'This is just a guide: we review the scope together before any payment.' : 'Just a guide: it helps me propose something that fits you.',
       project: 'This helps me prepare a proposal that fits your brand.',
       contact: 'Last step. I reply within 24 hours.'
     },
@@ -100,7 +100,7 @@ const SOL_COPY = {
     privacy: 'By sending, you share these answers with Luis Navas only to prepare your proposal.',
     err: {
       service: 'Choose a service to continue.', details: 'Answer the marked questions to continue.',
-      plan: 'Choose a plan or budget option.', timing: 'Tell me when you need it.',
+      plan: window.NV_PLANES_ACTIVOS ? 'Choose a plan or budget option.' : 'Choose an approximate budget.', timing: 'Tell me when you need it.',
       description: 'Tell me in one sentence what you need (at least 10 characters).',
       name: 'Enter your name.', nameBad: 'Enter just your name, without links.', email: 'Check your email: it looks incomplete.',
       phone: 'Check the WhatsApp number: use digits and the country code only.',
@@ -210,7 +210,8 @@ function SolicitarApp() {
 
   const svc = SOL_SERVICES.find(s => s.id === v.service);
   const tab = svc?.tab ? t.shop.tabs.find(x => x.id === svc.tab) : null;
-  const plans = tab ? tab.plans : [];
+  // Planes en pausa (ver i18n.js): sin planes, el paso 3 pregunta el presupuesto aproximado.
+  const plans = tab && window.NV_PLANES_ACTIVOS ? tab.plans : [];
 
   // Borrador: se guarda en este dispositivo mientras responden y se borra al enviar.
   React.useEffect(() => {
@@ -337,7 +338,7 @@ function SolicitarApp() {
 
   const fromPrice = s => {
     const tb = s.tab ? t.shop.tabs.find(x => x.id === s.tab) : null;
-    return tb ? Math.min(...tb.plans.map(p => p.price)) : null;
+    return tb && window.NV_PLANES_ACTIVOS ? Math.min(...tb.plans.map(p => p.price)) : null;
   };
 
   return (
