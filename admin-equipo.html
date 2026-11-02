@@ -284,7 +284,7 @@ img{max-width:100%}
       <div class="kpis" aria-label="Indicadores de la web">
         <div class="kpi">Visitas hoy <b id="kVisits">1.284</b><em class="up">+12 %</em></div>
         <div class="kpi">Conversión <b>2,4 %</b></div>
-        <div class="kpi">Leads <b id="kLeads">7</b><em class="warn">3 sin responder</em></div>
+        <div class="kpi">Contactos <b id="kLeads">—</b><em>inicia sesión</em></div>
         <div class="kpi">Carga <b>1,8 s</b></div>
       </div>
       <button class="icon-btn reload" id="btnReload" type="button" aria-label="Recargar el equipo" title="Recargar el equipo"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
@@ -404,12 +404,10 @@ const ROLES={
     fb:'Puedo revisar búsquedas, posiciones, páginas indexadas y errores en Google. ¿Por dónde empiezo?'},
   ventas:{label:'Comercial',sources:['Formularios','Correo'],help:'Contactos de la web, seguimiento y borradores de respuesta.',
     defInstr:'Avísame de cada contacto nuevo. Prepara borradores, pero nunca envíes nada sin mi aprobación.',
-    greet:'Tienes 3 contactos esperando respuesta. ¿Te preparo los borradores?',
+    greet:'Hola, Luis. Te aviso cada vez que alguien escriba por los formularios de la web.',
     quick:['¿Qué contactos están pendientes?','Prepárame las respuestas','¿Cuántos entraron esta semana?'],
-    r:[[/pendient|contacto|lead|formulario|nuevo/i,'Hay 3 sin responder: una distribuidora (ayer, 18:40), una consulta de precios al por mayor y una pregunta sobre envíos. ¿Te preparo las respuestas?'],
-       [/respuest|borrador|redact|prep[aá]r|^s[ií]/i,'Listo, dejé 3 borradores. El de la distribuidora propone una llamada esta semana y adjunta el catálogo. Revísalos antes de enviar: no envío nada sin tu visto bueno.'],
-       [/semana|cu[aá]nto|total/i,'Esta semana entraron 19 contactos: 11 consultas de precio, 5 de distribución y 3 de soporte. Respondimos 16 en menos de 24 horas.']],
-    fb:'Llevo el seguimiento de los contactos de la web. Pregúntame por pendientes, totales o pídeme un borrador.'},
+    r:[],
+    fb:'Para ver tus contactos reales, inicia sesión en el admin y vuelve a abrir la oficina.'},
   contenido:{label:'Creador de contenido',sources:['Instagram'],help:'Ideas, textos y calendario para redes sociales.',
     defInstr:'Cuando Marta me pase un brief de Redes, prepara estrategia, pilares, publicaciones con texto y hashtags, estilo visual con imágenes de ejemplo y propuesta de perfil.',
     greet:'Estoy armando las ideas de la semana. Ya tengo 3 casi listas.',
@@ -439,7 +437,7 @@ const COLORS=['#ff5a4e','#a46bf5','#1fb5c9','#ffb020','#ff7ab6','#3a5bd9','#7ed9
 const DEFAULTS=[
   {id:'a1',name:'Lía',role:'analitica',color:'#ff5a4e',status:'working',task:'Revisando el tráfico de las últimas 24 h'},
   {id:'a2',name:'Bruno',role:'seo',color:'#a46bf5',status:'idle',task:''},
-  {id:'a3',name:'Marta',role:'ventas',color:'#1fb5c9',status:'alert',task:'3 contactos sin responder'},
+  {id:'a3',name:'Marta',role:'ventas',color:'#1fb5c9',status:'idle',task:''},
   {id:'a4',name:'Teo',role:'contenido',color:'#ffb020',status:'working',task:'Preparando 3 ideas para reels'},
   {id:'a5',name:'Vega',role:'tecnico',color:'#ff7ab6',status:'idle',task:''},
   {id:'a6',name:'Camilo',role:'diseno',color:'#3a5bd9',status:'idle',task:''}
@@ -457,13 +455,15 @@ try{
   }
   localStorage.setItem('oficina-camilo-v2','1');
 }catch(e){}
+// Limpia los datos de ejemplo que quedaron guardados en este navegador (contactos inventados de Marta).
+agents.forEach(a=>{if(a.role!=='ventas')return;
+  if(a.task==='3 contactos sin responder'){a.task='';a.status='idle';}
+  a.msgs=(a.msgs||[]).filter(m=>!/3 contactos esperando|una distribuidora|Esta semana entraron 19 contactos|dejé 3 borradores/i.test(m.text||''));
+  if(!a.msgs.length)a.msgs=[{from:'agent',text:ROLES.ventas.greet}];
+});
 function save(){try{localStorage.setItem(STORE,JSON.stringify(agents.map(a=>({...a,status:a.status==='thinking'?(a.prev||'idle'):a.status,prev:undefined,msgs:a.msgs.slice(-40)}))));}catch(e){}}
-const feedItems=[
-  {id:'a3',text:'Llegó un contacto nuevo de una distribuidora',min:4},
-  {id:'a1',text:'Las visitas desde Instagram subieron un 18 %',min:12},
-  {id:'a5',text:'Revisión de velocidad completada: 1,8 s',min:29},
-  {id:'a4',text:'Dejó 3 borradores de publicaciones',min:44}
-];
+// Actividad real: empieza vacía y se llena con lo que pasa (mensajes de los formularios, solicitudes, Vega…).
+const feedItems=[];
 let selected=null;
 
 /* ---------- 3D ---------- */
@@ -812,6 +812,7 @@ function renderRoster(){
 function ago(min){return min<1?'ahora':min<60?`hace ${min} min`:`hace ${Math.round(min/60)} h`;}
 function renderFeed(){
   const ol=$('#feed');ol.innerHTML='';
+  if(!feedItems.length){const li=document.createElement('li');li.innerHTML='<span class="dot" style="color:#c9c9c4"></span><span></span>';li.children[1].textContent=(()=>{try{return live.on}catch(e){return false}})()?'Sin actividad todavía':'Inicia sesión en el admin para ver la actividad real';ol.appendChild(li);return;}
   feedItems.slice(0,5).forEach(f=>{
     const a=byId(f.id);const li=document.createElement('li');
     li.innerHTML=`<span class="dot" style="color:${a?a.color:'#8fa3aa'}"></span><span></span><time>${ago(f.min)}</time>`;
@@ -992,8 +993,11 @@ async function initLive(){
     if(adm.error||adm.data!==true){await live.sb.auth.signOut().catch(()=>{});return;}
     if(!await loadReqs(true))return;
     live.on=true;
+    await loadContactos(true);
+    try{live.sb.channel('contactos-admin').on('postgres_changes',{event:'*',schema:'public',table:'contactos'},()=>loadContactos(false)).subscribe();}catch(e){}
+    setInterval(()=>loadContactos(false),60000);
     $('.sample').textContent='SOLICITUDES EN VIVO · EL RESTO ES EJEMPLO';
-    $('#kLeads').previousSibling.textContent='Solicitudes abiertas ';
+    $('#kLeads').previousSibling.textContent='Contactos abiertos ';
     try{live.sb.channel('solicitudes-admin').on('postgres_changes',{event:'*',schema:'public',table:'solicitudes'},()=>loadReqs(false)).subscribe();}catch(e){}
     setInterval(()=>loadReqs(false),60000);
     await loadMonitor();
@@ -1040,15 +1044,37 @@ async function loadReqs(first){
   if(live.on)syncSales();
   return true;
 }
+// Mensajes de los formularios /solicitar y Contacto (tabla contactos).
+live.contactos=[];
+async function loadContactos(first){
+  const {data,error}=await live.sb.from('contactos').select('id,created_at,status,source,name,company,service').order('created_at',{ascending:false}).limit(40);
+  if(error){if(first)console.warn('Contactos:',error.message);return;}
+  const known=new Set(live.contactos.map(c=>c.id));
+  const a=salesAgent();
+  const texto=c=>`${c.source==='wizard'?'Nueva solicitud':'Nuevo mensaje'} de ${c.name}${c.company?` (${c.company})`:''}${c.service?` · ${c.service}`:''}`;
+  if(first){
+    // Los más recientes, con su hora real.
+    data.slice(0,5).reverse().forEach(c=>feedItems.unshift({id:a?a.id:'',text:texto(c),min:Math.max(0,Math.round((Date.now()-new Date(c.created_at))/60000))}));
+    feedItems.sort((x,y)=>x.min-y.min);renderFeed();
+  }else{
+    const fresh=data.filter(c=>!known.has(c.id));
+    fresh.reverse().forEach(c=>pushFeed(a?a.id:'',texto(c)));
+    if(fresh.length)toast(fresh.length===1?`✉️ ${texto(fresh[0])}`:`✉️ ${fresh.length} mensajes nuevos`);
+  }
+  live.contactos=data;
+  syncSales();
+}
 function syncSales(){
   const nuevas=live.reqs.filter(r=>r.status==='nueva').length;
   const abiertas=live.reqs.filter(r=>['nueva','revision','propuesta'].includes(r.status)).length;
-  const k=$('#kLeads');k.textContent=abiertas;const em=k.nextElementSibling;
-  em.textContent=nuevas?`${nuevas} sin revisar`:'al día';em.className=nuevas?'warn':'up';
+  const msgs=(live.contactos||[]).filter(c=>c.status==='nuevo').length;
+  const k=$('#kLeads');k.textContent=abiertas+msgs;const em=k.nextElementSibling;
+  em.textContent=nuevas+msgs?`${nuevas+msgs} sin revisar`:'al día';em.className=nuevas+msgs?'warn':'up';
   const a=salesAgent();
   const pagos=live.reqs.filter(payPending).length;
   if(a&&a.status!=='thinking'&&a.status!=='paused'&&!live.analyzing){
     if(pagos){a.status='alert';a.task=pagos===1?'1 pago por verificar':`${pagos} pagos por verificar`;}
+    else if(msgs){a.status='alert';a.task=msgs===1?'1 mensaje nuevo':`${msgs} mensajes nuevos`;}
     else if(nuevas){a.status='alert';a.task=nuevas===1?'1 solicitud nueva':`${nuevas} solicitudes nuevas`;}
     else{a.status='idle';a.task='';}
     refreshAgent(a);

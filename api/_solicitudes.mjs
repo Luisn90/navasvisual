@@ -52,6 +52,15 @@ export async function saveSolicitud(env, record, fetcher = fetch) {
   }, fetcher);
   return Array.isArray(rows) && rows[0] ? rows[0] : null;
 }
+// Mensajes de los formularios /solicitar y Contacto (tabla contactos).
+export async function saveContacto(env, d, fetcher = fetch) {
+  const record = { source: d.source, lang: d.lang, name: d.name, email: d.email, phone: d.phone || null, prefer: d.prefer || null,
+    company: d.company || null, service: d.service || null, message: d.message || null, details: d.details || [] };
+  await supabase(env, 'contactos', { method: 'POST', body: JSON.stringify(record), headers: { Prefer: 'return=minimal' } }, fetcher);
+}
+export async function listContactos(env, limit = 25, fetcher = fetch) {
+  return await supabase(env, `contactos?select=created_at,status,source,name,email,phone,prefer,company,service,message,details&order=created_at.desc&limit=${limit}`, {}, fetcher) || [];
+}
 export async function getSolicitud(env, id, fetcher = fetch) {
   if (!/^[0-9a-f-]{36}$/i.test(id || '')) return null;
   const rows = await supabase(env, `solicitudes?id=eq.${id}&select=*`, {}, fetcher);
@@ -233,11 +242,16 @@ export async function aiChat(env, { system, messages, maxTokens = 1500 }, fetche
   return text;
 }
 
-export async function chatWithMarta(env, { message, history = [], solicitudes = [], persona = null }, fetcher = fetch) {
+export async function chatWithMarta(env, { message, history = [], solicitudes = [], contactos = [], persona = null }, fetcher = fetch) {
   const context = solicitudes.length ? solicitudes.map(r => {
     const when = new Date(r.created_at).toISOString().slice(0, 16).replace('T', ' ');
     return `- [${r.status}] ${when} · ${r.name} (${r.brand}) · ${r.service_name} ${r.tier} $${r.price}${r.ai?.resumen ? ` · ${r.ai.resumen}` : ''}${r.ai?.prioridad ? ` · prioridad ${r.ai.prioridad}` : ''}${r.diseno?.conceptos?.length ? ` · conceptos de Camilo (ronda ${r.diseno.ronda}): ${r.diseno.conceptos.map(c => c.titulo).join(', ')}` : ''}${r.contenido?.pilares?.length ? ` · propuesta de Teo (ronda ${r.contenido.ronda}): pilares ${r.contenido.pilares.map(p => p.nombre).join(', ')}; ${r.contenido.publicaciones?.length || 0} publicaciones` : ''}`;
   }).join('\n') : 'No hay solicitudes guardadas todavía.';
+  const mensajes = contactos.length ? contactos.map(c => {
+    const when = new Date(c.created_at).toISOString().slice(0, 16).replace('T', ' ');
+    const extra = (c.details || []).map(([k, v]) => `${k}: ${v}`).join('; ');
+    return `- [${c.status}] ${when} · ${c.name}${c.company ? ` (${c.company})` : ''} · ${c.email}${c.phone ? ` · WhatsApp ${c.phone}` : ''}${c.prefer ? ` · prefiere ${c.prefer}` : ''} · ${c.source === 'wizard' ? 'formulario /solicitar' : 'página Contacto'}${c.service ? ` · ${c.service}` : ''}${extra ? ` · ${extra}` : ''}${c.message ? ` · «${c.message.slice(0, 600)}»` : ''}`;
+  }).join('\n') : 'No ha llegado ningún mensaje por los formularios todavía.';
   const turns = history.filter(m => m && (m.from === 'me' || m.from === 'agent') && typeof m.text === 'string')
     .slice(-12).map(m => ({ role: m.from === 'me' ? 'user' : 'assistant', content: m.text.slice(0, 2000) }));
   while (turns.length && turns[0].role !== 'user') turns.shift();
@@ -246,7 +260,7 @@ export async function chatWithMarta(env, { message, history = [], solicitudes = 
     if (messages.length && messages.at(-1).role === t.role) messages.at(-1).content += `\n\n${t.content}`;
     else messages.push({ ...t });
   }
-  const system = `${persona || MARTA}\n\nEstás hablando con Luis en su panel. Responde breve y útil. Solicitudes recientes (estado, fecha UTC, cliente, plan, resumen):\n${context}`;
+  const system = `${persona || MARTA}\n\nEstás hablando con Luis en su panel. Responde breve y útil. Usa solo estos datos reales; si no hay mensajes, dilo y no inventes contactos.\n\nMensajes de los formularios de la web (estado, fecha UTC, cliente, datos, mensaje):\n${mensajes}\n\nSolicitudes de planes antiguas (estado, fecha UTC, cliente, plan, resumen):\n${context}`;
   let text;
   if (aiProvider(env) === 'claude') {
     const result = await claude(env, { max_tokens: 1200, system, messages }, fetcher);

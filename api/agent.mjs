@@ -4,7 +4,7 @@ import { runContent, CONTENT_SERVICES, TEO } from './_contenido.mjs';
 import { runMonitor, latestReports, writeSummary, chatWithVega } from './_monitor.mjs';
 import { decidePayment, signedProofUrl } from './_pagos.mjs';
 import { guardarPresupuesto, enviarPresupuesto, getPresupuesto } from './_presupuestos.mjs';
-import { afterResponse, sendTelegram, verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
+import { afterResponse, sendTelegram, verifyAdmin, supabaseReady, aiReady, getSolicitud, updateSolicitud, listSolicitudes, listContactos, analyzeSolicitud, chatWithMarta } from './_solicitudes.mjs';
 
 const MAX_BODY = 64 * 1024;
 const json = (status, body) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -113,9 +113,9 @@ export async function handleAgent(request, { env = process.env, fetcher = fetch 
     }
     if (body?.action === 'chat') {
       if (typeof body.message !== 'string' || !body.message.trim()) return json(400, { error: 'invalid' });
-      const solicitudes = await listSolicitudes(env, 25, fetcher);
+      const [solicitudes, contactos] = await Promise.all([listSolicitudes(env, 25, fetcher), listContactos(env, 25, fetcher).catch(() => [])]);
       const persona = body.agent === 'diseno' ? CAMILO : body.agent === 'contenido' ? TEO : null;
-      const reply = await chatWithMarta(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], solicitudes, persona }, fetcher);
+      const reply = await chatWithMarta(env, { message: body.message.trim(), history: Array.isArray(body.history) ? body.history : [], solicitudes, contactos, persona }, fetcher);
       return json(200, { reply });
     }
     return json(400, { error: 'action' });

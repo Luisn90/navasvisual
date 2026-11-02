@@ -1,7 +1,7 @@
 // Formulario de la página de Contacto: el mensaje le llega a Luis por correo (para responder
 // directamente al cliente) y por Telegram, y el cliente recibe una confirmación.
 import './_seguro.mjs'; // escudo contra respuestas Brotli maliciosas (CVE-2026-111497)
-import { sendTelegram } from './_solicitudes.mjs';
+import { sendTelegram, saveContacto, supabaseReady } from './_solicitudes.mjs';
 import { sendEmail, emailReady, escapeHtml, brandHeader, EMAIL_FONT, EMAIL_HEAD } from './_pagos.mjs';
 import { firmaHtml, FIRMA } from './_presupuestos.mjs';
 
@@ -117,6 +117,8 @@ export async function handleContacto(request, { env = process.env, fetcher = fet
     return json(502, { error: 'email' });
   }
   await Promise.allSettled([
+    // Copia en la base de datos para que Marta la vea en la oficina (si falla, el correo ya salió).
+    supabaseReady(env) ? saveContacto(env, data, fetcher).catch(e => console.error('Contacto: no se pudo guardar', e.message)) : Promise.resolve(),
     copiaPermitida(data.email, now) ? sendEmail(env, { to: data.email, ...cliente }, fetcher) : Promise.resolve(),
     sendTelegram(env, `${data.source === 'wizard' ? '🧭 Nueva solicitud de servicio' : '✉️ Mensaje desde Contacto'}\n${data.name} · ${data.email}${data.phone ? ` · WhatsApp ${data.phone}` : ''}${data.company ? ` · ${data.company}` : ''}${data.service ? `\nServicio: ${data.service}` : ''}${data.prefer ? `\nPrefiere: ${data.prefer === 'whatsapp' ? 'WhatsApp' : 'correo'}` : ''}${data.details.length ? '\n\n' + data.details.map(([l, v]) => `• ${l}: ${v}`).join('\n') : ''}${data.message ? `\n\n${data.message.slice(0, 1500)}` : ''}`.slice(0, 3900), fetcher)
   ]);
