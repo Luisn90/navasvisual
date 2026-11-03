@@ -753,6 +753,32 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   .nv-work-page-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
 }
 
+/* Página de trabajos: la info flota sobre la imagen con un desenfoque que se funde hacia arriba */
+.nv-work-page-grid .nv-work-card__info {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  isolation: isolate;
+  padding: 44px 18px 14px;
+  align-items: flex-end; gap: 12px;
+  color: #fff;
+  pointer-events: none;
+}
+.nv-work-page-grid .nv-work-card__info::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  backdrop-filter: blur(16px) saturate(1.2);
+  background: linear-gradient(180deg, rgba(10,10,10,0) 0%, rgba(10,10,10,0.38) 100%);
+  /* El desenfoque aparece poco a poco: sin corte recto sobre la imagen */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 60%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 60%);
+}
+.nv-work-page-grid .nv-work-card__title { font-size: 16px; text-shadow: 0 1px 12px rgba(0,0,0,0.25); }
+.nv-work-page-grid .nv-work-card__client { color: rgba(255,255,255,0.72); }
+.nv-work-page-grid .nv-work-card__tag {
+  color: #fff; border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
+}
+.nv-work-page-grid .nv-work-card__overlay { display: none; }
+
 /* === CURSOR (subtle) === */
 .nv-cursor {
   position: fixed; pointer-events: none; z-index: 9000;

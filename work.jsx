@@ -88,7 +88,7 @@ function WorkApp() {
                   <div className="nv-work-card__info">
                     <div>
                       <div className="nv-work-card__title">{w.project}</div>
-                      <div className="nv-work-card__client">{w.client} · {w.year}</div>
+                      {[w.client, w.year].filter(Boolean).length > 0 && <div className="nv-work-card__client">{[w.client, w.year].filter(Boolean).join(' · ')}</div>}
                     </div>
                     <span className="nv-work-card__tag">{w.tag}</span>
                   </div>
