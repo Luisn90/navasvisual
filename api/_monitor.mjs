@@ -1,5 +1,6 @@
 // Vega, el monitor técnico: revisa navasvisual.com de forma periódica, guarda lo que
 // encuentra, avisa por Telegram cuando algo se rompe y resume qué arreglar o mejorar.
+import { timingSafeEqual } from 'node:crypto';
 import { sbRest, supabaseReady, aiReady, aiChat, callTool, sendTelegram, afterResponse } from './_solicitudes.mjs';
 
 export const PAGES = ['/', '/work', '/about', '/contact', '/solicitar', '/admin.html'];
@@ -383,7 +384,9 @@ export async function handleMonitor(request, { env = process.env, fetcher = fetc
   if (!['GET', 'POST'].includes(request.method)) return Response.json({ error: 'method' }, { status: 405 });
   const secret = env.MONITOR_SECRET?.trim();
   const token = request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
-  if (!secret || token !== secret) return Response.json({ error: 'auth' }, { status: 401 });
+  // Comparación en tiempo constante: no revela la clave por lo que tarda en responder.
+  const same = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && timingSafeEqual(x, y); };
+  if (!secret || !token || !same(token, secret)) return Response.json({ error: 'auth' }, { status: 401 });
   const url = new URL(request.url);
   const modo = url.searchParams.get('modo') === 'completo' ? 'completo' : 'rapido';
   await afterResponse(() => runMonitor(env, { base: url.origin, modo }, fetcher));
