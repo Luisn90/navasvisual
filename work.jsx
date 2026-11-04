@@ -7,9 +7,6 @@ function WorkApp() {
   const [filter, setFilter] = React.useState(requestedCategory || 'all');
   const [selectedProject, setSelectedProject] = React.useState(null);
   const { projects } = useProjects(t.work.items);
-  const ondasRef = React.useRef(null);
-  // Forma 3D de láminas curvas en el hero (assets/ondas.js)
-  React.useEffect(() => (window.NVOndas ? window.NVOndas(ondasRef.current) : undefined), []);
 
   React.useEffect(() => {
     setTimeout(() => setReady(true), 100);
@@ -42,9 +39,8 @@ function WorkApp() {
       <Nav active="work" lang={lang} setLang={setLang} t={t} ready={ready} onNavigate={navigate} />
 
       <main>
-        <section className="nv-section nv-workhero" style={{ paddingTop: 80 }}>
-          <div className="nv-workhero__3d" ref={ondasRef} aria-hidden="true" />
-          <div className="nv-container" style={{ position: 'relative', zIndex: 1 }}>
+        <section className="nv-section" style={{ paddingTop: 80 }}>
+          <div className="nv-container">
             <div className="reveal">
               <Eyebrow>{t.work.eyebrow}</Eyebrow>
               <h1 className="nv-h1" style={{ marginTop: 24, fontSize: 'clamp(48px, 9vw, 144px)' }}>
