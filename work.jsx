@@ -51,11 +51,12 @@ function WorkApp() {
               <p className="nv-work__lede" style={{ marginTop: 32, maxWidth: 540 }}>{t.work.lede}</p>
             </div>
 
-            <div style={{ display: 'flex', gap: 8, marginTop: 56, flexWrap: 'wrap' }} className="reveal">
+            <div className="nv-workfilters reveal" role="group" aria-label={lang === 'es' ? 'Filtrar por categoría' : 'Filter by category'}>
               {allTags.map(tag => (
                 <button
                   key={tag}
-                  onClick={() => setFilter(tag)}
+                  onClick={(e) => { setFilter(tag); e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); }}
+                  aria-pressed={filter === tag}
                   className="nv-btn"
                   style={{
                     padding: '10px 16px',

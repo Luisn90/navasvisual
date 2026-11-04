@@ -2104,3 +2104,20 @@ main:has(> .nv-sol) { padding-top: 0; }
   .nv-sol__svc-desc { font-size: 12px; }
   .nv-sol__actions .nv-btn { flex: 1; justify-content: center; }
 }
+
+/* Filtros de Trabajos: en el celular, una sola fila que se desliza de lado */
+.nv-workfilters { display: flex; gap: 8px; margin-top: 56px; flex-wrap: wrap; }
+@media (max-width: 720px) {
+  .nv-workfilters {
+    flex-wrap: nowrap; overflow-x: auto; margin-top: 36px;
+    margin-left: calc(var(--pad) * -1); margin-right: calc(var(--pad) * -1);
+    padding: 2px var(--pad);
+    scroll-snap-type: x proximity; scroll-padding: 0 var(--pad);
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    /* Las píldoras se desvanecen en el borde derecho: invita a deslizar */
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+  .nv-workfilters::-webkit-scrollbar { display: none; }
+  .nv-workfilters .nv-btn { width: auto; flex: none; white-space: nowrap; scroll-snap-align: start; }
+}
