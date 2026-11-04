@@ -753,6 +753,22 @@ body.loading .nv-hero__title span em { animation-play-state: paused; }
   .nv-work-page-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
 }
 
+/* Hero de Trabajos con la forma 3D (assets/ondas.js) a la derecha, fundida con el fondo */
+.nv-workhero { position: relative; overflow: hidden; }
+.nv-workhero__3d {
+  position: absolute; top: 0; right: 0; z-index: 0;
+  width: 62%; height: 700px;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%), linear-gradient(180deg, #000 62%, transparent 96%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%), linear-gradient(180deg, #000 62%, transparent 96%);
+  mask-composite: intersect;
+}
+.nv-workhero__3d canvas { display: block; width: 100% !important; height: 100% !important; }
+@media (max-width: 760px) {
+  .nv-workhero__3d { width: 100%; height: 440px; opacity: 0.45; }
+}
+
 /* Página de trabajos y carrusel de la portada: la info flota sobre la imagen con un desenfoque que se funde hacia arriba */
 :is(.nv-work-page-grid, .nv-wslider) .nv-work-card__info {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
