@@ -1,0 +1,6 @@
+# Archivos del repositorio que no deben publicarse en la web
+docs/
+tests/
+scripts/
+uploads/
+netlify.toml
