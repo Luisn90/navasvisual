@@ -1,4 +1,28 @@
 // Página Work - Navas Visual
+
+// Carrusel del hero: dos columnas de proyectos que se deslizan suavemente (una sube, la otra baja)
+function WorkHeroCarousel({ projects, onOpen }) {
+  const withImage = projects.filter(p => p.image).slice(0, 10);
+  if (withImage.length < 4) return null;
+  const half = Math.ceil(withImage.length / 2);
+  const cols = [withImage.slice(0, half), withImage.slice(half)];
+  return (
+    <div className="nv-workhero__carousel" aria-hidden="true">
+      {cols.map((col, c) => (
+        <div className="nv-workhero__col" key={c}>
+          <div className={`nv-workhero__track nv-workhero__track--${c === 0 ? 'up' : 'down'}`}>
+            {[...col, ...col].map((p, i) => (
+              <button type="button" tabIndex={-1} className="nv-workhero__card" key={i} onClick={() => onOpen(p)}>
+                <img src={p.image} alt="" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function WorkApp() {
   const { lang, setLang, t } = useI18n();
   const [ready, setReady] = React.useState(false);
@@ -41,9 +65,10 @@ function WorkApp() {
       <main>
         <section className="nv-section" style={{ paddingTop: 80 }}>
           <div className="nv-container">
+            <div className="nv-workhero">
+            <WorkHeroCarousel projects={sorted} onOpen={setSelectedProject} />
             <div className="reveal">
-              <Eyebrow>{t.work.eyebrow}</Eyebrow>
-              <h1 className="nv-h1" style={{ marginTop: 24, fontSize: 'clamp(48px, 9vw, 144px)' }}>
+              <h1 className="nv-h1 nv-workhero__title">
                 <span style={{ display: 'block', fontWeight: 500 }}>
                   {lang === 'es' ? 'Selección' : 'Selected'} <br />{lang === 'es' ? 'de proyectos' : 'projects'}
                 </span>
@@ -70,6 +95,7 @@ function WorkApp() {
                   <span style={{ opacity: 0.5, marginLeft: 2 }}>{tag === 'all' ? projects.length : (tagCounts[tag] || 0)}</span>
                 </button>
               ))}
+            </div>
             </div>
 
             {items.length === 0 && <p className="nv-order__text" style={{ marginTop: 32 }}>{lang === 'es' ? 'Todavía no hay trabajos publicados en esta categoría.' : 'No published projects in this category yet.'}</p>}
