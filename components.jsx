@@ -148,6 +148,15 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
     setTimeout(() => onNavigate(href), 80);
   };
 
+  // Barra más ancha arriba del todo; compacta al hacer scroll
+  const [atTop, setAtTop] = useState(true);
+  useEffect(() => {
+    const onScroll = () => setAtTop(window.scrollY < 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Lock body scroll when menu open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
@@ -156,7 +165,7 @@ function Nav({ active, lang, setLang, t, ready, onNavigate }) {
 
   return (
     <>
-      <nav className={`nv-nav ${ready ? 'ready' : ''}`}>
+      <nav className={`nv-nav ${ready ? 'ready' : ''} ${atTop ? 'nv-nav--top' : ''}`}>
         <div className="nv-nav__inner">
           <a href="/" onClick={(e) => { e.preventDefault(); handleNav('/'); }} className="nv-nav__logo">
             <LogoSVG size={30} color="#3a3a3a" />
