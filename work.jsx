@@ -63,19 +63,27 @@ function WorkApp() {
       <Nav active="work" lang={lang} setLang={setLang} t={t} ready={ready} onNavigate={navigate} />
 
       <main>
-        <section className="nv-section" style={{ paddingTop: 80 }}>
-          <div className="nv-container">
-            <div className="nv-workhero">
+        <section className="nv-workhero">
+          <div className="nv-container nv-workhero__inner">
             <WorkHeroCarousel projects={sorted} onOpen={setSelectedProject} />
-            <div className="reveal">
+            <div className="reveal nv-workhero__text">
               <h1 className="nv-h1 nv-workhero__title">
                 <span style={{ display: 'block', fontWeight: 500 }}>
                   {lang === 'es' ? 'Selección' : 'Selected'} <br />{lang === 'es' ? 'de proyectos' : 'projects'}
                 </span>
               </h1>
               <p className="nv-work__lede" style={{ marginTop: 32, maxWidth: 540 }}>{t.work.lede}</p>
+              <a href="#proyectos" className="nv-btn nv-btn--primary nv-workhero__cta"
+                 onClick={(e) => { e.preventDefault(); document.getElementById('proyectos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
+                {lang === 'es' ? 'Ver proyectos' : 'View projects'}
+                <span className="nv-workhero__cta-arrow" aria-hidden="true">↓</span>
+              </a>
             </div>
+          </div>
+        </section>
 
+        <section className="nv-section nv-workprojects" id="proyectos">
+          <div className="nv-container">
             <div className="nv-workfilters reveal" role="group" aria-label={lang === 'es' ? 'Filtrar por categoría' : 'Filter by category'}>
               {allTags.map(tag => (
                 <button
@@ -95,7 +103,6 @@ function WorkApp() {
                   <span style={{ opacity: 0.5, marginLeft: 2 }}>{tag === 'all' ? projects.length : (tagCounts[tag] || 0)}</span>
                 </button>
               ))}
-            </div>
             </div>
 
             {items.length === 0 && <p className="nv-order__text" style={{ marginTop: 32 }}>{lang === 'es' ? 'Todavía no hay trabajos publicados en esta categoría.' : 'No published projects in this category yet.'}</p>}

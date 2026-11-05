@@ -2136,22 +2136,32 @@ main:has(> .nv-sol) { padding-top: 0; }
   .nv-workfilters .nv-btn { width: auto; flex: none; white-space: nowrap; scroll-snap-align: start; }
 }
 
-/* Trabajos: carrusel vertical del hero (2 columnas, desvanecido abajo) */
-.nv-workhero { position: relative; }
+/* Trabajos: hero a pantalla completa con carrusel vertical (2 columnas, desvanecido abajo) */
+.nv-workhero { padding: clamp(48px, 8vw, 80px) var(--pad) clamp(40px, 6vw, 64px); position: relative; }
+.nv-workhero__inner { position: relative; }
+.nv-workhero__text { position: relative; z-index: 1; }
 .nv-workhero__title { margin-top: 0; font-size: clamp(48px, 9vw, 144px); }
+.nv-workhero__cta { margin-top: 40px; }
+.nv-workhero__cta-arrow { display: inline-block; transition: transform 0.5s var(--easing); }
+.nv-workhero__cta:hover .nv-workhero__cta-arrow { transform: translateY(3px); }
 .nv-workhero__carousel { display: none; }
 @media (min-width: 1000px) {
+  /* 100% de la pantalla: se resta el espacio del menú (main tiene 70px arriba) */
+  .nv-workhero { padding-top: 0; padding-bottom: 0; }
+  .nv-workhero__inner { min-height: calc(100vh - 70px); min-height: calc(100svh - 70px); display: flex; align-items: center; }
   .nv-workhero__title { font-size: clamp(48px, 6.6vw, 144px); }
   .nv-workhero__carousel {
     display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-    position: absolute; right: 0; top: -150px; bottom: -48px;
+    position: absolute; right: 0; top: -70px; bottom: 0;
     width: min(40%, 620px);
     overflow: hidden; z-index: 0;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 62%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 62%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 70%, transparent 100%);
   }
-  .nv-workhero > .reveal, .nv-workhero > .nv-workfilters { position: relative; z-index: 1; }
 }
+@media (max-width: 720px) { .nv-workhero__cta { width: auto; } }
+.nv-workprojects { padding-top: clamp(40px, 6vw, 72px); scroll-margin-top: 40px; }
+.nv-workprojects .nv-workfilters { margin-top: 0; }
 .nv-workhero__col { overflow: hidden; }
 .nv-workhero__track { display: flex; flex-direction: column; gap: 16px; will-change: transform; }
 .nv-workhero__track--up { animation: nvWorkUp 48s linear infinite; }
