@@ -2136,7 +2136,7 @@ main:has(> .nv-sol) { padding-top: 0; }
   .nv-workfilters .nv-btn { width: auto; flex: none; white-space: nowrap; scroll-snap-align: start; }
 }
 
-/* Trabajos: hero a pantalla completa con carrusel vertical (2 columnas, desvanecido abajo) */
+/* Trabajos: hero a pantalla completa con carrusel vertical (3 columnas, desvanecido abajo) */
 .nv-workhero { padding: clamp(48px, 8vw, 80px) var(--pad) clamp(40px, 6vw, 64px); position: relative; }
 .nv-workhero__inner { position: relative; }
 .nv-workhero__text { position: relative; z-index: 1; }
@@ -2151,24 +2151,25 @@ main:has(> .nv-sol) { padding-top: 0; }
   .nv-workhero__inner { min-height: calc(100vh - 70px); min-height: calc(100svh - 70px); display: flex; align-items: center; }
   .nv-workhero__title { font-size: clamp(48px, 6.6vw, 144px); }
   .nv-workhero__carousel {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
     position: absolute; right: 0; top: -70px; bottom: 0;
-    width: min(40%, 620px);
+    width: min(44%, 680px);
     overflow: hidden; z-index: 0;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 70%, transparent 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
   }
 }
 @media (max-width: 720px) { .nv-workhero__cta { width: auto; } }
 .nv-workprojects { padding-top: clamp(40px, 6vw, 72px); scroll-margin-top: 40px; }
 .nv-workprojects .nv-workfilters { margin-top: 0; }
 .nv-workhero__col { overflow: hidden; }
-.nv-workhero__track { display: flex; flex-direction: column; gap: 16px; will-change: transform; }
+.nv-workhero__track { display: flex; flex-direction: column; gap: 12px; will-change: transform; }
 .nv-workhero__track--up { animation: nvWorkUp 48s linear infinite; }
 .nv-workhero__track--down { animation: nvWorkDown 56s linear infinite; }
+.nv-workhero__track--up2 { animation: nvWorkUp 62s linear infinite; }
 .nv-workhero__carousel:hover .nv-workhero__track { animation-play-state: paused; }
-@keyframes nvWorkUp { from { transform: translateY(0); } to { transform: translateY(calc(-50% - 8px)); } }
-@keyframes nvWorkDown { from { transform: translateY(calc(-50% - 8px)); } to { transform: translateY(0); } }
+@keyframes nvWorkUp { from { transform: translateY(0); } to { transform: translateY(calc(-50% - 6px)); } }
+@keyframes nvWorkDown { from { transform: translateY(calc(-50% - 6px)); } to { transform: translateY(0); } }
 .nv-workhero__card {
   display: block; width: 100%; aspect-ratio: 4 / 5; padding: 0; border: 0;
   border-radius: var(--radius); overflow: hidden; background: var(--bg-soft); cursor: pointer;

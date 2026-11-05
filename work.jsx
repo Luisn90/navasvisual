@@ -1,16 +1,20 @@
 // Página Work - Navas Visual
 
-// Carrusel del hero: dos columnas de proyectos que se deslizan suavemente (una sube, la otra baja)
+// Carrusel del hero: tres columnas de proyectos que se deslizan suavemente (suben y bajan alternadas)
 function WorkHeroCarousel({ projects, onOpen }) {
-  const withImage = projects.filter(p => p.image).slice(0, 10);
-  if (withImage.length < 4) return null;
-  const half = Math.ceil(withImage.length / 2);
-  const cols = [withImage.slice(0, half), withImage.slice(half)];
+  const withImage = projects.filter(p => p.image).slice(0, 12);
+  if (withImage.length < 3) return null;
+  // Reparte los proyectos en 3 columnas (uno a cada una, por turnos)
+  const cols = [0, 1, 2].map(c => {
+    let col = withImage.filter((_, i) => i % 3 === c);
+    while (col.length < 4) col = col.concat(col); // con pocos proyectos, se repiten para no dejar huecos
+    return col;
+  });
   return (
     <div className="nv-workhero__carousel" aria-hidden="true">
       {cols.map((col, c) => (
         <div className="nv-workhero__col" key={c}>
-          <div className={`nv-workhero__track nv-workhero__track--${c === 0 ? 'up' : 'down'}`}>
+          <div className={`nv-workhero__track nv-workhero__track--${['up', 'down', 'up2'][c]}`}>
             {[...col, ...col].map((p, i) => (
               <button type="button" tabIndex={-1} className="nv-workhero__card" key={i} onClick={() => onOpen(p)}>
                 <img src={p.image} alt="" loading={i < 3 ? 'eager' : 'lazy'} decoding="async" />
