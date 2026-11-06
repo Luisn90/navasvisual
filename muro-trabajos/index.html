@@ -58,72 +58,25 @@ img { display: block; max-width: 100%; }
 ::selection { background: var(--fg); color: var(--bg); }
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
 
-/* Menú */
-.nv-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 16px var(--pad); display: flex; justify-content: center; pointer-events: none; transition: padding 0.7s var(--easing-out); }
-.nv-nav__inner {
-  background: rgba(255,255,255,0.78);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border: 1px solid var(--bg-line);
-  border-radius: 999px;
-  padding: 8px 8px 8px 22px;
-  display: flex; align-items: center; gap: 28px;
-  pointer-events: auto;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.04);
-  animation: navIn 0.9s var(--easing-out) 0.1s backwards;
-  transition: gap 0.7s var(--easing-out), padding 0.7s var(--easing-out), box-shadow 0.7s var(--easing-out);
-}
-@keyframes navIn { from { transform: translateY(-100%); opacity: 0; } }
-@media (min-width: 1100px) {
-  .nv-nav--top { padding-top: 22px; }
-  .nv-nav--top .nv-nav__inner { gap: clamp(28px, calc(24vw - 200px), 260px); padding: 11px 11px 11px 28px; box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 4px 14px rgba(0,0,0,0.03); }
-}
-.nv-nav__logo { display: flex; align-items: center; opacity: 0.9; transition: opacity 0.3s ease; }
-.nv-nav__logo:hover { opacity: 1; }
-.nv-nav__logo svg { display: block; }
-.nv-nav__wordmark { margin-left: 10px; display: flex; flex-direction: column; white-space: nowrap; }
-.nv-nav__name { font-size: 17px; line-height: 1.05; font-weight: 400; letter-spacing: .01em; }
-.nv-nav__tagline { margin-top: 3px; font-size: 7px; line-height: 1; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: var(--fg-muted); }
-@media (max-width: 380px), (min-width: 721px) and (max-width: 960px) { .nv-nav__wordmark { display: none; } }
-.nv-nav__links { display: flex; gap: 4px; }
-.nv-nav__link { font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 999px; color: var(--fg-muted); transition: color 0.4s var(--easing), background 0.4s var(--easing); }
-.nv-nav__link:hover { color: var(--fg); }
-.nv-nav__link.active { color: var(--fg); background: var(--bg-soft); }
-.nv-nav__right { display: flex; gap: 6px; align-items: center; margin-left: auto; }
-.nv-lang { display: flex; background: var(--bg-soft); border-radius: 999px; padding: 3px; }
-.nv-lang button { font-family: var(--font-mono); font-size: 10px; font-weight: 500; padding: 4px 10px; border-radius: 999px; color: var(--fg-muted); letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.4s var(--easing); }
-.nv-lang button.active { background: var(--bg); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-.nv-nav__cta { background: var(--fg); color: var(--bg); padding: 9px 18px 9px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: transform 0.4s var(--easing); }
-.nv-nav__cta:hover { transform: scale(1.04); }
-.nv-nav__cta-dot { width: 6px; height: 6px; border-radius: 50%; background: #58e35d; box-shadow: 0 0 0 0 rgba(88,227,93,0.5); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(88,227,93,0.5); } 50% { box-shadow: 0 0 0 6px rgba(88,227,93,0); } }
-.nv-hamburger { display: none; flex-direction: column; justify-content: center; align-items: center; gap: 5px; width: 38px; height: 38px; border-radius: 50%; background: var(--bg-soft); }
-.nv-hamburger span { display: block; width: 16px; height: 1.5px; background: var(--fg); border-radius: 2px; transition: transform 0.4s var(--easing), opacity 0.3s var(--easing), width 0.4s var(--easing); }
-.nv-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-.nv-hamburger.open span:nth-child(2) { opacity: 0; width: 0; }
-.nv-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-@media (max-width: 720px) {
-  .nv-hamburger { display: flex; }
-  .nv-nav__cta--desktop, .nv-nav__links { display: none; }
-}
-.nv-drawer { position: fixed; inset: 0; z-index: 99; background: var(--bg); visibility: hidden; opacity: 0; transition: opacity 0.4s var(--easing), visibility 0.4s; display: flex; flex-direction: column; justify-content: space-between; padding: 110px var(--pad) max(28px, env(safe-area-inset-bottom, 0px)); }
-.nv-drawer.open { visibility: visible; opacity: 1; }
-.nv-drawer__links { display: flex; flex-direction: column; }
-.nv-drawer__link { display: flex; align-items: baseline; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--bg-line); font-size: clamp(32px, 9vw, 52px); font-weight: 500; letter-spacing: -0.035em; line-height: 1; }
-.nv-drawer__num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--fg-soft); font-weight: 400; }
-.nv-drawer__arrow { margin-left: auto; font-size: 0.5em; color: var(--fg-soft); }
-.nv-drawer__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-@media (min-width: 721px) { .nv-drawer { display: none; } }
+/* Barra superior simple */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 20px var(--pad) 0; }
+.bar__logo { display: flex; align-items: center; gap: 10px; opacity: 0.9; transition: opacity 0.3s ease; }
+.bar__logo:hover { opacity: 1; }
+.bar__logo svg { display: block; }
+.bar__name { font-size: 17px; line-height: 1.05; font-weight: 400; letter-spacing: .01em; }
+.bar nav { display: flex; gap: 22px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.bar nav a { color: var(--fg-muted); transition: color 0.3s var(--easing); }
+.bar nav a:hover { color: var(--fg); }
 
 /* Muro */
-main { padding-top: 70px; }
 .stage {
   position: relative;
-  margin: 12px var(--pad) 0;
-  height: clamp(520px, calc(100svh - 100px), 980px);
+  margin-top: 20px;
+  height: clamp(520px, calc(100svh - 76px), 980px);
   overflow: hidden;
-  border-radius: var(--radius-lg);
-  background: var(--bg-soft);
+  border-top: 1px solid var(--bg-line);
+  border-bottom: 1px solid var(--bg-line);
+  background: var(--bg);
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
@@ -133,8 +86,8 @@ main { padding-top: 70px; }
 .stage::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background:
-    linear-gradient(to right, var(--bg-soft), transparent 12%, transparent 88%, var(--bg-soft)),
-    linear-gradient(to bottom, var(--bg-soft), transparent 14%, transparent 86%, var(--bg-soft));
+    linear-gradient(to right, var(--bg), transparent 12%, transparent 88%, var(--bg)),
+    linear-gradient(to bottom, var(--bg), transparent 16%, transparent 84%, var(--bg));
 }
 .scene { position: absolute; inset: 0; perspective: 2000px; perspective-origin: 50% 38%; }
 .wall {
@@ -151,7 +104,7 @@ main { padding-top: 70px; }
 .tile {
   position: relative; display: block; width: 100%; aspect-ratio: 4 / 5;
   border-radius: var(--radius-sm); overflow: hidden; cursor: pointer;
-  background: var(--bg);
+  background: var(--bg-soft);
   box-shadow: 0 16px 28px -14px rgba(10,10,10,0.30);
   transform: translateZ(0);
   transition: transform 0.45s var(--easing-out), box-shadow 0.45s var(--easing-out);
@@ -160,7 +113,7 @@ main { padding-top: 70px; }
 }
 .tile:hover, .tile:focus-visible { transform: translateZ(38px); box-shadow: 0 30px 40px -16px rgba(10,10,10,0.34); }
 .tile img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.tile .ph, .vph { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: space-between; padding: 14px; text-align: left; background: var(--bg); }
+.tile .ph, .vph { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: space-between; padding: 14px; text-align: left; background: var(--bg-soft); }
 .tile.nofoto .ph { display: flex; }
 .tile.nofoto img { display: none; }
 .ph b { font-weight: 500; font-size: 20px; line-height: 1.05; letter-spacing: -0.03em; }
@@ -214,60 +167,24 @@ main { padding-top: 70px; }
   .meta { font-size: 19px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tile, .nv-nav, .nv-nav__inner { animation: none; transition: none; }
-  .vwrap img, .nv-drawer { transition: none; }
-  .nv-nav__cta-dot { animation: none; }
+  .tile { animation: none; transition: none; }
+  .vwrap img { transition: none; }
 }
 </style>
 </head>
 <body>
 
-<nav class="nv-nav nv-nav--top" id="nav" aria-label="Principal">
-  <div class="nv-nav__inner">
-    <a class="nv-nav__logo" href="/" aria-label="Navas Visual, inicio">
-      <svg width="30" height="30" viewBox="0 0 87 87" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z" fill="#3a3a3a"/>
-        <path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z" fill="#3a3a3a"/>
-        <path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z" fill="#3a3a3a"/>
-      </svg>
-      <span class="nv-nav__wordmark">
-        <span class="nv-nav__name">Navas Visual</span>
-        <span class="nv-nav__tagline" data-i="tag">Diseño visual digital</span>
-      </span>
-    </a>
-    <div class="nv-nav__links">
-      <a class="nv-nav__link active" href="/work" data-i="work">Trabajo</a>
-      <a class="nv-nav__link" href="/#servicios" data-i="plans">Planes</a>
-      <a class="nv-nav__link" href="/about" data-i="about">Sobre mí</a>
-      <a class="nv-nav__link" href="/contact" data-i="contact">Contacto</a>
-    </div>
-    <div class="nv-nav__right">
-      <div class="nv-lang">
-        <button type="button" data-lang="es" class="active">ES</button>
-        <button type="button" data-lang="en">EN</button>
-      </div>
-      <a class="nv-nav__cta nv-nav__cta--desktop" href="/solicitar"><span class="nv-nav__cta-dot"></span><span data-i="avail">Disponible</span></a>
-      <button class="nv-hamburger" id="burger" type="button" aria-label="Menú" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button>
-    </div>
-  </div>
-</nav>
-
-<div class="nv-drawer" id="drawer">
-  <nav class="nv-drawer__links" aria-label="Menú móvil">
-    <a class="nv-drawer__link" href="/"><span class="nv-drawer__num">01</span><span data-i="home">Inicio</span><span class="nv-drawer__arrow">↗</span></a>
-    <a class="nv-drawer__link" href="/work"><span class="nv-drawer__num">02</span><span data-i="work">Trabajo</span><span class="nv-drawer__arrow">↗</span></a>
-    <a class="nv-drawer__link" href="/#servicios"><span class="nv-drawer__num">03</span><span data-i="plans">Planes</span><span class="nv-drawer__arrow">↗</span></a>
-    <a class="nv-drawer__link" href="/about"><span class="nv-drawer__num">04</span><span data-i="about">Sobre mí</span><span class="nv-drawer__arrow">↗</span></a>
-    <a class="nv-drawer__link" href="/contact"><span class="nv-drawer__num">05</span><span data-i="contact">Contacto</span><span class="nv-drawer__arrow">↗</span></a>
-  </nav>
-  <div class="nv-drawer__foot">
-    <div class="nv-lang">
-      <button type="button" data-lang="es" class="active">ES</button>
-      <button type="button" data-lang="en">EN</button>
-    </div>
-    <a class="nv-nav__cta" href="/solicitar"><span class="nv-nav__cta-dot"></span><span data-i="avail">Disponible</span></a>
-  </div>
-</div>
+<header class="bar">
+  <a class="bar__logo" href="/" aria-label="Navas Visual, inicio">
+    <svg width="30" height="30" viewBox="0 0 87 87" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M44.23 0H24.17L0 41.98H20.06L44.23 0Z" fill="#3a3a3a"/>
+      <path d="M58.9708 0H57.0508L17.6108 68.81C13.1708 76.56 18.7608 86.21 27.6908 86.21L68.0908 15.74C72.1108 8.73 67.0508 0 58.9708 0Z" fill="#3a3a3a"/>
+      <path d="M86.1206 44.23H66.0606L41.8906 86.21C54.3006 86.21 65.7706 79.58 71.9606 68.82L86.1206 44.22V44.23Z" fill="#3a3a3a"/>
+    </svg>
+    <span class="bar__name">Navas Visual</span>
+  </a>
+  <nav aria-label="Principal"><a href="/work">Trabajos</a><a href="/contact">Contacto</a></nav>
+</header>
 
 <main>
   <section class="stage" id="trabajos" aria-label="Muro de trabajos">
@@ -533,44 +450,6 @@ main { padding-top: 70px; }
     if (!viewer.hidden && cur >= 0) boxFor(order[cur]);
   });
 
-  // Idioma (misma clave que el resto del sitio), menú y barra
-  var I18N = {
-    es: { tag: 'Diseño visual digital', home: 'Inicio', work: 'Trabajo', plans: 'Planes', about: 'Sobre mí', contact: 'Contacto', avail: 'Disponible', visit: 'Ver sitio publicado', close: 'Cerrar · Esc', copy: '© 2026 Navas Visual. Todos los derechos reservados.', prev: 'Imagen anterior', next: 'Imagen siguiente', menu: 'Menú' },
-    en: { tag: 'Digital visual design', home: 'Home', work: 'Work', plans: 'Plans', about: 'About', contact: 'Contact', avail: 'Available', visit: 'View live site', close: 'Close · Esc', copy: '© 2026 Navas Visual. All rights reserved.', prev: 'Previous image', next: 'Next image', menu: 'Menu' }
-  };
-  var lang = 'es';
-  try { if (localStorage.getItem('nv-lang') === 'en') lang = 'en'; } catch (e) {}
-  function applyLang() {
-    var d = I18N[lang];
-    document.documentElement.lang = lang;
-    document.querySelectorAll('[data-i]').forEach(function (el) { el.textContent = d[el.getAttribute('data-i')]; });
-    document.querySelectorAll('[data-lang]').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-lang') === lang); });
-    $('prev').setAttribute('aria-label', d.prev);
-    $('next').setAttribute('aria-label', d.next);
-    $('burger').setAttribute('aria-label', d.menu);
-  }
-  document.querySelectorAll('[data-lang]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      lang = b.getAttribute('data-lang');
-      try { localStorage.setItem('nv-lang', lang); } catch (e) {}
-      applyLang();
-    });
-  });
-  applyLang();
-
-  var nav = $('nav'), drawer = $('drawer'), burger = $('burger');
-  function onScroll() { nav.classList.toggle('nv-nav--top', window.scrollY < 24); }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-  function setDrawer(open) {
-    drawer.classList.toggle('open', open);
-    burger.classList.toggle('open', open);
-    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    document.body.classList.toggle('locked', open);
-  }
-  burger.addEventListener('click', function () { setDrawer(!drawer.classList.contains('open')); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawer.classList.contains('open')) setDrawer(false); });
-  window.addEventListener('resize', function () { if (window.innerWidth > 720 && drawer.classList.contains('open')) setDrawer(false); });
 })();
 </script>
 </body>
